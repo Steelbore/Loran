@@ -18,6 +18,7 @@ loran-pages = { path = "../loran-pages" }
 loran-index = { path = "../loran-index" }
 nucleo-matcher = { workspace = true }
 serde = { workspace = true }
+toml = { workspace = true }
 
 [build-dependencies]
 loran-pages = { path = "../loran-pages" }

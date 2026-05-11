@@ -48,7 +48,21 @@ fn main() {
         writeln!(generated, "    ({rel:?}, include_str!({abs:?})),")
             .expect("formatting into a String never fails");
     }
-    generated.push_str("];\n");
+    generated.push_str("];\n\n");
+
+    // Bundle categories.toml as a literal string so the runtime can
+    // parse it without doing its own filesystem walk.
+    let categories_path = pages_dir.join("categories.toml");
+    if categories_path.is_file() {
+        let abs = categories_path.to_string_lossy().replace('\\', "/");
+        writeln!(
+            generated,
+            "pub(crate) const BUNDLED_CATEGORIES: &str = include_str!({abs:?});"
+        )
+        .expect("formatting into a String never fails");
+    } else {
+        generated.push_str("pub(crate) const BUNDLED_CATEGORIES: &str = \"\";\n");
+    }
 
     let out_dir = std::env::var_os("OUT_DIR").expect("OUT_DIR set by cargo");
     let out_path = Path::new(&out_dir).join("bundled_pages.rs");

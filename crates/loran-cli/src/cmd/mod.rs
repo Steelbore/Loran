@@ -10,5 +10,6 @@
 //! and writing output through `JsonEmitter` (JSON) or stdout/stderr
 //! directly (text).
 
+pub(crate) mod categories;
 pub(crate) mod list;
 pub(crate) mod show;

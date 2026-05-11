@@ -15,7 +15,7 @@
 use loran_index::{IngestError, Ingestor};
 use loran_pages::Page;
 
-include!(concat!(env!("OUT_DIR"), "/bundled_pages.rs"));
+use crate::bundled_data::BUNDLED_PAGES;
 
 /// Read-only [`Ingestor`] backed by the build-time bundle.
 #[derive(Debug, Default, Clone, Copy)]
