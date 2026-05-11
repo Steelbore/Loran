@@ -41,15 +41,17 @@ fn main() -> ExitCode {
     }
 
     if let Some(cmd) = cli.command.as_ref() {
-        if let Command::Show(args) = cmd {
-            cmd::show::run(&cli, args)
-        } else {
-            let name = cmd.name();
-            eprintln!(
-                "loran {name}: not yet implemented in this Phase 1 milestone. \
-                 See `loran-plan-v0_1.md` WP-P1.11 onwards."
-            );
-            ExitCode::from(1)
+        match cmd {
+            Command::List(args) => cmd::list::run(&cli, args),
+            Command::Show(args) => cmd::show::run(&cli, args),
+            _ => {
+                let name = cmd.name();
+                eprintln!(
+                    "loran {name}: not yet implemented in this Phase 1 milestone. \
+                     See `loran-plan-v0_1.md` WP-P1.11 onwards."
+                );
+                ExitCode::from(1)
+            }
         }
     } else {
         // No sub-command + no --version: print usage hint and exit 0.

@@ -111,7 +111,8 @@ fn every_sub_command_appears_in_help_output() {
 
 #[test]
 fn sub_command_stub_returns_exit_code_one_with_pointer_to_plan() {
-    let assert = loran().arg("list").assert().failure().code(1);
+    // `mcp` is a Phase 3 verb and remains a stub through Sub-phase 1C.
+    let assert = loran().arg("mcp").assert().failure().code(1);
     let stderr = String::from_utf8(assert.get_output().stderr.clone()).unwrap();
     assert!(stderr.contains("not yet implemented"));
     assert!(stderr.contains("loran-plan-v0_1.md"));
@@ -119,13 +120,9 @@ fn sub_command_stub_returns_exit_code_one_with_pointer_to_plan() {
 
 #[test]
 fn global_flag_is_accepted_before_or_after_subcommand() {
-    // Both orderings must succeed.
-    loran()
-        .args(["--json", "list"])
-        .assert()
-        .failure()  // list is still a stub
-        .code(1);
-    loran().args(["list", "--json"]).assert().failure().code(1);
+    // `list` is implemented; both orderings should succeed.
+    loran().args(["--json", "list"]).assert().success();
+    loran().args(["list", "--json"]).assert().success();
 }
 
 #[test]
