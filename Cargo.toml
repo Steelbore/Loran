@@ -45,6 +45,22 @@ jiff = "0.2"
 # CLI (per SFRS canonical)
 clap = { version = "4", features = ["derive", "env", "wrap_help"] }
 
+# Markdown rendering (loran-render). CommonMark; no_std-friendly.
+pulldown-cmark = { version = "0.13", default-features = false }
+
+# Filesystem traversal for the MarkdownPagesIngestor (loran-index).
+walkdir = "2"
+
+# Fuzzy search (Phase 1 — loran-core resolution).
+nucleo-matcher = "0.3"
+
+# Subprocess control for the live --help capture engine (Phase 1D — loran-core).
+which = "7"
+wait-timeout = "0.2"
+
+# TTY detection for the agent-env cascade (Phase 1B — loran-cli).
+is-terminal = "0.4"
+
 [workspace.lints.rust]
 unsafe_code = "deny"
 unsafe_op_in_unsafe_fn = "deny"

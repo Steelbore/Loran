@@ -13,5 +13,10 @@ repository.workspace = true
 homepage.workspace = true
 readme.workspace = true
 
+[dependencies]
+serde = { workspace = true }
+toml = { workspace = true }
+thiserror = { workspace = true }
+
 [lints]
 workspace = true
