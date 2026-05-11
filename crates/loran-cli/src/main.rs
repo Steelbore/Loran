@@ -12,6 +12,7 @@
 //! exit with [`ExitCode::NotYetImplemented`]; real implementations land
 //! in Sub-phases 1C–1D per `loran-plan-v0_1.md`.
 
+mod agent;
 mod cli;
 mod color;
 mod envelope;

@@ -88,9 +88,7 @@ impl ExitCode {
     pub(crate) fn hint(self, context: &ErrorContext) -> String {
         match self {
             Self::Success => String::new(),
-            Self::GeneralError => {
-                "loran --help        # see the full command surface".to_owned()
-            }
+            Self::GeneralError => "loran --help        # see the full command surface".to_owned(),
             Self::UsageError => "loran --help        # check argument shape".to_owned(),
             Self::NotFound => match (&context.query, &context.tool) {
                 (Some(q), _) => format!("loran search {q} --json"),
@@ -114,12 +112,11 @@ impl ExitCode {
                 None => "loran new <tool> --edit".to_owned(),
             },
             Self::OverlayWriteDenied => match &context.tool {
-                Some(t) => format!(
-                    "mkdir -p \"$XDG_DATA_HOME/loran/overlays/user\" && loran new {t}"
-                ),
+                Some(t) => {
+                    format!("mkdir -p \"$XDG_DATA_HOME/loran/overlays/user\" && loran new {t}")
+                }
                 None => {
-                    "mkdir -p \"$XDG_DATA_HOME/loran/overlays/user\" && loran new <tool>"
-                        .to_owned()
+                    "mkdir -p \"$XDG_DATA_HOME/loran/overlays/user\" && loran new <tool>".to_owned()
                 }
             },
             Self::TarballVerifyFailed => {
@@ -215,8 +212,7 @@ mod tests {
 
     #[test]
     fn names_are_distinct_and_screaming_snake_case() {
-        let names: HashSet<&'static str> =
-            ExitCode::all().iter().map(|c| c.name()).collect();
+        let names: HashSet<&'static str> = ExitCode::all().iter().map(|c| c.name()).collect();
         assert_eq!(names.len(), 12, "no duplicate names");
         for n in &names {
             assert!(
