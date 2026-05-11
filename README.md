@@ -5,6 +5,10 @@ SPDX-FileCopyrightText: 2026 Mohamed Hammad
 
 # Loran
 
+[![CI](https://github.com/Steelbore/loran/actions/workflows/ci.yml/badge.svg)](https://github.com/Steelbore/loran/actions/workflows/ci.yml)
+[![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](LICENSE)
+[![Rust](https://img.shields.io/badge/rust-1.88%2B-orange.svg)](rust-toolchain.toml)
+
 > The Steelbore reference manual.
 
 **Loran** is the canonical, agent-friendly reference tool for Steelbore-based systems (Bravais, Ferrite OS, future distros). It is to Steelbore what `man` is to Unix and `info` is to GNU — a system-level handbook for every tool the system ships and recommends — with one critical difference: it is agent-native (`--json`, `schema`, MCP) from day one.
