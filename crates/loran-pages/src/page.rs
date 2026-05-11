@@ -3,7 +3,7 @@
 
 //! The validated [`Page`] data structure and its raw deserialisation form.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// A fully-validated Loran page.
 ///
@@ -13,7 +13,11 @@ use serde::Deserialize;
 /// metadata represented as `Option<T>`.
 ///
 /// See [`crate`] for the parsing contract.
-#[derive(Debug, Clone, PartialEq, Eq)]
+///
+/// `Serialize` is implemented so the resolution chain (`loran-core`) can
+/// drop `Page` values straight into the SFRS JSON envelope without
+/// projection — `data.body.page` in the `loran show` envelope is a `Page`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Page {
     /// Canonical binary name, lower-kebab-case (Spec §6.1). Required.
     pub name: String,

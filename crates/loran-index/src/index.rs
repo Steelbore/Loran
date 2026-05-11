@@ -28,6 +28,7 @@ pub struct Index {
     by_name: BTreeMap<String, Page>,
     by_category: BTreeMap<String, Vec<String>>,
     by_replaces: BTreeMap<String, Vec<String>>,
+    by_safe_alias: BTreeMap<String, Vec<String>>,
     by_tag: BTreeMap<String, Vec<String>>,
 }
 
@@ -53,6 +54,13 @@ impl Index {
 
             for legacy in &page.replaces {
                 idx.by_replaces
+                    .entry(legacy.clone())
+                    .or_default()
+                    .push(page.name.clone());
+            }
+
+            for legacy in &page.safe_alias_for {
+                idx.by_safe_alias
                     .entry(legacy.clone())
                     .or_default()
                     .push(page.name.clone());
@@ -109,6 +117,18 @@ impl Index {
     /// iterator if no entry declares `legacy` in its `replaces` list.
     pub fn by_replaces(&self, legacy: &str) -> impl Iterator<Item = &Page> {
         self.by_replaces_or_category(&self.by_replaces, legacy)
+    }
+
+    /// All pages that declare a given legacy tool name in `safe_alias_for`.
+    ///
+    /// Strict subset of [`Self::by_replaces`] — by the Spec §6.1
+    /// invariant `safe_alias_for ⊆ replaces`, but with the additional
+    /// promise that the modern entry's default behaviour is close
+    /// enough to the legacy one to back an `alias legacy=modern`. Used
+    /// by `loran find --safe-alias` and the future `loran list
+    /// --safe-alias-for`.
+    pub fn by_safe_alias(&self, legacy: &str) -> impl Iterator<Item = &Page> {
+        self.by_replaces_or_category(&self.by_safe_alias, legacy)
     }
 
     /// All pages carrying a given discovery tag.
@@ -240,6 +260,51 @@ mod tests {
 
         let absent: Vec<&str> = idx.by_replaces("vi").map(|p| p.name.as_str()).collect();
         assert!(absent.is_empty());
+    }
+
+    #[test]
+    fn by_safe_alias_is_a_strict_subset_of_by_replaces() {
+        let make_page = |name: &str, replaces: &[&str], safe: &[&str]| {
+            let replaces_lit = replaces
+                .iter()
+                .map(|r| format!("\"{r}\""))
+                .collect::<Vec<_>>()
+                .join(", ");
+            let safe_lit = safe
+                .iter()
+                .map(|s| format!("\"{s}\""))
+                .collect::<Vec<_>>()
+                .join(", ");
+            let src = format!(
+                "+++\nname = \"{name}\"\ncategory = \"c\"\nsummary = \"s\"\n\
+                 replaces = [{replaces_lit}]\nsafe_alias_for = [{safe_lit}]\n+++\n"
+            );
+            Page::parse(&src).expect("test page builds")
+        };
+
+        let idx = Index::build(vec![
+            // bat: alias-safe for cat (drop-in)
+            make_page("bat", &["cat"], &["cat"]),
+            // eza: replaces ls but NOT alias-safe (different columns)
+            make_page("eza", &["ls"], &[]),
+            // jaq: alias-safe for jq
+            make_page("jaq", &["jq"], &["jq"]),
+        ])
+        .unwrap();
+
+        // by_replaces sees every entry that supersedes the legacy name.
+        let cat_replacements: Vec<&str> = idx.by_replaces("cat").map(|p| p.name.as_str()).collect();
+        assert_eq!(cat_replacements, vec!["bat"]);
+
+        // by_safe_alias sees only the strict subset that's actually alias-safe.
+        let cat_alias_safe: Vec<&str> = idx.by_safe_alias("cat").map(|p| p.name.as_str()).collect();
+        assert_eq!(cat_alias_safe, vec!["bat"]);
+
+        // ls has a replacer but no alias-safe replacer.
+        let ls_replacements: Vec<&str> = idx.by_replaces("ls").map(|p| p.name.as_str()).collect();
+        assert_eq!(ls_replacements, vec!["eza"]);
+        let ls_alias_safe: Vec<&str> = idx.by_safe_alias("ls").map(|p| p.name.as_str()).collect();
+        assert!(ls_alias_safe.is_empty());
     }
 
     #[test]

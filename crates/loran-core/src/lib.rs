@@ -5,12 +5,26 @@
 
 //! Loran core — orchestration and resolution chains.
 //!
-//! Phase 1B surface: [`BundledPagesIngestor`], the read-side source
-//! over the build-time page bundle. Resolution chains (`resolve_show`,
-//! `resolve_find`, `resolve_search`) and the live `--help` capture
-//! engine land in Sub-phases 1C–1D per `loran-plan-v0_1.md` WP-P1.04
-//! and WP-P1.05.
+//! v1 surface:
+//!
+//! - [`BundledPagesIngestor`] — read-side source over the pages baked
+//!   into the binary at compile time.
+//! - [`resolve_show`] / [`ShowResult`] — curated-or-fail tool lookup
+//!   for `loran show <tool>`.
+//! - [`resolve_find`] / [`FindResult`] — reverse legacy-name lookup
+//!   for `loran find <legacy>` (with optional `--safe-alias` filter).
+//! - [`resolve_search`] / [`SearchResult`] / [`ScoredMatch`] — fuzzy
+//!   match across the catalog for `loran search <query>`.
+//!
+//! The live `--help` capture engine and the tldr-pages tarball
+//! resolver land in Sub-phase 1D and Phase 2 (Billet) respectively.
 
 mod bundled;
+mod find;
+mod search;
+mod show;
 
 pub use bundled::BundledPagesIngestor;
+pub use find::{FindResult, resolve_find};
+pub use search::{ScoredMatch, SearchResult, resolve_search};
+pub use show::{BodyBlock, IntroBlock, ShowResult, resolve_show};
