@@ -297,7 +297,8 @@ Each requirement is testable. The implementation is described in `loran-spec-v0_
 | FR-021 | The capture shall be performed via direct `execve`-style subprocess invocation: `argv = [tool, "--help"]`. No shell, no string interpolation.                            | Ingot |
 | FR-022 | The capture shall enforce a 5-second wall-clock timeout, SIGKILL on overrun, with exit code `LIVE_HELP_TIMEOUT = 9`.                                                     | Ingot |
 | FR-023 | On non-zero exit, the capture shall retry the sequence `--help → -h → help` and prefer the non-empty result.                                                              | Ingot |
-| FR-024 | The capture shall set `PAGER="bat -pp"`, `MANPAGER="bat -pp"`, `LESS=""` in the subprocess environment, falling back to `cat` if `bat` is absent on `$PATH`.            | Ingot |
+| FR-024 | The capture shall set `PAGER` and `MANPAGER` in the subprocess environment via the pager-selection cascade defined in the spec (`--pager <cmd>` flag → `$MANPAGER` → `$PAGER` → `bat -pp` if `bat` is on `$PATH` → `cat`). `LESS` is cleared only when the cascade falls back to the Steelbore default or `cat`. The chosen pager is surfaced in `--format json` as `data.body.pager_command`. | Ingot |
+| FR-024a | `loran help` shall accept a `--pager <cmd>` flag overriding the cascade. `--pager=""` disables pagination (passthrough equivalent to `cat`).                              | Ingot |
 | FR-025 | The captured output shall render in a de-themed frame: monochrome chrome, NOT the Steelbore palette, with a `LIVE OUTPUT — uncurated, captured from <tool> --help at <ISO 8601 UTC>` header. | Ingot |
 | FR-026 | `loran help` shall never be invokable via the MCP surface (writes-side block + arbitrary-subprocess attack-surface block).                                                | Bloom |
 
