@@ -3,10 +3,31 @@
 
 #![forbid(unsafe_code)]
 
-//! Loran render — Markdown to terminal output.
+//! Loran renderer — Markdown body → terminal output.
 //!
-//! Phase 0 placeholder. The text-mode `render_text` entry point lands in
-//! Phase 1 per WP-P1.06; TUI-mode rendering arrives in Phase 2 (Billet).
+//! v1 ships a single mode: ANSI-free plain text suitable for any
+//! POSIX terminal **and** for piping into `grep` / `awk` / `cut` / `sed`
+//! (PRD quality goal Q-03, NFR-050). TUI rendering with the Steelbore
+//! palette is deferred to Phase 2 (Billet).
+//!
+//! Output rules (Spec §10, kept minimal so the same renderer can drive
+//! both `loran show` and the rare cases where we render a tldr body):
+//!
+//! - Headings become a blank line, the heading text in `UPPER CASE`
+//!   (Standard "primary text" convention for non-coloured surfaces),
+//!   another blank line.
+//! - Paragraphs become a text line followed by a blank line.
+//! - Lists are emitted with `- ` bullets, with two spaces of
+//!   indentation per nesting level. Numbered lists are still bullet-
+//!   formatted; numerical ordering is not preserved in v1 because the
+//!   Steelbore catalog content does not rely on it.
+//! - Code blocks indent every contained line by four spaces. Fence
+//!   info-strings are dropped.
+//! - Inline code becomes `` `text` ``.
+//! - Links become `text (url)` — visible URLs for terminal users who
+//!   cannot click.
+//! - Raw HTML is passed through verbatim.
 
-/// Placeholder used to verify the workspace builds cleanly during Phase 0.
-pub const fn placeholder() {}
+mod text;
+
+pub use text::render_text;
