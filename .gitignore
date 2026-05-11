@@ -1,0 +1,29 @@
+# Rust artifacts
+target/
+**/*.rs.bk
+Cargo.lock.bak
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Claude Code session state + exported transcripts
+.claude/
+Chat.txt
+2026-*-this-session-is-being-continued-from-a-previous-c.txt
+
+# Other agents
+.gemini/
+
+# Backups
+*.bak
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Node (in case xtask or tooling pulls in npm later)
+node_modules/
