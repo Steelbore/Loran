@@ -20,7 +20,7 @@ Copyright (c) 2026 Mohamed Hammad
 
 **Revision 2026-05-12 (in-place amendment to v0.2):**
 
-- **Pager-selection cascade** in `loran help`. The previous spec forced `PAGER="bat -pp"` unconditionally, overriding the user's environment. The amendment defines a precedence chain that respects the user's setup first: `--pager <cmd>` flag → `$MANPAGER` → `$PAGER` → `bat -pp` (if `bat` is on `$PATH`) → `cat`. The Steelbore default only fires when nothing else applies. See §2 decision #12 (rewritten), §4.2 step 2 + new §4.2.1, §7 (added `--pager` flag on `loran help`), and PRD FR-024 (synchronised).
+- **Pager-selection cascade** in `loran help`. The previous spec forced `PAGER="bat -pp"` unconditionally, overriding the user's environment. The amendment defines a precedence chain that respects the user's setup first: `--pager <cmd>` flag → `$MANPAGER` → `$PAGER` → `bat -pp` (if `bat` on `$PATH`) → `moor` (if on `$PATH`) → `cat`. The Steelbore default chain (`bat -pp` → `moor` → `cat`) only fires when nothing the user pinned applies. The `--pager` flag also accepts a `loran` sentinel that means "skip user env and use the Steelbore default chain unconditionally" — useful for testing the bundled pager logic on a system where `$PAGER` is already set, and for users who want Loran-consistent rendering regardless of shell environment. See §2 decision #12 (rewritten), §4.2 step 2 + §4.2.1, §7 (added `--pager` flag on `loran help`), and PRD FR-024 (synchronised).
 
 **Changes since v0.1 (2026-04-29):**
 
@@ -70,7 +70,7 @@ These are settled and inform the rest of this spec. Listed up front so reviewers
 | 9  | **Page format:** single Markdown file with TOML frontmatter (Hugo/Zola style).                          |
 | 10 | **In-process rendering** of Loran's curated pages via `pulldown-cmark` + `ratatui` + `crossterm`. No `bat` for own pages. |
 | 11 | **De-themed rendering** for `loran help` captures: monochrome frame, NOT the Steelbore palette. Brand cues reserved for curated content. |
-| 12 | **Pager-selection cascade** for the `loran help` subprocess only: `--pager <cmd>` flag → `$MANPAGER` → `$PAGER` → `bat -pp` (if `bat` on `$PATH`) → `cat`. The Steelbore default (`bat -pp`) only fires when the user has not pre-configured a pager. (See §4.2.1.) |
+| 12 | **Pager-selection cascade** for the `loran help` subprocess only: `--pager <cmd>` flag → `$MANPAGER` → `$PAGER` → `bat -pp` (if `bat` on `$PATH`) → `moor` (if `moor` on `$PATH`) → `cat`. The Steelbore default chain only fires when the user has not pre-configured a pager. `--pager=loran` is a reserved sentinel meaning "skip the user-env steps and run the Steelbore default chain". `--pager=""` disables pagination (cat passthrough). (See §4.2.1.) |
 | 13 | **`loran new <tool>`** scaffolds pages from a user-editable template, writing to the user overlay by default. |
 | 14 | **`replaces`** (broad set) + **`safe_alias_for`** (strict subset, alias-safe). Validated at index build: `safe_alias_for ⊆ replaces`. |
 | 15 | **`written_in`** in frontmatter (implementation language). **`language`** is reserved for future i18n. |
@@ -251,21 +251,30 @@ The de-themed rendering is load-bearing for brand integrity: a user seeing the S
 
 Loran respects the user's pager configuration. The subprocess spawned by `loran help` inherits `PAGER` and `MANPAGER` from the first source in this list that resolves:
 
-| Source | When it wins | Notes |
-|---|---|---|
-| `--pager <cmd>` | Provided on the `loran help` invocation | Highest priority. Empty string `--pager=""` disables pagination (`cat`-equivalent passthrough). |
-| `$MANPAGER` | Set in the user's environment | Closer semantic match — help text is documentation-like. |
-| `$PAGER` | Set in the user's environment | General fallback for users who haven't distinguished `MANPAGER`. |
-| `bat -pp` | `bat` is on `$PATH` and nothing above resolved | Steelbore default; `-pp` disables paging+decoration so output streams naturally. |
-| `cat` | `bat` is not on `$PATH` | Final fallback. |
+| Step | Source | When it wins | Notes |
+|---|---|---|---|
+| 1 | `--pager <cmd>` | Provided on the `loran help` invocation | Highest priority. Two special values: `--pager=""` disables pagination (cat-equivalent passthrough); `--pager=loran` is a reserved sentinel that skips steps 2–3 and runs the Steelbore default chain (steps 4–6) regardless of the user's environment. |
+| 2 | `$MANPAGER` | Set in the user's environment | Closer semantic match — `--help` output is documentation-like. Skipped when step 1 was the `loran` sentinel. |
+| 3 | `$PAGER` | Set in the user's environment | General fallback for users who haven't distinguished `MANPAGER`. Skipped when step 1 was the `loran` sentinel. |
+| 4 | `bat -pp` | `bat` is on `$PATH` and nothing above resolved | Steelbore default. `-pp` disables internal paging+decoration so output streams naturally into the de-themed frame. |
+| 5 | `moor` | `moor` is on `$PATH` and nothing above resolved | Steelbore-blessed pure-Rust alternative (formerly `moar`). Used when `bat` is not installed but the user still wants paging. |
+| 6 | `cat` | Final fallback | Always available. |
 
 The resolved pager value is set on **both** `PAGER` and `MANPAGER` in the subprocess environment so tools that internally consult either variable behave consistently.
 
-**`LESS` handling.** When the cascade selects the user's own `$PAGER` / `$MANPAGER`, `LESS` is **not** modified — the user has presumably configured `LESS` to pair with their pager. When the cascade falls back to the Steelbore `bat -pp` default or to `cat`, `LESS` is cleared to `""` to keep behaviour predictable across systems.
+**`--pager=loran` semantics.** The sentinel exists for three concrete cases:
+
+- **Testing the bundled pager logic** on a system where `$PAGER` and `$MANPAGER` are already set, without having to `unset` them.
+- **Loran-consistent rendering** for users who want the same output regardless of which shell they're in. Especially useful for screencasts, bug reports, and tutorials.
+- **Future use** — any time a downstream tool or skill needs to invoke `loran help` with predictable pagination, it can pass `--pager=loran` rather than reconstructing the cascade externally.
+
+`--pager=loran` is a sentinel, not an executable name. It is intercepted by the CLI before the env is built; the actual `loran` binary never ends up as a subprocess pager.
+
+**`LESS` handling.** When the cascade selects the user's own `$PAGER` / `$MANPAGER` (steps 2–3), `LESS` is **not** modified — the user has presumably configured `LESS` to pair with their pager. When the cascade falls back to the Steelbore default chain (steps 4–6), `LESS` is cleared to `""` to keep behaviour predictable across systems.
 
 **`--no-color` / `NO_COLOR` interaction.** Honoured separately by the rendering frame (§4.2 step 3); the pager cascade itself does not consult these.
 
-**JSON envelope.** In `--format json`, the chosen pager is surfaced as `data.body.pager_command` so agents can correlate captured output with the pagination layer that produced it.
+**JSON envelope.** In `--format json`, the chosen pager is surfaced as `data.body.pager_command` so agents can correlate captured output with the pagination layer that produced it. The step number that won the cascade is surfaced as `data.body.pager_source` (one of `"flag"`, `"manpager-env"`, `"pager-env"`, `"bat"`, `"moor"`, `"cat"`).
 
 ---
 
@@ -404,7 +413,7 @@ Noun-verb per SFRS §2 Rule 7. Verbs in the canonical set where applicable.
 | `loran`                            | TUI if TTY, else `loran list --json`. Auto-detection per SFRS §5.                          |
 | `loran list`                       | List tools (filterable). Honours `--category`, `--replaces`, `--safe-alias-for`, `--fields`. |
 | `loran show <tool>`                | Show resolved curated page (Steelbore intro + body per §4.1). Curated-or-fail.            |
-| `loran help <tool>`                | Capture and render `<tool> --help` directly (always-live, de-themed). Per §4.2. Sub-command flag: `--pager <cmd>` (overrides the §4.2.1 cascade; `--pager=""` disables pagination).            |
+| `loran help <tool>`                | Capture and render `<tool> --help` directly (always-live, de-themed). Per §4.2. Sub-command flag: `--pager <cmd>` (overrides the §4.2.1 cascade; `--pager=""` disables pagination; `--pager=loran` forces the Steelbore default chain).            |
 | `loran find <legacy>`              | Reverse lookup: which tool replaces `<legacy>`? Use `--safe-alias` to filter to alias-safe matches only. |
 | `loran search <query>`             | Fuzzy search across name, summary, replaces, tags.                                         |
 | `loran categories`                 | List categories with counts. JSON-friendly.                                                |
@@ -483,7 +492,7 @@ Per SFRS §6. Example for `loran show eza --json`:
 }
 ```
 
-For `loran show`, `body.kind ∈ {custom, tldr, none}`. For `loran help`, the envelope mirrors this but `body.kind = "live_help"` and `data.body.captured_at` carries the spawn timestamp.
+For `loran show`, `body.kind ∈ {custom, tldr, none}`. For `loran help`, the envelope mirrors this but `body.kind = "live_help"`, `data.body.captured_at` carries the spawn timestamp, `data.body.pager_command` records the resolved pager (per the §4.2.1 cascade), and `data.body.pager_source ∈ {"flag", "manpager-env", "pager-env", "bat", "moor", "cat"}` records which cascade step won.
 
 ---
 

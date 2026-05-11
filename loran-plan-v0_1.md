@@ -310,7 +310,7 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 | **Outputs** | The `help` capture engine per spec §4.2 |
 | **PRD links** | FR-020 to FR-025, FR-024a, NFR-034 |
 
-**Approach.** `capture_help(tool_name, opts: HelpOpts) -> HelpResult`. Steps: resolve binary via PATH (using `which` crate or hand-rolled), spawn `Command::new(path).arg("--help")` with no shell, resolve the pager via the §4.2.1 cascade (`opts.pager` override → `$MANPAGER` → `$PAGER` → `bat -pp` if `bat` on PATH → `cat`), set `PAGER` and `MANPAGER` to the resolved command in the subprocess env, clear `LESS` only when the Steelbore default fired, enforce 5s timeout via async-or-thread + `kill_on_drop`, capture stdout+stderr, prefer non-empty. On non-zero exit, retry `-h` then `help` subcommand. Returns a typed `HelpResult` with captured text + ISO 8601 UTC capture timestamp + which flag variant succeeded + the resolved pager command. Implementation uses synchronous threads with a wall-clock timer — keeps the v1 fast path async-free per spec §3.3.
+**Approach.** `capture_help(tool_name, opts: HelpOpts) -> HelpResult`. Steps: resolve binary via PATH (using `which` crate or hand-rolled), spawn `Command::new(path).arg("--help")` with no shell, resolve the pager via the §4.2.1 cascade (`opts.pager` override → `$MANPAGER` → `$PAGER` → `bat -pp` if `bat` on PATH → `moor` if `moor` on PATH → `cat`), set `PAGER` and `MANPAGER` to the resolved command in the subprocess env, clear `LESS` only when a step in the Steelbore default chain fired (steps 4–6), enforce 5s timeout via async-or-thread + `kill_on_drop`, capture stdout+stderr, prefer non-empty. On non-zero exit, retry `-h` then `help` subcommand. Returns a typed `HelpResult` with captured text + ISO 8601 UTC capture timestamp + which flag variant succeeded + the resolved pager command + a `PagerSource` enum recording which cascade step won. The `--pager=loran` sentinel is intercepted by the CLI (`loran-cli`) before `HelpOpts` is built — `opts.pager` arrives as `None` from the cascade's perspective but a separate `opts.skip_user_env_pager: bool` is set so steps 2–3 are bypassed. Implementation uses synchronous threads with a wall-clock timer — keeps the v1 fast path async-free per spec §3.3.
 
 **Acceptance criteria:**
 - [ ] Binary resolution via PATH only; argv never trusted as path
@@ -318,9 +318,10 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 - [ ] 5s timeout enforced; SIGKILL on overrun → `LIVE_HELP_TIMEOUT = 9`
 - [ ] Retry sequence: `--help` → `-h` → `help`; prefer non-empty
 - [ ] Capture timestamp is ISO 8601 UTC with `Z` suffix
-- [ ] Pager cascade implemented per spec §4.2.1: flag override → `$MANPAGER` → `$PAGER` → `bat -pp` → `cat`. `LESS` cleared only when the Steelbore default or `cat` fires.
-- [ ] `HelpResult.pager_command` records the resolved pager for surfacing in `--format json`
-- [ ] Unit tests use mock binaries (echo scripts) to verify timeout, retry, capture, and every step of the pager cascade (with `MANPAGER`, `PAGER`, fallback when `bat` is absent, and the `--pager=""` disable case)
+- [ ] Pager cascade implemented per spec §4.2.1: flag override → `$MANPAGER` → `$PAGER` → `bat -pp` → `moor` → `cat`. `LESS` cleared only when a default-chain step (4–6) fires.
+- [ ] `--pager=loran` skips steps 2–3 and forces the default chain
+- [ ] `HelpResult.pager_command` and `HelpResult.pager_source` recorded for surfacing in `--format json`
+- [ ] Unit tests use mock binaries (echo scripts) to verify timeout, retry, capture, and every step of the pager cascade — explicit `--pager <cmd>`, `--pager=""` disable, `--pager=loran` sentinel, `$MANPAGER` precedence over `$PAGER`, `$PAGER` fallback, `bat -pp` when bat present, `moor` when bat absent + moor present, `cat` when both absent
 
 ### WP-P1.06 — Markdown → terminal text renderer (`loran-render`, text mode)
 
