@@ -3,12 +3,36 @@
 
 #![deny(unsafe_code)]
 
-//! Loran index — pluggable ingestor framework and merged-overlay index.
+//! Loran index — pluggable ingestion of [`loran_pages::Page`] values and
+//! the merged in-memory [`Index`] queried by the CLI surface.
 //!
-//! Phase 0 placeholder. The `Ingestor` trait, `MarkdownPagesIngestor`, and
-//! `Index` data structure land in Phase 1 per WP-P1.02. The `DescribeIngestor`
-//! (which scrapes SFRS `describe` output from sibling Steelbore CLIs) arrives
-//! in Phase 3 (Bloom).
+//! ## Architecture
+//!
+//! Ingestion is decoupled from indexing via the [`Ingestor`] trait, so
+//! the same [`Index::build`] pipeline can consume pages produced from
+//! any source. v1 ships exactly one implementation
+//! ([`MarkdownPagesIngestor`], which walks a directory of `*.md`
+//! files); Phase 3 will add a `DescribeIngestor` that synthesises
+//! entries by invoking `<tool> describe --json` against SFRS-compliant
+//! Steelbore CLIs on `$PATH`.
+//!
+//! ## Failure policy
+//!
+//! Both stages **fail loud** (Spec §6.1, FR-035):
+//!
+//! - [`MarkdownPagesIngestor::ingest`] returns the first malformed page
+//!   it encounters wrapped in [`IngestError::Page`]. There is no silent
+//!   skip mode.
+//! - [`Index::build`] rejects duplicate `name`s with
+//!   [`IndexError::DuplicateName`]. The caller is expected to surface
+//!   this as a `PAGE_PARSE_ERROR` (Spec §9 code 8).
 
-/// Placeholder used to verify the workspace builds cleanly during Phase 0.
-pub const fn placeholder() {}
+mod error;
+mod index;
+mod ingestor;
+mod markdown;
+
+pub use error::{IndexError, IngestError};
+pub use index::Index;
+pub use ingestor::Ingestor;
+pub use markdown::MarkdownPagesIngestor;

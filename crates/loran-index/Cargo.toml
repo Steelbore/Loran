@@ -13,5 +13,10 @@ repository.workspace = true
 homepage.workspace = true
 readme.workspace = true
 
+[dependencies]
+loran-pages = { path = "../loran-pages" }
+thiserror = { workspace = true }
+walkdir = { workspace = true }
+
 [lints]
 workspace = true
