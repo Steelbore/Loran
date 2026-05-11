@@ -81,6 +81,15 @@ pub struct Page {
     /// Leading whitespace immediately following the fence is preserved;
     /// downstream renderers handle trimming according to their own
     /// presentation rules.
+    ///
+    /// **Serialization:** skipped. When a `Page` is flattened into the
+    /// `loran show` envelope, the raw body is surfaced via
+    /// `data.body.body_md` (a `BodyBlock` in `loran-core`) — not at the
+    /// top level — so the structured payload's top-level shape matches
+    /// Spec §8 (metadata fields + nested `intro`/`body` objects).
+    /// `loran list`'s JSON output similarly carries only metadata,
+    /// keeping the list payload compact.
+    #[serde(skip_serializing)]
     pub body: String,
 }
 

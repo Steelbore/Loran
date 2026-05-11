@@ -132,6 +132,15 @@ impl ExitCode {
         matches!(self, Self::Success)
     }
 
+    /// Numeric exit code as a `u8`, suitable for [`std::process::ExitCode::from`].
+    ///
+    /// Every variant fits in `u8` by construction (0..=11), so the
+    /// conversion is infallible — but it is expressed via `try_from`
+    /// so future variant additions cannot silently truncate.
+    pub(crate) fn to_process_code(self) -> u8 {
+        u8::try_from(self.numeric()).unwrap_or(1)
+    }
+
     /// Every variant, in numeric order. Used by tests and by `loran
     /// schema --json` (Phase 3) to enumerate the surface.
     pub(crate) fn all() -> [ExitCode; 12] {

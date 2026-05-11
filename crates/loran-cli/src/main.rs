@@ -14,6 +14,7 @@
 
 mod agent;
 mod cli;
+mod cmd;
 mod color;
 mod envelope;
 mod exit;
@@ -24,7 +25,7 @@ use std::process::ExitCode;
 
 use clap::Parser;
 
-use crate::cli::Cli;
+use crate::cli::{Cli, Command};
 
 fn main() -> ExitCode {
     let cli = Cli::parse();
@@ -40,12 +41,16 @@ fn main() -> ExitCode {
     }
 
     if let Some(cmd) = cli.command.as_ref() {
-        let name = cmd.name();
-        eprintln!(
-            "loran {name}: not yet implemented in this Phase 1 milestone. \
-             See `loran-plan-v0_1.md` WP-P1.11 onwards."
-        );
-        ExitCode::from(1)
+        if let Command::Show(args) = cmd {
+            cmd::show::run(&cli, args)
+        } else {
+            let name = cmd.name();
+            eprintln!(
+                "loran {name}: not yet implemented in this Phase 1 milestone. \
+                 See `loran-plan-v0_1.md` WP-P1.11 onwards."
+            );
+            ExitCode::from(1)
+        }
     } else {
         // No sub-command + no --version: print usage hint and exit 0.
         // Phase 2 will replace this with the TUI default view.
