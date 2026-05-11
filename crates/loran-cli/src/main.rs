@@ -14,6 +14,7 @@
 
 mod cli;
 mod color;
+mod envelope;
 mod logging;
 mod version;
 
