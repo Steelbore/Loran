@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Mohamed Hammad
+#
+# Loran category registry. Categories are first-class structural keys
+# referenced by every page's `category` frontmatter field (Spec §6.2).
+# Slash-tolerant: `system/file-listing` is a valid table name today and
+# is stored verbatim. v1 renders flat; nested UX is deferred to the
+# threshold described in Spec §15 Open Question 4.
+
+[file-listing]
+title = "File listing"
+description = "Tools that enumerate filesystem entries — Steelbore's modern ls replacements."
+
+[file-viewing]
+title = "File viewing"
+description = "Tools that display file contents with syntax highlighting and structure-aware rendering."
+
+[text-search]
+title = "Text search"
+description = "Tools that search file contents — Steelbore's grep family."
+
+[file-search]
+title = "File search"
+description = "Tools that locate files by name, attributes, or content patterns."
+
+[process-management]
+title = "Process management"
+description = "Tools that list, inspect, and operate on running processes."
+
+[system-monitoring]
+title = "System monitoring"
+description = "Interactive monitors for CPU, memory, network, disk, and process state."
+
+[networking]
+title = "Networking"
+description = "DNS, HTTP, port scanning, and packet inspection tools."
+
+[version-control]
+title = "Version control"
+description = "Git porcelains, diff viewers, and repository navigators."
+
+[shell-utilities]
+title = "Shell utilities"
+description = "Shells, prompts, and small productivity tools that improve daily terminal use."
+
+[data-processing]
+title = "Data processing"
+description = "JSON, YAML, CSV, and structured-data manipulation tools."

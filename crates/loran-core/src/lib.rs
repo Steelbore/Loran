@@ -5,8 +5,12 @@
 
 //! Loran core — orchestration and resolution chains.
 //!
-//! Phase 0 placeholder. The `resolve_show`, `resolve_find`, `resolve_search`,
-//! and `capture_help` entry points land in Phase 1 per WP-P1.04 / WP-P1.05.
+//! Phase 1B surface: [`BundledPagesIngestor`], the read-side source
+//! over the build-time page bundle. Resolution chains (`resolve_show`,
+//! `resolve_find`, `resolve_search`) and the live `--help` capture
+//! engine land in Sub-phases 1C–1D per `loran-plan-v0_1.md` WP-P1.04
+//! and WP-P1.05.
 
-/// Placeholder used to verify the workspace builds cleanly during Phase 0.
-pub const fn placeholder() {}
+mod bundled;
+
+pub use bundled::BundledPagesIngestor;

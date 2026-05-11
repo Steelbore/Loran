@@ -13,5 +13,12 @@ repository.workspace = true
 homepage.workspace = true
 readme.workspace = true
 
+[dependencies]
+loran-pages = { path = "../loran-pages" }
+loran-index = { path = "../loran-index" }
+
+[build-dependencies]
+loran-pages = { path = "../loran-pages" }
+
 [lints]
 workspace = true

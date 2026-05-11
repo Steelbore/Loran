@@ -324,6 +324,10 @@ dependencies = [
 [[package]]
 name = "loran-core"
 version = "0.0.0"
+dependencies = [
+ "loran-index",
+ "loran-pages",
+]
 
 [[package]]
 name = "loran-index"
