@@ -5,7 +5,7 @@ SPDX-FileCopyrightText: 2026 Mohamed Hammad
 
 # Loran
 
-[![CI](https://github.com/Steelbore/loran/actions/workflows/ci.yml/badge.svg)](https://github.com/Steelbore/loran/actions/workflows/ci.yml)
+[![CI](https://github.com/Steelbore/Loran/actions/workflows/ci.yml/badge.svg)](https://github.com/Steelbore/Loran/actions/workflows/ci.yml)
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.88%2B-orange.svg)](rust-toolchain.toml)
 

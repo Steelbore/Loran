@@ -21,7 +21,7 @@ authors = ["Mohamed Hammad <Mohamed.Hammad@Steelbore.com>"]
 edition = "2024"
 rust-version = "1.88"
 license = "GPL-3.0-or-later"
-repository = "https://github.com/Steelbore/loran"
+repository = "https://github.com/Steelbore/Loran"
 homepage = "https://Loran.Steelbore.com/"
 readme = "README.md"
 
