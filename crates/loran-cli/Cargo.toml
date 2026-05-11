@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Mohamed Hammad
+
+[package]
+name = "loran-cli"
+description = "Loran — the Steelbore reference manual (CLI binary)."
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+
+[[bin]]
+name = "loran"
+path = "src/main.rs"
+
+[lints]
+workspace = true

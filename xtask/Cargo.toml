@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Mohamed Hammad
+
+[package]
+name = "xtask"
+description = "Loran — build / release / lint helpers (cargo xtask <cmd>)."
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+publish = false
+
+[[bin]]
+name = "xtask"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = { workspace = true }
+
+[lints]
+workspace = true

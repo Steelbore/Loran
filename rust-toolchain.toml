@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Mohamed Hammad
+
+[toolchain]
+channel = "1.88.0"
+components = ["clippy", "rustfmt"]
+profile = "minimal"

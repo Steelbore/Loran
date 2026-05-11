@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Mohamed Hammad
+
+# Project-specific Clippy configuration. Workspace-level lint levels are set
+# in Cargo.toml under [workspace.lints]; this file is for clippy.toml-only
+# knobs (allowed crates, MSRV, cognitive-complexity threshold, etc.).
+
+# Match the workspace.package rust-version pin.
+msrv = "1.88.0"
+
+# Placeholder. Add specific lint allowlists / blocklists as code lands.
+# disallowed-methods = []
+# disallowed-types = []
