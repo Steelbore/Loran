@@ -11,5 +11,7 @@
 //! directly (text).
 
 pub(crate) mod categories;
+pub(crate) mod find;
 pub(crate) mod list;
+pub(crate) mod search;
 pub(crate) mod show;

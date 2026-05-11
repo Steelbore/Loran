@@ -43,7 +43,9 @@ fn main() -> ExitCode {
     if let Some(cmd) = cli.command.as_ref() {
         match cmd {
             Command::Categories(args) => cmd::categories::run(&cli, args),
+            Command::Find(args) => cmd::find::run(&cli, args),
             Command::List(args) => cmd::list::run(&cli, args),
+            Command::Search(args) => cmd::search::run(&cli, args),
             Command::Show(args) => cmd::show::run(&cli, args),
             _ => {
                 let name = cmd.name();
