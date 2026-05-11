@@ -61,6 +61,10 @@ wait-timeout = "0.2"
 # TTY detection for the agent-env cascade (Phase 1B — loran-cli).
 is-terminal = "0.4"
 
+# Test-only deps (dev-dependencies in member crates).
+assert_cmd = "2"
+predicates = "3"
+
 [workspace.lints.rust]
 unsafe_code = "deny"
 unsafe_op_in_unsafe_fn = "deny"

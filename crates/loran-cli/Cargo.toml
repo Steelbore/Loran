@@ -17,5 +17,19 @@ readme.workspace = true
 name = "loran"
 path = "src/main.rs"
 
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }
+is-terminal = { workspace = true }
+jiff = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+[dev-dependencies]
+assert_cmd = { workspace = true }
+predicates = { workspace = true }
+
 [lints]
 workspace = true
