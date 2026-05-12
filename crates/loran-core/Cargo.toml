@@ -17,6 +17,7 @@ readme.workspace = true
 loran-pages = { path = "../loran-pages" }
 loran-index = { path = "../loran-index" }
 dirs = { workspace = true }
+flate2 = { workspace = true }
 jiff = { workspace = true }
 minisign-verify = { workspace = true }
 nucleo-matcher = { workspace = true }
@@ -24,6 +25,7 @@ postcard = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 sha2 = { workspace = true }
+tar = { workspace = true }
 thiserror = { workspace = true }
 toml = { workspace = true }
 ureq = { workspace = true }
