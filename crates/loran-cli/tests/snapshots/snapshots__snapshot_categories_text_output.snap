@@ -2,13 +2,13 @@
 source: crates/loran-cli/tests/snapshots.rs
 expression: normalise(&stdout)
 ---
-data-processing	Data processing	1
-file-listing	File listing	1
-file-search	File search	1
-file-viewing	File viewing	1
-networking	Networking	1
+data-processing	Data processing	4
+file-listing	File listing	3
+file-search	File search	2
+file-viewing	File viewing	3
+networking	Networking	2
 process-management	Process management	1
-shell-utilities	Shell utilities	0
-system-monitoring	System monitoring	1
-text-search	Text search	1
-version-control	Version control	0
+shell-utilities	Shell utilities	5
+system-monitoring	System monitoring	2
+text-search	Text search	2
+version-control	Version control	2

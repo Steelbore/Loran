@@ -28,18 +28,18 @@ fn find_strict_mode_only_returns_alias_safe_replacers() {
     let stdout = String::from_utf8(safe.get_output().stdout.clone()).unwrap();
     assert!(stdout.contains("bat\t"), "got {stdout}");
 
-    // `eza` replaces `ls` but isn't alias-safe — strict mode should
-    // return nothing for `ls`.
-    let ls_strict = loran()
-        .args(["find", "ls", "--safe-alias"])
+    // `rg` replaces `grep` but isn't alias-safe — strict mode should
+    // return nothing for `grep`.
+    let strict = loran()
+        .args(["find", "grep", "--safe-alias"])
         .assert()
         .success();
-    let stdout = String::from_utf8(ls_strict.get_output().stdout.clone()).unwrap();
+    let stdout = String::from_utf8(strict.get_output().stdout.clone()).unwrap();
     assert!(
         stdout.contains("no Steelbore tool"),
-        "expected no-match diagnostic for ls --safe-alias; got {stdout}"
+        "expected no-match diagnostic for grep --safe-alias; got {stdout}"
     );
-    assert!(stdout.contains("hint: loran search ls"));
+    assert!(stdout.contains("hint: loran search grep"));
 }
 
 #[test]

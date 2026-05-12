@@ -2,11 +2,29 @@
 source: crates/loran-cli/tests/snapshots.rs
 expression: normalise(&stdout)
 ---
+bandwhich	system-monitoring	Per-process and per-connection bandwidth monitor for the terminal.
 bat	file-viewing	cat with syntax highlighting, line numbers, and Git integration.
 bottom	system-monitoring	Cross-platform graphical process and system monitor (TUI).
+broot	file-listing	Interactive TUI for navigating large directory trees with live fuzzy filtering.
+dasel	data-processing	Multi-format query and edit â JSON, YAML, TOML, XML â one selector syntax.
+delta	file-viewing	Syntax-highlighting pager for git, diff, and grep output. Side-by-side and unified.
+direnv	shell-utilities	Per-directory environment variables. `.envrc` activates on cd, deactivates on leave.
 dog	networking	Modern DNS lookup tool â dig with sane defaults and JSON output.
+dust	file-search	Disk-usage analyser. Shows where space is going in a colour bar-chart, sorted by size.
 eza	file-listing	Modern ls replacement. Steelbore default for file listing.
 fd	file-search	Simple, fast user-friendly alternative to find.
+git-cliff	version-control	Conventional-commit changelog generator. Configurable templates, no JS runtime.
+gron	data-processing	Make JSON greppable. Flattens nested structures into discoverable assignment lines.
+hexyl	file-viewing	Coloured hex viewer for the terminal. Distinguishes ASCII, control, and printable bytes.
+hyperfine	shell-utilities	Benchmarking tool for CLI commands. Warmup runs, statistical analysis, JSON export.
 jaq	data-processing	Faster, drop-in jq replacement with stricter semantics.
+just	shell-utilities	Modern command runner. `justfile` recipes with arguments, dependencies, and listing.
+lazygit	version-control	Git TUI with stage-hunk-by-hunk, interactive rebase, and one-key commands.
+lsd	file-listing	Drop-in `ls` replacement with colours and icons. Conservative alternative to eza.
+miller	data-processing	awk for CSV / TSV / JSON / Parquet â name-keyed, schema-aware, streaming.
 procs	process-management	Modern ps replacement with colour, search, and tree view.
 rg	text-search	ripgrep â recursively search files for a regex pattern. The Steelbore default.
+sd	text-search	Intuitive find-and-replace CLI. Literal patterns by default, regex with -r.
+starship	shell-utilities	Cross-shell prompt. One TOML config drives Bash, Zsh, Fish, Nushell, PowerShell, Ion.
+xh	networking	Friendly HTTP client. Re-implementation of HTTPie's UX in Rust with extra polish.
+zoxide	shell-utilities	Smart `cd` that learns. Type a fragment of any visited directory and jump there.
