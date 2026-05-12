@@ -16,6 +16,7 @@
 //! the `loran help` rendering path.
 
 mod app;
+mod markdown;
 mod terminal;
 pub mod theme;
 

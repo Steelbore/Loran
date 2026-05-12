@@ -17,6 +17,7 @@ readme.workspace = true
 crossterm = { workspace = true }
 loran-index = { path = "../loran-index" }
 loran-pages = { path = "../loran-pages" }
+pulldown-cmark = { workspace = true }
 ratatui = { workspace = true }
 thiserror = { workspace = true }
 

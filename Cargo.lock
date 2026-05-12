@@ -1011,6 +1011,7 @@ dependencies = [
  "crossterm",
  "loran-index",
  "loran-pages",
+ "pulldown-cmark",
  "ratatui",
  "tempfile",
  "thiserror",

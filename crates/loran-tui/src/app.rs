@@ -3,24 +3,30 @@
 
 //! TUI application loop.
 //!
-//! WP-P2.02 stood up the shell. WP-P2.03 adds a dual-pane browse
-//! view: categories on the left, tools-in-selected-category on the
-//! right. Tab toggles focus; `j` / `k` and the arrow keys move the
-//! selection within the focused pane. Enter records a tool selection
-//! that the detail view (WP-P2.04) will consume; `/` and `?` are
-//! reserved for the search overlay (P2.05) and in-app help (P2.06).
+//! State machine:
+//!
+//! - `View::Browse` (WP-P2.03): dual-pane categories + tools.
+//! - `View::Detail` (WP-P2.04): name + intro + body with a right
+//!   sidebar of `pairs_with` / `safe_alias_for` / `written_in`
+//!   badges. Tab cycles `Rendered → Raw → Frontmatter` sub-views.
+//!
+//! Esc returns one step (Detail → Browse, Browse → quit); `q` and
+//! `Ctrl-C` always quit. `/` and `?` are reserved for the search
+//! overlay (P2.05) and in-app help (P2.06).
 
 use std::time::Duration;
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyModifiers};
 use loran_index::Index;
+use loran_pages::Page;
 use ratatui::Frame;
-use ratatui::layout::{Alignment, Constraint, Direction, Layout};
+use ratatui::layout::{Alignment, Constraint, Direction, Layout, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
-use ratatui::widgets::{Block, Borders, List, ListItem, ListState, Paragraph};
+use ratatui::widgets::{Block, Borders, List, ListItem, ListState, Paragraph, Wrap};
 
 use crate::TerminalGuard;
+use crate::markdown;
 use crate::terminal::TuiError;
 use crate::theme::Palette;
 
@@ -28,7 +34,7 @@ use crate::theme::Palette;
 /// instant" key responsiveness without burning CPU on an idle screen.
 const TICK_MS: u64 = 60;
 
-/// Which pane currently owns keyboard focus.
+/// Which pane currently owns keyboard focus in the browse view.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub(crate) enum Focus {
     Categories,
@@ -44,6 +50,43 @@ impl Focus {
     }
 }
 
+/// Top-level navigation state.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) enum View {
+    Browse,
+    Detail {
+        tool: String,
+        sub_view: DetailSubView,
+    },
+}
+
+/// Detail-view sub-modes. Tab cycles `Rendered → Raw → Frontmatter`,
+/// matching Spec §10's agent-inspection contract.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub(crate) enum DetailSubView {
+    Rendered,
+    Raw,
+    Frontmatter,
+}
+
+impl DetailSubView {
+    fn cycle(self) -> Self {
+        match self {
+            Self::Rendered => Self::Raw,
+            Self::Raw => Self::Frontmatter,
+            Self::Frontmatter => Self::Rendered,
+        }
+    }
+
+    fn label(self) -> &'static str {
+        match self {
+            Self::Rendered => "rendered",
+            Self::Raw => "raw markdown",
+            Self::Frontmatter => "frontmatter",
+        }
+    }
+}
+
 /// Top-level TUI application state.
 #[derive(Debug)]
 pub struct App {
@@ -53,7 +96,7 @@ pub struct App {
     focus: Focus,
     cat_state: ListState,
     tool_state: ListState,
-    selected_tool: Option<String>,
+    view: View,
     should_quit: bool,
 }
 
@@ -76,7 +119,7 @@ impl App {
             focus: Focus::Categories,
             cat_state,
             tool_state,
-            selected_tool: None,
+            view: View::Browse,
             should_quit: false,
         };
         app.sync_tool_selection();
@@ -89,7 +132,6 @@ impl App {
         Self::new(index, Palette::from_env())
     }
 
-    /// Tool names in the currently-selected category, sorted by name.
     fn tools_in_selected_category(&self) -> Vec<String> {
         let Some(cat) = self.selected_category() else {
             return Vec::new();
@@ -110,8 +152,6 @@ impl App {
             .map(String::as_str)
     }
 
-    /// Re-anchor `tool_state` after a category change so the right
-    /// pane never points at a stale index.
     fn sync_tool_selection(&mut self) {
         let tools = self.tools_in_selected_category();
         if tools.is_empty() {
@@ -160,24 +200,41 @@ impl App {
         let tools = self.tools_in_selected_category();
         if let Some(idx) = self.tool_state.selected() {
             if let Some(name) = tools.get(idx) {
-                self.selected_tool = Some(name.clone());
+                self.open_detail(name.clone());
             }
         }
     }
 
-    /// Last tool the user activated with Enter. Cleared by callers
-    /// once the detail-view (P2.04) consumes it.
-    #[must_use]
-    pub fn take_selected_tool(&mut self) -> Option<String> {
-        self.selected_tool.take()
+    fn open_detail(&mut self, tool: String) {
+        self.view = View::Detail {
+            tool,
+            sub_view: DetailSubView::Rendered,
+        };
+    }
+
+    fn close_detail(&mut self) {
+        self.view = View::Browse;
     }
 
     fn handle_key(&mut self, key: KeyEvent) {
+        // Always-on keys.
         match (key.code, key.modifiers) {
-            (KeyCode::Char('q') | KeyCode::Esc, _)
-            | (KeyCode::Char('c' | 'd'), KeyModifiers::CONTROL) => {
+            (KeyCode::Char('q'), _) | (KeyCode::Char('c' | 'd'), KeyModifiers::CONTROL) => {
                 self.should_quit = true;
+                return;
             }
+            _ => {}
+        }
+
+        match self.view.clone() {
+            View::Browse => self.handle_browse_key(key),
+            View::Detail { tool, sub_view } => self.handle_detail_key(key, tool, sub_view),
+        }
+    }
+
+    fn handle_browse_key(&mut self, key: KeyEvent) {
+        match (key.code, key.modifiers) {
+            (KeyCode::Esc, _) => self.should_quit = true,
             (KeyCode::Tab | KeyCode::BackTab, _) => {
                 self.focus = self.focus.toggle();
             }
@@ -188,14 +245,31 @@ impl App {
             (KeyCode::Char('h') | KeyCode::Left, _) => self.focus = Focus::Categories,
             (KeyCode::Char('l') | KeyCode::Right, _) => self.focus = Focus::Tools,
             (KeyCode::Enter, _) => self.confirm(),
-            // Reserved for later WPs:
-            // `/` → fuzzy-search overlay (P2.05)
-            // `?` → in-app help overlay (P2.06)
+            _ => {}
+        }
+    }
+
+    fn handle_detail_key(&mut self, key: KeyEvent, tool: String, sub_view: DetailSubView) {
+        match (key.code, key.modifiers) {
+            (KeyCode::Esc | KeyCode::Backspace, _) => self.close_detail(),
+            (KeyCode::Tab, _) => {
+                self.view = View::Detail {
+                    tool,
+                    sub_view: sub_view.cycle(),
+                };
+            }
             _ => {}
         }
     }
 
     fn render(&mut self, frame: &mut Frame<'_>) {
+        match self.view.clone() {
+            View::Browse => self.render_browse(frame),
+            View::Detail { tool, sub_view } => self.render_detail(frame, &tool, sub_view),
+        }
+    }
+
+    fn render_browse(&mut self, frame: &mut Frame<'_>) {
         let area = frame.area();
         let palette = self.palette;
         let chrome = Style::default()
@@ -212,7 +286,6 @@ impl App {
             ])
             .split(area);
 
-        // Header.
         let header = Paragraph::new(Line::from(vec![
             Span::styled(
                 "LORAN",
@@ -227,7 +300,6 @@ impl App {
         .block(Block::default().borders(Borders::BOTTOM).style(chrome));
         frame.render_widget(header, vertical[0]);
 
-        // Body — two panes side-by-side.
         let body = Layout::default()
             .direction(Direction::Horizontal)
             .constraints([Constraint::Length(28), Constraint::Min(0)])
@@ -236,14 +308,15 @@ impl App {
         self.render_categories(frame, body[0]);
         self.render_tools(frame, body[1]);
 
-        // Footer.
-        let footer = Paragraph::new(self.footer_line())
-            .alignment(Alignment::Center)
-            .style(chrome);
-        frame.render_widget(footer, vertical[2]);
+        frame.render_widget(
+            Paragraph::new(self.footer_browse())
+                .alignment(Alignment::Center)
+                .style(chrome),
+            vertical[2],
+        );
     }
 
-    fn render_categories(&mut self, frame: &mut Frame<'_>, area: ratatui::layout::Rect) {
+    fn render_categories(&mut self, frame: &mut Frame<'_>, area: Rect) {
         let palette = self.palette;
         let focused = matches!(self.focus, Focus::Categories);
         let border_style = if focused {
@@ -290,7 +363,7 @@ impl App {
         frame.render_stateful_widget(list, area, &mut self.cat_state);
     }
 
-    fn render_tools(&mut self, frame: &mut Frame<'_>, area: ratatui::layout::Rect) {
+    fn render_tools(&mut self, frame: &mut Frame<'_>, area: Rect) {
         let palette = self.palette;
         let focused = matches!(self.focus, Focus::Tools);
         let border_style = if focused {
@@ -363,7 +436,208 @@ impl App {
         frame.render_stateful_widget(list, area, &mut self.tool_state);
     }
 
-    fn footer_line(&self) -> Line<'_> {
+    fn render_detail(&mut self, frame: &mut Frame<'_>, tool: &str, sub_view: DetailSubView) {
+        let area = frame.area();
+        let palette = self.palette;
+        let chrome = Style::default()
+            .fg(palette.foreground)
+            .bg(palette.background);
+
+        let vertical = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Length(3),
+                Constraint::Min(0),
+                Constraint::Length(1),
+            ])
+            .split(area);
+
+        // Header: tool name + sub-view label.
+        let header = Paragraph::new(Line::from(vec![
+            Span::styled(
+                tool.to_uppercase(),
+                Style::default()
+                    .fg(palette.accent)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::raw("   "),
+            Span::styled(
+                format!("[{}]", sub_view.label()),
+                Style::default().fg(palette.muted).bg(palette.background),
+            ),
+        ]))
+        .alignment(Alignment::Left)
+        .block(Block::default().borders(Borders::BOTTOM).style(chrome));
+        frame.render_widget(header, vertical[0]);
+
+        // Body + sidebar.
+        let mid = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([Constraint::Min(0), Constraint::Length(28)])
+            .split(vertical[1]);
+
+        let page = self.index.get(tool);
+        self.render_detail_body(frame, mid[0], tool, page, sub_view);
+        self.render_detail_sidebar(frame, mid[1], page);
+
+        // Footer.
+        frame.render_widget(
+            Paragraph::new(self.footer_detail())
+                .alignment(Alignment::Center)
+                .style(chrome),
+            vertical[2],
+        );
+    }
+
+    fn render_detail_body(
+        &self,
+        frame: &mut Frame<'_>,
+        area: Rect,
+        tool: &str,
+        page: Option<&Page>,
+        sub_view: DetailSubView,
+    ) {
+        let palette = self.palette;
+        let chrome = Style::default()
+            .fg(palette.foreground)
+            .bg(palette.background);
+        let muted = Style::default().fg(palette.muted).bg(palette.background);
+
+        let Some(page) = page else {
+            let missing = Paragraph::new(Line::from(Span::styled(
+                format!("page `{tool}` not in the merged index"),
+                muted,
+            )))
+            .alignment(Alignment::Center)
+            .block(Block::default().borders(Borders::ALL).style(chrome));
+            frame.render_widget(missing, area);
+            return;
+        };
+
+        let title = match sub_view {
+            DetailSubView::Rendered => " rendered ",
+            DetailSubView::Raw => " raw ",
+            DetailSubView::Frontmatter => " frontmatter ",
+        };
+
+        let mut lines: Vec<Line<'static>> = vec![
+            Line::from(Span::styled(page.summary.clone(), chrome)),
+            Line::from(Span::styled(
+                "Steelbore curated entry · Tab to cycle views".to_owned(),
+                muted,
+            )),
+            Line::raw(""),
+            Line::from(Span::styled(
+                "──────".to_owned(),
+                Style::default().fg(palette.muted).bg(palette.background),
+            )),
+            Line::raw(""),
+        ];
+
+        match sub_view {
+            DetailSubView::Rendered => {
+                lines.extend(markdown::render(&page.body, palette));
+            }
+            DetailSubView::Raw => {
+                for line in page.body.lines() {
+                    lines.push(Line::from(Span::styled(line.to_owned(), chrome)));
+                }
+            }
+            DetailSubView::Frontmatter => {
+                lines.extend(frontmatter_lines(page, palette));
+            }
+        }
+
+        let body = Paragraph::new(lines).wrap(Wrap { trim: false }).block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title(title)
+                .style(chrome),
+        );
+        frame.render_widget(body, area);
+    }
+
+    fn render_detail_sidebar(&self, frame: &mut Frame<'_>, area: Rect, page: Option<&Page>) {
+        let palette = self.palette;
+        let chrome = Style::default()
+            .fg(palette.foreground)
+            .bg(palette.background);
+        let muted = Style::default().fg(palette.muted).bg(palette.background);
+        let label = Style::default().fg(palette.muted).bg(palette.background);
+        let accent = Style::default()
+            .fg(palette.accent)
+            .bg(palette.background)
+            .add_modifier(Modifier::BOLD);
+
+        let mut lines: Vec<Line<'static>> = Vec::new();
+
+        if let Some(page) = page {
+            // Category.
+            lines.push(Line::from(vec![
+                Span::styled("category ".to_owned(), label),
+                Span::styled(page.category.clone(), chrome),
+            ]));
+
+            // written_in with rust badge.
+            if let Some(lang) = &page.written_in {
+                let badge = if lang.eq_ignore_ascii_case("rust") {
+                    "🦀 rust".to_owned()
+                } else {
+                    lang.clone()
+                };
+                lines.push(Line::from(vec![
+                    Span::styled("written_in ".to_owned(), label),
+                    Span::styled(badge, accent),
+                ]));
+            }
+
+            if !page.replaces.is_empty() {
+                lines.push(Line::raw(""));
+                lines.push(Line::from(Span::styled("replaces".to_owned(), label)));
+                for r in &page.replaces {
+                    lines.push(Line::from(Span::styled(format!("· {r}"), chrome)));
+                }
+            }
+
+            if !page.safe_alias_for.is_empty() {
+                lines.push(Line::raw(""));
+                lines.push(Line::from(Span::styled("safe_alias_for".to_owned(), label)));
+                for a in &page.safe_alias_for {
+                    lines.push(Line::from(Span::styled(format!("✓ {a}"), accent)));
+                }
+            }
+
+            if !page.pairs_with.is_empty() {
+                lines.push(Line::raw(""));
+                lines.push(Line::from(Span::styled("pairs_with".to_owned(), label)));
+                for p in &page.pairs_with {
+                    lines.push(Line::from(Span::styled(format!("+ {p}"), chrome)));
+                }
+            }
+
+            if !page.tags.is_empty() {
+                lines.push(Line::raw(""));
+                lines.push(Line::from(Span::styled("tags".to_owned(), label)));
+                lines.push(Line::from(Span::styled(page.tags.join(", "), muted)));
+            }
+
+            if let Some(official) = &page.official {
+                lines.push(Line::raw(""));
+                lines.push(Line::from(Span::styled("official".to_owned(), label)));
+                lines.push(Line::from(Span::styled(official.clone(), muted)));
+            }
+        }
+
+        let sidebar = Paragraph::new(lines).wrap(Wrap { trim: false }).block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title(" badges ")
+                .style(chrome),
+        );
+        frame.render_widget(sidebar, area);
+    }
+
+    fn footer_browse(&self) -> Line<'_> {
         let palette = self.palette;
         let key = Style::default()
             .fg(palette.foreground)
@@ -381,6 +655,77 @@ impl App {
             Span::styled(" quit", muted),
         ])
     }
+
+    fn footer_detail(&self) -> Line<'_> {
+        let palette = self.palette;
+        let key = Style::default()
+            .fg(palette.foreground)
+            .bg(palette.background)
+            .add_modifier(Modifier::BOLD);
+        let muted = Style::default().fg(palette.muted).bg(palette.background);
+        Line::from(vec![
+            Span::styled("Tab", key),
+            Span::styled(" cycle views  ·  ", muted),
+            Span::styled("Esc", key),
+            Span::styled(" back  ·  ", muted),
+            Span::styled("q", key),
+            Span::styled(" quit", muted),
+        ])
+    }
+}
+
+fn frontmatter_lines(page: &Page, palette: Palette) -> Vec<Line<'static>> {
+    let chrome = Style::default()
+        .fg(palette.foreground)
+        .bg(palette.background);
+    let label = Style::default().fg(palette.muted).bg(palette.background);
+    let mut lines = Vec::new();
+
+    let push = |lines: &mut Vec<Line<'static>>, key: &str, value: String| {
+        lines.push(Line::from(vec![
+            Span::styled(format!("{key:<14} = "), label),
+            Span::styled(value, chrome),
+        ]));
+    };
+
+    push(&mut lines, "name", quote(&page.name));
+    push(&mut lines, "category", quote(&page.category));
+    push(&mut lines, "summary", quote(&page.summary));
+    push(&mut lines, "replaces", toml_array(&page.replaces));
+    push(
+        &mut lines,
+        "safe_alias_for",
+        toml_array(&page.safe_alias_for),
+    );
+    push(&mut lines, "pairs_with", toml_array(&page.pairs_with));
+    push(&mut lines, "tags", toml_array(&page.tags));
+    push(&mut lines, "aliases", toml_array(&page.aliases));
+    if let Some(v) = &page.official {
+        push(&mut lines, "official", quote(v));
+    }
+    if let Some(v) = &page.tldr_page {
+        push(&mut lines, "tldr_page", quote(v));
+    }
+    if let Some(v) = &page.written_in {
+        push(&mut lines, "written_in", quote(v));
+    }
+    if let Some(v) = &page.since {
+        push(&mut lines, "since", quote(v));
+    }
+    lines
+}
+
+fn quote(value: &str) -> String {
+    format!("\"{value}\"")
+}
+
+fn toml_array(items: &[String]) -> String {
+    let joined = items
+        .iter()
+        .map(|s| format!("\"{s}\""))
+        .collect::<Vec<_>>()
+        .join(", ");
+    format!("[{joined}]")
 }
 
 /// Initialise the terminal, run the event loop, and restore on exit.
@@ -400,12 +745,13 @@ pub fn run(app: &mut App) -> Result<(), TuiError> {
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
+
     use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
     use loran_index::{Index, Ingestor, MarkdownPagesIngestor};
-    use std::fs;
     use tempfile::TempDir;
 
-    use super::{App, Focus};
+    use super::{App, DetailSubView, Focus, View};
     use crate::theme::Palette;
 
     fn key(code: KeyCode) -> KeyEvent {
@@ -424,28 +770,33 @@ mod tests {
         fs::write(path, body).unwrap();
     }
 
-    fn page(name: &str, category: &str) -> String {
+    fn rich_page(name: &str) -> String {
         format!(
-            "+++\nname = \"{name}\"\ncategory = \"{category}\"\nsummary = \"{name} summary.\"\n+++\n"
+            "+++\n\
+             name = \"{name}\"\n\
+             category = \"file-listing\"\n\
+             summary = \"{name} summary.\"\n\
+             replaces = [\"ls\"]\n\
+             safe_alias_for = [\"ls\"]\n\
+             pairs_with = [\"bat\"]\n\
+             tags = [\"x\"]\n\
+             written_in = \"rust\"\n\
+             +++\n\
+             \n\
+             ## {name}\n\n\
+             Steelbore notes for {name}.\n"
         )
     }
 
     fn two_category_index() -> Index {
         let dir = TempDir::new().unwrap();
-        write_page(
-            dir.path(),
-            "file-listing/eza.md",
-            &page("eza", "file-listing"),
-        );
-        write_page(
-            dir.path(),
-            "file-listing/exa.md",
-            &page("exa", "file-listing"),
-        );
+        write_page(dir.path(), "file-listing/eza.md", &rich_page("eza"));
+        write_page(dir.path(), "file-listing/exa.md", &rich_page("exa"));
         write_page(
             dir.path(),
             "process-management/procs.md",
-            &page("procs", "process-management"),
+            "+++\nname = \"procs\"\ncategory = \"process-management\"\n\
+             summary = \"procs.\"\n+++\n",
         );
         let pages = MarkdownPagesIngestor::new(dir.path()).ingest().unwrap();
         Index::build(pages).unwrap()
@@ -462,16 +813,90 @@ mod tests {
         let app = App::new(two_category_index(), Palette::monochrome());
         assert_eq!(app.focus, Focus::Categories);
         assert_eq!(app.cat_state.selected(), Some(0));
-        assert_eq!(app.tool_state.selected(), Some(0));
+        assert_eq!(app.view, View::Browse);
     }
 
     #[test]
-    fn tab_toggles_focus() {
+    fn tab_toggles_focus_in_browse() {
         let mut app = App::new(two_category_index(), Palette::monochrome());
         app.handle_key(key(KeyCode::Tab));
         assert_eq!(app.focus, Focus::Tools);
         app.handle_key(key(KeyCode::Tab));
         assert_eq!(app.focus, Focus::Categories);
+    }
+
+    #[test]
+    fn enter_in_tools_opens_detail_view() {
+        let mut app = App::new(two_category_index(), Palette::monochrome());
+        app.handle_key(key(KeyCode::Tab));
+        app.handle_key(key(KeyCode::Enter));
+        match &app.view {
+            View::Detail { tool, sub_view } => {
+                assert!(matches!(tool.as_str(), "eza" | "exa"));
+                assert_eq!(*sub_view, DetailSubView::Rendered);
+            }
+            View::Browse => panic!("expected Detail view, got Browse"),
+        }
+    }
+
+    #[test]
+    fn tab_in_detail_cycles_sub_views() {
+        let mut app = App::new(two_category_index(), Palette::monochrome());
+        app.handle_key(key(KeyCode::Tab));
+        app.handle_key(key(KeyCode::Enter));
+        app.handle_key(key(KeyCode::Tab));
+        let View::Detail { sub_view, .. } = &app.view else {
+            panic!("expected Detail view");
+        };
+        assert_eq!(*sub_view, DetailSubView::Raw);
+
+        app.handle_key(key(KeyCode::Tab));
+        let View::Detail { sub_view, .. } = &app.view else {
+            panic!("expected Detail view");
+        };
+        assert_eq!(*sub_view, DetailSubView::Frontmatter);
+
+        app.handle_key(key(KeyCode::Tab));
+        let View::Detail { sub_view, .. } = &app.view else {
+            panic!("expected Detail view");
+        };
+        assert_eq!(*sub_view, DetailSubView::Rendered);
+    }
+
+    #[test]
+    fn esc_in_detail_returns_to_browse() {
+        let mut app = App::new(two_category_index(), Palette::monochrome());
+        app.handle_key(key(KeyCode::Tab));
+        app.handle_key(key(KeyCode::Enter));
+        assert!(matches!(app.view, View::Detail { .. }));
+
+        app.handle_key(key(KeyCode::Esc));
+        assert_eq!(app.view, View::Browse);
+    }
+
+    #[test]
+    fn q_quits_from_any_view() {
+        let mut app = App::new(two_category_index(), Palette::monochrome());
+        app.handle_key(key(KeyCode::Tab));
+        app.handle_key(key(KeyCode::Enter));
+        app.handle_key(key(KeyCode::Char('q')));
+        assert!(app.should_quit);
+    }
+
+    #[test]
+    fn ctrl_c_quits_from_detail() {
+        let mut app = App::new(two_category_index(), Palette::monochrome());
+        app.handle_key(key(KeyCode::Tab));
+        app.handle_key(key(KeyCode::Enter));
+        app.handle_key(ctrl(KeyCode::Char('c')));
+        assert!(app.should_quit);
+    }
+
+    #[test]
+    fn esc_quits_from_browse() {
+        let mut app = App::new(two_category_index(), Palette::monochrome());
+        app.handle_key(key(KeyCode::Esc));
+        assert!(app.should_quit);
     }
 
     #[test]
@@ -484,39 +909,6 @@ mod tests {
     }
 
     #[test]
-    fn changing_category_resets_tool_selection_to_first() {
-        let mut app = App::new(two_category_index(), Palette::monochrome());
-        // Move down within tools first, then change category.
-        app.handle_key(key(KeyCode::Tab)); // focus → tools
-        app.handle_key(key(KeyCode::Char('j'))); // tool 0 → 1
-        assert_eq!(app.tool_state.selected(), Some(1));
-
-        app.handle_key(key(KeyCode::Char('h'))); // focus → categories
-        app.handle_key(key(KeyCode::Char('j'))); // next category
-        // Category has only one tool (procs); tool index must clamp.
-        assert_eq!(app.tool_state.selected(), Some(0));
-    }
-
-    #[test]
-    fn enter_promotes_to_tools_when_focused_on_categories() {
-        let mut app = App::new(two_category_index(), Palette::monochrome());
-        app.handle_key(key(KeyCode::Enter));
-        assert_eq!(app.focus, Focus::Tools);
-        // Selected tool not yet recorded — Enter on categories only shifts focus.
-        assert!(app.selected_tool.is_none());
-    }
-
-    #[test]
-    fn enter_in_tools_records_selection() {
-        let mut app = App::new(two_category_index(), Palette::monochrome());
-        app.handle_key(key(KeyCode::Tab));
-        app.handle_key(key(KeyCode::Enter));
-        // First tool in the first category is "exa" or "eza" (sort order).
-        let picked = app.take_selected_tool();
-        assert!(matches!(picked.as_deref(), Some("eza" | "exa")));
-    }
-
-    #[test]
     fn empty_index_has_no_selection() {
         let app = App::new(empty_index(), Palette::monochrome());
         assert_eq!(app.cat_state.selected(), None);
@@ -524,22 +916,12 @@ mod tests {
     }
 
     #[test]
-    fn q_and_ctrl_c_still_quit() {
-        let mut app = App::new(two_category_index(), Palette::monochrome());
-        app.handle_key(key(KeyCode::Char('q')));
-        assert!(app.should_quit);
-        let mut app2 = App::new(two_category_index(), Palette::monochrome());
-        app2.handle_key(ctrl(KeyCode::Char('c')));
-        assert!(app2.should_quit);
-    }
-
-    #[test]
     fn g_jumps_to_first_and_shift_g_to_last() {
         let mut app = App::new(two_category_index(), Palette::monochrome());
-        app.handle_key(key(KeyCode::Char('j'))); // 0 → 1
-        app.handle_key(key(KeyCode::Char('g'))); // → 0
+        app.handle_key(key(KeyCode::Char('j')));
+        app.handle_key(key(KeyCode::Char('g')));
         assert_eq!(app.cat_state.selected(), Some(0));
-        app.handle_key(key(KeyCode::Char('G'))); // → last
+        app.handle_key(key(KeyCode::Char('G')));
         assert_eq!(app.cat_state.selected(), Some(app.categories.len() - 1));
     }
 }
