@@ -3,14 +3,21 @@
 
 #![deny(unsafe_code)]
 
-//! Loran TUI — ratatui application.
+//! Loran TUI — `ratatui` application.
 //!
-//! Phase 0 placeholder. The TUI shell, browse view, detail view, fuzzy-search
-//! overlay, and in-app help land in Phase 2 (Billet) per WP-P2.02 through
-//! WP-P2.06. Until then, Loran is text-mode only.
+//! WP-P2.02 ships the shell: panic-safe terminal initialisation,
+//! Steelbore palette, an event loop, a placeholder pane, and the
+//! `q` / `Ctrl-C` quit binding. Subsequent WPs layer the browse,
+//! detail, and fuzzy-search views on top.
 //!
-//! Brand boundary: only curated content uses the Steelbore palette; live
-//! `--help` capture frames are deliberately monochrome (Spec §2 decision #11).
+//! Brand boundary: only curated content uses the Steelbore palette;
+//! live `--help` capture frames remain monochrome (Spec §2 decision
+//! #11). The palette set lives in [`theme`] and never bleeds into
+//! the `loran help` rendering path.
 
-/// Placeholder used to verify the workspace builds cleanly during Phase 0.
-pub const fn placeholder() {}
+mod app;
+mod terminal;
+pub mod theme;
+
+pub use app::{App, run};
+pub use terminal::{TerminalGuard, TuiError};

@@ -61,6 +61,10 @@ wait-timeout = "0.2"
 # TTY detection for the agent-env cascade (Phase 1B — loran-cli).
 is-terminal = "0.4"
 
+# Phase 2 TUI (Billet — loran-tui, WP-P2.02 onwards).
+ratatui = { version = "0.29", default-features = false, features = ["crossterm"] }
+crossterm = "0.28"
+
 # Phase 2 (Billet) foundation:
 #   - postcard: compact binary cache for the Index (WP-P2.01).
 #   - dirs: XDG_CACHE_HOME / DATA / CONFIG resolution (WP-P2.01).
