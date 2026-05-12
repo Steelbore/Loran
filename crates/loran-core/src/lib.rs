@@ -23,6 +23,7 @@ mod bundled;
 mod bundled_data;
 mod cache;
 mod categories;
+mod fetch;
 mod find;
 mod help;
 mod search;
@@ -32,6 +33,9 @@ mod signing;
 pub use bundled::BundledPagesIngestor;
 pub use cache::{CACHE_FORMAT_VERSION, Cache, CacheError};
 pub use categories::{Categories, CategoryEntry, bundled_categories};
+pub use fetch::{
+    DEFAULT_BODY_LIMIT_BYTES, FetchClient, FetchError, FetchOutcome, Manifest, sha256_hex,
+};
 pub use find::{FindResult, resolve_find};
 pub use help::{
     HELP_TIMEOUT, HelpError, HelpFlag, HelpOpts, HelpResult, PagerSource, capture_help,
