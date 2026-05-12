@@ -1,0 +1,5 @@
+---
+source: crates/loran-cli/tests/snapshots.rs
+expression: normalise(&stdout)
+---
+eza	file-listing	Modern ls replacement. Steelbore default for file listing.

@@ -27,5 +27,12 @@ which = { workspace = true }
 [build-dependencies]
 loran-pages = { path = "../loran-pages" }
 
+[dev-dependencies]
+criterion = { workspace = true }
+
+[[bench]]
+name = "resolution"
+harness = false
+
 [lints]
 workspace = true

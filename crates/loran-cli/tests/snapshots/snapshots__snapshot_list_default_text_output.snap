@@ -1,0 +1,12 @@
+---
+source: crates/loran-cli/tests/snapshots.rs
+expression: normalise(&stdout)
+---
+bat	file-viewing	cat with syntax highlighting, line numbers, and Git integration.
+bottom	system-monitoring	Cross-platform graphical process and system monitor (TUI).
+dog	networking	Modern DNS lookup tool â dig with sane defaults and JSON output.
+eza	file-listing	Modern ls replacement. Steelbore default for file listing.
+fd	file-search	Simple, fast user-friendly alternative to find.
+jaq	data-processing	Faster, drop-in jq replacement with stricter semantics.
+procs	process-management	Modern ps replacement with colour, search, and tree view.
+rg	text-search	ripgrep â recursively search files for a regex pattern. The Steelbore default.

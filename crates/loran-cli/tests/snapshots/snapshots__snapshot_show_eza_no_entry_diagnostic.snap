@@ -1,0 +1,11 @@
+---
+source: crates/loran-cli/tests/snapshots.rs
+expression: normalise(&stderr)
+---
+error: no Loran entry for 'definitely-not-in-the-catalog-xyz'
+
+  hint: loran new definitely-not-in-the-catalog-xyz --edit
+        (scaffolds a page in your user overlay; opens $EDITOR)
+
+  see also: loran search definitely-not-in-the-catalog-xyz --json
+            loran help definitely-not-in-the-catalog-xyz  (capture upstream --help directly)

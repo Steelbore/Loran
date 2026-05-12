@@ -64,6 +64,9 @@ is-terminal = "0.4"
 # Test-only deps (dev-dependencies in member crates).
 assert_cmd = "2"
 predicates = "3"
+insta = { version = "1", features = ["yaml"] }
+tempfile = "3"
+criterion = { version = "0.5", default-features = false, features = ["html_reports", "cargo_bench_support"] }
 
 [workspace.lints.rust]
 unsafe_code = "deny"

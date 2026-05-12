@@ -51,6 +51,19 @@ jobs:
       - name: cargo test --workspace
         run: cargo test --workspace --no-fail-fast
 
+      - name: cargo test --release (NFR thresholds enforced)
+        # NFR-001 (`resolve_show` ≤ 50 ms) and NFR-002
+        # (1k-page index build + list ≤ 100 ms) only enforce their
+        # production-tight thresholds in release builds. Debug runs
+        # use a 10× relaxation in the same test file.
+        run: cargo test --release -p loran-core --test nfr
+
+      - name: cargo bench --no-run (compile-check benchmarks)
+        # We don't run benchmarks in CI — wall-clock numbers from a
+        # GitHub-hosted runner are too noisy to gate on. Compile so
+        # benchmark code doesn't bit-rot.
+        run: cargo bench --no-run --workspace
+
       - name: cargo audit
         # Don't fail CI on advisories that have no fix available; record
         # them as warnings. Hard advisories (ones with patched versions
