@@ -19,3 +19,4 @@ pub(crate) mod schema;
 pub(crate) mod search;
 pub(crate) mod show;
 pub(crate) mod update;
+pub(crate) mod validate;

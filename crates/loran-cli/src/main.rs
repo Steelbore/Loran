@@ -52,6 +52,7 @@ fn main() -> ExitCode {
             Command::Search(args) => cmd::search::run(&cli, args),
             Command::Show(args) => cmd::show::run(&cli, args),
             Command::Update(args) => cmd::update::run(&cli, args),
+            Command::Validate(args) => cmd::validate::run(&cli, args),
             _ => {
                 let name = cmd.name();
                 eprintln!(
