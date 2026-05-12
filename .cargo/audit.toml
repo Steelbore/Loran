@@ -27,5 +27,33 @@ ignore = [
     # Re-check whenever `postcard` releases a 2.x or otherwise drops
     # the heapless 0.7 dep.
     "RUSTSEC-2023-0089",
+
+    # `paste 1.0.15` is unmaintained (RUSTSEC-2024-0436). Reaches us
+    # transitively:
+    #
+    #   paste 1.0.15
+    #   └── ratatui 0.29.0
+    #       └── loran-tui 0.0.0
+    #
+    # `paste` is a proc-macro for token pasting with no runtime
+    # surface; the advisory is "no longer maintained" with no known
+    # CVE. The fix is upstream (ratatui 0.30 is expected to drop
+    # `paste` in favour of `pastey`); we re-check whenever ratatui
+    # publishes a new minor.
+    "RUSTSEC-2024-0436",
+
+    # `lru 0.12.5` IterMut unsound under Stacked Borrows
+    # (RUSTSEC-2026-0002). Reaches us transitively:
+    #
+    #   lru 0.12.5
+    #   └── ratatui 0.29.0
+    #       └── loran-tui 0.0.0
+    #
+    # Loran never calls `Lru::iter_mut`; the advisory only triggers
+    # when downstream code uses that specific method against the lru
+    # cache. ratatui's internal use is read-only via `Iter`. The fix
+    # is upstream (lru 0.13 publishes a Stacked-Borrows-clean
+    # implementation); we re-check whenever ratatui bumps lru.
+    "RUSTSEC-2026-0002",
 ]
 informational_warnings = ["unmaintained"]
