@@ -165,27 +165,6 @@ pub(crate) enum Command {
     Mcp(McpArgs),
 }
 
-impl Command {
-    /// Human-readable name of the sub-command. Used in dispatch logging
-    /// and the Phase 1B "not yet implemented" notice.
-    pub(crate) fn name(&self) -> &'static str {
-        match self {
-            Self::List(_) => "list",
-            Self::Show(_) => "show",
-            Self::Help(_) => "help",
-            Self::Find(_) => "find",
-            Self::Search(_) => "search",
-            Self::Categories(_) => "categories",
-            Self::New(_) => "new",
-            Self::Update(_) => "update",
-            Self::Validate(_) => "validate",
-            Self::Schema(_) => "schema",
-            Self::Describe(_) => "describe",
-            Self::Mcp(_) => "mcp",
-        }
-    }
-}
-
 // ─── Per-sub-command arg bundles ─────────────────────────────────────
 
 #[derive(Debug, Args)]

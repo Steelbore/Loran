@@ -55,14 +55,7 @@ fn main() -> ExitCode {
             Command::Show(args) => cmd::show::run(&cli, args),
             Command::Update(args) => cmd::update::run(&cli, args),
             Command::Validate(args) => cmd::validate::run(&cli, args),
-            Command::Mcp(_) => {
-                let name = cmd.name();
-                eprintln!(
-                    "loran {name}: not yet implemented in this Phase 1 milestone. \
-                     See `loran-plan-v0_1.md` WP-P1.11 onwards."
-                );
-                ExitCode::from(1)
-            }
+            Command::Mcp(args) => cmd::mcp::run(&cli, args),
         }
     } else {
         // No sub-command + no --version: launch the TUI when running

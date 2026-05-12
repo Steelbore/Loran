@@ -38,11 +38,6 @@ fn exit_0_on_describe() {
 }
 
 #[test]
-fn exit_1_on_stub_subcommand() {
-    loran().arg("mcp").assert().failure().code(1);
-}
-
-#[test]
 fn exit_2_on_unknown_verb() {
     loran()
         .arg("definitely-not-a-real-verb")

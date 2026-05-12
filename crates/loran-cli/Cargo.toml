@@ -26,6 +26,7 @@ jiff = { workspace = true }
 schemars = { workspace = true }
 loran-core = { path = "../loran-core" }
 loran-index = { path = "../loran-index" }
+loran-mcp = { path = "../loran-mcp" }
 loran-pages = { path = "../loran-pages" }
 loran-render = { path = "../loran-render" }
 loran-tui = { path = "../loran-tui" }

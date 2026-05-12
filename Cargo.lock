@@ -937,6 +937,7 @@ dependencies = [
  "jiff",
  "loran-core",
  "loran-index",
+ "loran-mcp",
  "loran-pages",
  "loran-render",
  "loran-tui",
