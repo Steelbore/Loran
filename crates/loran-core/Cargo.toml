@@ -18,6 +18,7 @@ loran-pages = { path = "../loran-pages" }
 loran-index = { path = "../loran-index" }
 dirs = { workspace = true }
 jiff = { workspace = true }
+minisign-verify = { workspace = true }
 nucleo-matcher = { workspace = true }
 postcard = { workspace = true }
 serde = { workspace = true }

@@ -27,6 +27,7 @@ mod find;
 mod help;
 mod search;
 mod show;
+mod signing;
 
 pub use bundled::BundledPagesIngestor;
 pub use cache::{CACHE_FORMAT_VERSION, Cache, CacheError};
@@ -38,3 +39,4 @@ pub use help::{
 };
 pub use search::{ScoredMatch, SearchResult, resolve_search};
 pub use show::{BodyBlock, IntroBlock, ShowResult, resolve_show};
+pub use signing::{SignError, verify as verify_minisign};
