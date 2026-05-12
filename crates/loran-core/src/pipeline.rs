@@ -36,7 +36,7 @@ use std::path::Path;
 use crate::extract::{ExtractError, extract_tarball, extract_zip};
 use crate::fetch::{FetchClient, FetchError, FetchOutcome};
 use crate::meta::{MetaError, SourceMetaStore};
-use crate::signing::{SignError, verify};
+use crate::signing::{SignError, verify_any};
 
 /// Canonical name for the upstream Steelbore pages source. Used as the
 /// key in `sources.toml` and the JSON `data.source` field.
@@ -118,8 +118,12 @@ pub struct UpdateOpts {
     pub tarball_url: String,
     /// Override the signature URL.
     pub signature_url: String,
-    /// Override the trust-root public key (raw base64 minisign form).
-    pub public_key: String,
+    /// Override the trust-root public-key set (raw base64 minisign
+    /// form). Verification accepts a signature that matches **any**
+    /// key in this slice — the parallel-key transition primitive
+    /// documented in `OPERATIONS.md`. A length-one set behaves
+    /// identically to single-key verification.
+    pub public_keys: Vec<String>,
     /// Where to install the extracted catalog. Typically
     /// `$XDG_DATA_HOME/loran/pages/`.
     pub target_dir: std::path::PathBuf,
@@ -143,14 +147,15 @@ impl UpdateOpts {
     /// - `LORAN_PAGES_MANIFEST_URL`
     /// - `LORAN_PAGES_TARBALL_URL`
     /// - `LORAN_PAGES_SIG_URL`
-    /// - `LORAN_PAGES_PUBLIC_KEY`
+    /// - `LORAN_PAGES_PUBLIC_KEY` (comma-separated for parallel-key
+    ///   transitions; single value is the common case)
     #[must_use]
     pub fn default_publisher(target_dir: impl Into<std::path::PathBuf>) -> Self {
         Self {
             manifest_url: env_or("LORAN_PAGES_MANIFEST_URL", PUBLISHER_PAGES_MANIFEST_URL),
             tarball_url: env_or("LORAN_PAGES_TARBALL_URL", PUBLISHER_PAGES_TARBALL_URL),
             signature_url: env_or("LORAN_PAGES_SIG_URL", PUBLISHER_PAGES_SIG_URL),
-            public_key: env_or("LORAN_PAGES_PUBLIC_KEY", PUBLISHER_PUBLIC_KEY),
+            public_keys: env_or_keys("LORAN_PAGES_PUBLIC_KEY", PUBLISHER_PUBLIC_KEY),
             target_dir: target_dir.into(),
             source_name: SOURCE_UPSTREAM_PAGES.to_owned(),
             dry_run: false,
@@ -161,6 +166,20 @@ impl UpdateOpts {
 
 fn env_or(key: &str, default: &str) -> String {
     std::env::var(key).unwrap_or_else(|_| default.to_owned())
+}
+
+/// Parse `KEY` as a comma-separated list of minisign public keys.
+/// Falls back to a single-element vec containing `default` when unset
+/// or empty. Whitespace and empty entries are trimmed.
+fn env_or_keys(key: &str, default: &str) -> Vec<String> {
+    let raw = std::env::var(key).unwrap_or_default();
+    if raw.trim().is_empty() {
+        return vec![default.to_owned()];
+    }
+    raw.split(',')
+        .map(|s| s.trim().to_owned())
+        .filter(|s| !s.is_empty())
+        .collect()
 }
 
 /// Refresh the upstream Steelbore pages catalog.
@@ -221,7 +240,8 @@ pub fn update_pages(
     };
     let sig_text = String::from_utf8_lossy(&sig_bytes).into_owned();
 
-    verify(&tarball, &sig_text, &opts.public_key)?;
+    let key_refs: Vec<&str> = opts.public_keys.iter().map(String::as_str).collect();
+    verify_any(&tarball, &sig_text, &key_refs)?;
 
     extract_tarball(&tarball, &opts.target_dir)?;
 
@@ -377,7 +397,7 @@ mod tests {
         assert!(opts.manifest_url.starts_with("https://"));
         assert!(opts.tarball_url.ends_with(".tar.gz"));
         assert!(opts.signature_url.ends_with(".minisig"));
-        assert_eq!(opts.public_key, PUBLISHER_PUBLIC_KEY);
+        assert_eq!(opts.public_keys, vec![PUBLISHER_PUBLIC_KEY.to_owned()]);
         assert!(!opts.dry_run);
         assert!(!opts.force_refresh);
     }

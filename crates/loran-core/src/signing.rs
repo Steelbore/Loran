@@ -69,6 +69,58 @@ pub fn verify(
         .map_err(|_| SignError::Mismatch)
 }
 
+/// Verify a payload against a *slice* of trust-pinned public keys.
+///
+/// Accepts the signature if it verifies under **any** key in the
+/// slice; returns [`SignError::Mismatch`] when none match (or
+/// [`SignError::InvalidPublicKey`] when every key in the slice
+/// failed to decode — a misconfiguration distinct from an
+/// adversarial signature mismatch).
+///
+/// This is the parallel-key transition primitive from
+/// `OPERATIONS.md`: ship a Loran release whose binary embeds both
+/// the outgoing and incoming publisher keys, sign artifacts with
+/// the incoming key for the announced overlap window, then ship a
+/// follow-up release that drops the outgoing key.
+///
+/// Slices of length one behave identically to [`verify`]; an
+/// empty slice is rejected as `InvalidPublicKey` because
+/// "trust no key" is a configuration bug, not a verification path.
+pub fn verify_any(
+    payload: &[u8],
+    signature_text: &str,
+    public_keys: &[&str],
+) -> Result<(), SignError> {
+    if public_keys.is_empty() {
+        return Err(SignError::InvalidPublicKey(
+            "verify_any called with an empty trust-pinned key set".to_owned(),
+        ));
+    }
+
+    let signature = Signature::decode(signature_text)
+        .map_err(|e| SignError::InvalidSignature(e.to_string()))?;
+
+    let mut every_key_failed_to_decode = true;
+    for key_text in public_keys {
+        if let Ok(key) = PublicKey::from_base64(extract_key_line(key_text)) {
+            every_key_failed_to_decode = false;
+            if key.verify(payload, &signature, false).is_ok() {
+                return Ok(());
+            }
+        }
+        // Otherwise try the next key; if every key fails to decode we
+        // surface that distinctly below.
+    }
+
+    if every_key_failed_to_decode {
+        Err(SignError::InvalidPublicKey(
+            "every trust-pinned key failed to decode".to_owned(),
+        ))
+    } else {
+        Err(SignError::Mismatch)
+    }
+}
+
 /// Strip the `untrusted comment:` header line from a minisign public
 /// key file and return the bare base64 key. If no such header is
 /// present the input is passed through trimmed.
@@ -134,6 +186,42 @@ AXRNotITPOsPYT+ehfb8hOek42NaoeecflDu0TgLrkT6MDQ9Eh4rHKj4LU+AxBb3QrrE2MSU5w57bEb6
             matches!(err, SignError::Mismatch),
             "wrong-payload must surface as Mismatch, not a decode error; got {err:?}"
         );
+    }
+
+    #[test]
+    fn verify_any_with_single_correct_key_succeeds() {
+        super::verify_any(TEST_PAYLOAD, TEST_SIGNATURE, &[TEST_PUBLIC_KEY])
+            .expect("single-element slice must behave like verify");
+    }
+
+    #[test]
+    fn verify_any_accepts_when_signature_matches_second_key() {
+        // First key is the bundled placeholder (different from the
+        // signing key); second is the actual TEST_PUBLIC_KEY that
+        // signed the fixture.
+        let other = "RWQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+        super::verify_any(TEST_PAYLOAD, TEST_SIGNATURE, &[other, TEST_PUBLIC_KEY])
+            .expect("verify_any must accept signature matching ANY key in the slice");
+    }
+
+    #[test]
+    fn verify_any_rejects_when_no_key_matches() {
+        let other = "RWQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+        let err = super::verify_any(TEST_PAYLOAD, TEST_SIGNATURE, &[other]).unwrap_err();
+        assert!(matches!(err, SignError::Mismatch), "got {err:?}");
+    }
+
+    #[test]
+    fn verify_any_with_empty_slice_returns_invalid_public_key() {
+        let err = super::verify_any(TEST_PAYLOAD, TEST_SIGNATURE, &[]).unwrap_err();
+        assert!(matches!(err, SignError::InvalidPublicKey(_)), "got {err:?}");
+    }
+
+    #[test]
+    fn verify_any_with_every_key_undecodable_returns_invalid_public_key() {
+        let err =
+            super::verify_any(TEST_PAYLOAD, TEST_SIGNATURE, &["bogus", "also bogus"]).unwrap_err();
+        assert!(matches!(err, SignError::InvalidPublicKey(_)), "got {err:?}");
     }
 
     #[test]
