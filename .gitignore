@@ -22,6 +22,7 @@ CLAUDE.md
 
 # Other agents
 .gemini/
+.grok/
 
 # Backups
 *.bak
