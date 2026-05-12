@@ -45,6 +45,7 @@ fn main() -> ExitCode {
             Command::Categories(args) => cmd::categories::run(&cli, args),
             Command::Describe(args) => cmd::describe::run(&cli, args),
             Command::Find(args) => cmd::find::run(&cli, args),
+            Command::Help(args) => cmd::help::run(&cli, args),
             Command::List(args) => cmd::list::run(&cli, args),
             Command::Schema(args) => cmd::schema::run(&cli, args),
             Command::Search(args) => cmd::search::run(&cli, args),

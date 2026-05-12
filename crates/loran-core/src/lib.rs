@@ -23,11 +23,16 @@ mod bundled;
 mod bundled_data;
 mod categories;
 mod find;
+mod help;
 mod search;
 mod show;
 
 pub use bundled::BundledPagesIngestor;
 pub use categories::{Categories, CategoryEntry, bundled_categories};
 pub use find::{FindResult, resolve_find};
+pub use help::{
+    HELP_TIMEOUT, HelpError, HelpFlag, HelpOpts, HelpResult, PagerSource, capture_help,
+    resolve_pager,
+};
 pub use search::{ScoredMatch, SearchResult, resolve_search};
 pub use show::{BodyBlock, IntroBlock, ShowResult, resolve_show};
