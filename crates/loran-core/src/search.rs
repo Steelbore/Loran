@@ -14,10 +14,11 @@ use loran_index::Index;
 use loran_pages::Page;
 use nucleo_matcher::pattern::{CaseMatching, Normalization, Pattern};
 use nucleo_matcher::{Matcher, Utf32String};
+use schemars::JsonSchema;
 use serde::Serialize;
 
 /// A single fuzzy-search hit, paired with its match score.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct ScoredMatch {
     /// The matched page in full.
     pub page: Page,
@@ -28,7 +29,7 @@ pub struct ScoredMatch {
 }
 
 /// Outcome of [`resolve_search`].
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct SearchResult {
     /// The free-text query the user typed, echoed back.
     pub query: String,

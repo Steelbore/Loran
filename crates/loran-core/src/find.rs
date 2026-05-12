@@ -16,10 +16,11 @@
 
 use loran_index::Index;
 use loran_pages::Page;
+use schemars::JsonSchema;
 use serde::Serialize;
 
 /// Outcome of [`resolve_find`].
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct FindResult {
     /// The legacy tool name the user asked about, echoed back.
     pub query: String,

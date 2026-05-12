@@ -13,7 +13,8 @@
 //! applies the partial onto a base [`Page`]. Empty / unset bodies in
 //! the overlay file inherit the base body; non-empty bodies replace it.
 
-use serde::Deserialize;
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 use crate::error::PageError;
 use crate::page::Page;
@@ -26,7 +27,7 @@ use crate::parse::{split_frontmatter, validate_category, validate_summary_length
 /// TOML has no `null`, so there is no syntax for "clear an optional
 /// field that the base layer set" — an overlay can only override or
 /// inherit. That matches Spec §5.1's intent.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, JsonSchema)]
 pub struct OverlayPage {
     pub name: String,
     pub category: Option<String>,

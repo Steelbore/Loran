@@ -83,7 +83,7 @@ fn describe_manifest_lists_every_subcommand_with_capability_tags() {
 }
 
 #[test]
-fn schema_emits_placeholder_jsonschema_draft_2020_12_for_page() {
+fn schema_emits_full_draft_2020_12_document() {
     let assert = loran().arg("schema").assert().success();
     let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
     let parsed: serde_json::Value =
@@ -98,24 +98,64 @@ fn schema_emits_placeholder_jsonschema_draft_2020_12_for_page() {
         parsed.get("$id").and_then(|s| s.as_str()).is_some(),
         "must carry $id"
     );
-    assert_eq!(
-        parsed
-            .pointer("/meta/placeholder")
-            .and_then(serde_json::Value::as_bool),
-        Some(true),
-        "meta.placeholder=true is the v1 signal"
-    );
 
-    // Page-shape sanity.
-    assert_eq!(parsed.get("type").and_then(|t| t.as_str()), Some("object"));
-    let required = parsed
-        .get("required")
-        .and_then(|r| r.as_array())
-        .expect("required array");
-    for field in ["name", "category", "summary"] {
+    // Every public type appears in `$defs`.
+    for name in [
+        "Page",
+        "OverlayPage",
+        "IntroBlock",
+        "BodyBlock",
+        "ShowResult",
+        "FindResult",
+        "ScoredMatch",
+        "SearchResult",
+        "CategoryEntry",
+        "Categories",
+        "UpdateOutcome",
+    ] {
         assert!(
-            required.iter().any(|v| v.as_str() == Some(field)),
-            "`{field}` must be in required"
+            parsed
+                .pointer(&format!("/$defs/{name}"))
+                .and_then(|v| v.as_object())
+                .is_some(),
+            "$defs/{name} must be an object schema"
         );
     }
+
+    // Sub-command responses navigate to their schema via $ref.
+    for verb in ["show", "find", "search", "categories", "list", "update"] {
+        assert!(
+            parsed.pointer(&format!("/responses/{verb}")).is_some(),
+            "responses/{verb} missing"
+        );
+    }
+}
+
+#[test]
+fn schema_with_page_key_emits_just_the_page_subschema() {
+    let assert = loran().args(["schema", "page"]).assert().success();
+    let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
+    let parsed: serde_json::Value = serde_json::from_str(&stdout).expect("valid JSON");
+
+    assert_eq!(
+        parsed.get("$schema").and_then(|s| s.as_str()),
+        Some("https://json-schema.org/draft/2020-12/schema")
+    );
+    // The Page sub-schema carries the title schemars generates.
+    assert!(
+        parsed
+            .get("title")
+            .and_then(|s| s.as_str())
+            .is_some_and(|t| t.contains("Page")),
+        "page sub-schema must carry a Page-derived title"
+    );
+}
+
+#[test]
+fn schema_with_unknown_key_returns_usage_error() {
+    loran()
+        .args(["schema", "no-such-type"])
+        .assert()
+        .failure()
+        .code(2);
 }

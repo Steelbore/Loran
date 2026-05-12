@@ -11,12 +11,13 @@
 
 use std::collections::BTreeMap;
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::bundled_data::BUNDLED_CATEGORIES;
 
 /// A single entry in the categories registry.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct CategoryEntry {
     /// Human-readable title (e.g. `"File listing"`).
     pub title: String,
@@ -25,7 +26,7 @@ pub struct CategoryEntry {
 }
 
 /// The full registry — `slug -> CategoryEntry`.
-#[derive(Debug, Clone, Default, Serialize)]
+#[derive(Debug, Clone, Default, Serialize, JsonSchema)]
 pub struct Categories {
     /// Entries keyed by slug, sorted (`BTreeMap` preserves order).
     pub entries: BTreeMap<String, CategoryEntry>,

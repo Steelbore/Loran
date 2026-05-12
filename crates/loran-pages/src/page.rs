@@ -3,6 +3,7 @@
 
 //! The validated [`Page`] data structure and its raw deserialisation form.
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// A fully-validated Loran page.
@@ -27,7 +28,7 @@ use serde::{Deserialize, Serialize};
 /// invariants.** The cache layer only deserialises values written by a
 /// previously-validated serialise round-trip; external code paths
 /// should still go through `Page::parse`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct Page {
     /// Canonical binary name, lower-kebab-case (Spec §6.1). Required.
     pub name: String,

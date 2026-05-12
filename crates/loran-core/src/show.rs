@@ -10,6 +10,7 @@
 
 use loran_index::Index;
 use loran_pages::Page;
+use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::tldr::{NoTldr, TldrLookup};
@@ -20,7 +21,7 @@ use crate::tldr::{NoTldr, TldrLookup};
 /// full `Page`); rather than box the larger variant we accept the size
 /// difference because the result is always consumed immediately on the
 /// stack at the call site and never stored in a long-lived collection.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 #[serde(tag = "outcome", rename_all = "snake_case")]
 #[allow(clippy::large_enum_variant)] // consumed immediately at the call site
 pub enum ShowResult {
@@ -47,7 +48,7 @@ pub enum ShowResult {
 }
 
 /// "Steelbore intro" block surfaced as `data.intro` in the JSON envelope.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct IntroBlock {
     /// Always `"steelbore"` in v1.
     pub source: &'static str,
@@ -56,7 +57,7 @@ pub struct IntroBlock {
 }
 
 /// "Body" block surfaced as `data.body` in the JSON envelope.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct BodyBlock {
     /// `"custom"` when sourced from a curated Loran page, `"tldr"` when
     /// sourced from the tldr-pages mirror as a fallback,

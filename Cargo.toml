@@ -65,6 +65,9 @@ is-terminal = "0.4"
 ratatui = { version = "0.29", default-features = false, features = ["crossterm"] }
 crossterm = "0.28"
 
+# Phase 3 schema emission (Bloom — WP-P3.01).
+schemars = "0.8"
+
 # Phase 2 (Billet) foundation:
 #   - postcard: compact binary cache for the Index (WP-P2.01).
 #   - dirs: XDG_CACHE_HOME / DATA / CONFIG resolution (WP-P2.01).

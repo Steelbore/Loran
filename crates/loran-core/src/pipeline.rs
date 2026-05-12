@@ -80,7 +80,7 @@ pub const PUBLISHER_PAGES_SIG_URL: &str =
 pub const PUBLISHER_PUBLIC_KEY: &str = "RWQsvqYQlDxdL2X0KKUsxVNyWw9P0tBXOVJzTI0sD845q4PE5zlISFHM";
 
 /// Outcome of a single source update.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, schemars::JsonSchema, serde::Serialize)]
 pub enum UpdateOutcome {
     /// Manifest 304'd — local install already matches upstream.
     NotModified,
