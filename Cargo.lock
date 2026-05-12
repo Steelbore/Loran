@@ -1009,6 +1009,7 @@ name = "loran-tui"
 version = "0.0.0"
 dependencies = [
  "crossterm",
+ "loran-core",
  "loran-index",
  "loran-pages",
  "pulldown-cmark",

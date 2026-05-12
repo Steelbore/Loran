@@ -15,6 +15,7 @@ readme.workspace = true
 
 [dependencies]
 crossterm = { workspace = true }
+loran-core = { path = "../loran-core" }
 loran-index = { path = "../loran-index" }
 loran-pages = { path = "../loran-pages" }
 pulldown-cmark = { workspace = true }
