@@ -142,9 +142,9 @@ Update this table whenever the document is revised.
 - [ ] **LOR-P000-035** — Add `cargo test --workspace` job step
 - [ ] **LOR-P000-036** — Add `cargo audit` job step (install `cargo-audit` if not pre-cached)
 - [ ] **LOR-P000-037** — Add SPDX-header check as a CI step calling the xtask command from LOR-P000-031
-- [ ] **LOR-P000-038** — Configure Tier 1 platform matrix: Linux x86_64 (glibc), Linux x86_64 (musl), Linux aarch64, FreeBSD amd64
-- [ ] **LOR-P000-039** — Configure Tier 2 platform: macOS arm64 with `continue-on-error: true`
-- [ ] **LOR-P000-040** — Configure fail-fast within Tier 1 jobs; Tier 2 jobs report without blocking merge
+- [x] **LOR-P000-038** — Configure Tier 1 platform matrix: Linux x86_64 (glibc), Linux x86_64 (musl), Linux aarch64, FreeBSD amd64
+- [x] **LOR-P000-039** — Configure Tier 2 platform: macOS arm64 with `continue-on-error: true`
+- [x] **LOR-P000-040** — Configure fail-fast within Tier 1 jobs; Tier 2 jobs report without blocking merge
 - [ ] **LOR-P000-041** — Add CI status badge to top of `README.md`
 
 ---
