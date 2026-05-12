@@ -135,19 +135,32 @@ pub struct UpdateOpts {
 impl UpdateOpts {
     /// Default `UpdateOpts` targeting the placeholder Steelbore
     /// publisher. Caller must override `target_dir`.
+    ///
+    /// Each URL and the public key honour an environment override so
+    /// integration tests can point the pipeline at a staging publisher
+    /// (or an unreachable loopback address) without modifying source:
+    ///
+    /// - `LORAN_PAGES_MANIFEST_URL`
+    /// - `LORAN_PAGES_TARBALL_URL`
+    /// - `LORAN_PAGES_SIG_URL`
+    /// - `LORAN_PAGES_PUBLIC_KEY`
     #[must_use]
     pub fn default_publisher(target_dir: impl Into<std::path::PathBuf>) -> Self {
         Self {
-            manifest_url: PUBLISHER_PAGES_MANIFEST_URL.to_owned(),
-            tarball_url: PUBLISHER_PAGES_TARBALL_URL.to_owned(),
-            signature_url: PUBLISHER_PAGES_SIG_URL.to_owned(),
-            public_key: PUBLISHER_PUBLIC_KEY.to_owned(),
+            manifest_url: env_or("LORAN_PAGES_MANIFEST_URL", PUBLISHER_PAGES_MANIFEST_URL),
+            tarball_url: env_or("LORAN_PAGES_TARBALL_URL", PUBLISHER_PAGES_TARBALL_URL),
+            signature_url: env_or("LORAN_PAGES_SIG_URL", PUBLISHER_PAGES_SIG_URL),
+            public_key: env_or("LORAN_PAGES_PUBLIC_KEY", PUBLISHER_PUBLIC_KEY),
             target_dir: target_dir.into(),
             source_name: SOURCE_UPSTREAM_PAGES.to_owned(),
             dry_run: false,
             force_refresh: false,
         }
     }
+}
+
+fn env_or(key: &str, default: &str) -> String {
+    std::env::var(key).unwrap_or_else(|_| default.to_owned())
 }
 
 /// Refresh the upstream Steelbore pages catalog.
@@ -272,10 +285,12 @@ pub struct UpdateTldrOpts {
 }
 
 impl UpdateTldrOpts {
+    /// Default options. `LORAN_TLDR_ARCHIVE_URL` overrides the zip URL
+    /// so integration tests can run against an unreachable loopback.
     #[must_use]
     pub fn default_publisher(target_dir: impl Into<std::path::PathBuf>) -> Self {
         Self {
-            archive_url: TLDR_PAGES_URL.to_owned(),
+            archive_url: env_or("LORAN_TLDR_ARCHIVE_URL", TLDR_PAGES_URL),
             target_dir: target_dir.into(),
             source_name: SOURCE_TLDR_PAGES.to_owned(),
             dry_run: false,
