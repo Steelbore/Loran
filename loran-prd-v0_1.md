@@ -567,7 +567,7 @@ Any failure between steps 1 and 5 aborts the update with `TARBALL_VERIFY_FAILED 
 
 The ed25519 public key is baked into the Loran binary at compile time. Rotation therefore requires a new Loran release. This is a deliberate trade-off: it makes key compromise harder to recover from gracefully (no over-the-wire key rotation), but it also makes key spoofing impossible without compromising the binary distribution chain.
 
-Specific rotation procedure, parallel-key transition windows, and emergency-rotation policy are deferred to v0.3 (Open Question 1).
+Specific rotation procedure, parallel-key transition windows, and emergency-rotation policy are documented in `OPERATIONS.md` (resolved by WP-P3.05; the parallel-key transition primitive lives in `loran-core::signing::verify_any`).
 
 ### 12.4 The tldr-pages asymmetry
 
@@ -669,7 +669,7 @@ Per Steelbore Standard §2, release codenames follow the cast-form list.
 - `loran schema` emits full JSON Schema Draft 2020-12 for Anthropic, OpenAI, Gemini, MCP function-calling.
 - `DescribeIngestor` implementation: ingests `<tool> describe --json` from allowlisted Steelbore binaries.
 - Cross-distro overlay surfacing (the Bravais and Ferrite OS overlays are part of the upstream tarball, not just the per-distro overlays).
-- Minisign key rotation procedure documented and tested (resolving Open Question 1).
+- Minisign key rotation procedure documented and tested in `OPERATIONS.md` (WP-P3.05; closes Open Question 1).
 
 **Exit criteria:** All FRs and NFRs pass. Loran can be invoked by Claude Code, Codex CLI, and Cursor without TUI activation, with no special configuration beyond the standard agent env vars.
 
@@ -773,7 +773,7 @@ Full canonical list in spec §3.3. Critical ones:
 - Key stored on a hardware token in normal operation; published key is widely-known.
 - Rotation requires a new Loran release; users on old Loran versions cannot be tricked by a rotated key from a newer publisher.
 - `--require-signatures` blocks the tldr asymmetry from being a sideways attack vector.
-- Open Question 1 (key rotation policy) will define emergency-rotation procedures.
+- `OPERATIONS.md` §3 defines the emergency-rotation procedure for a compromised publisher key (closed Open Question 1 via WP-P3.05).
 
 ### 17.3 tldr-pages upstream changes
 
@@ -826,11 +826,16 @@ Full canonical list in spec §3.3. Critical ones:
 
 The same set as spec §15. Resolution belongs in v0.3 of the spec; the PRD inherits the same open list.
 
-1. **Minisign key rotation policy.** Acceptable cadence? Emergency-rotation procedure? Parallel-key transition windows?
-2. **`pairs_with` reciprocity.** Should `loran validate` warn on non-reciprocal pairings, or accept asymmetry as intentional?
-3. **`DescribeIngestor` trust list.** Allowlist baked into the upstream tarball (current leaning)? Self-declaration via SFRS `describe`? Cryptographic attestation?
+**Resolved during Phase 3 (Bloom):**
 
-None of these blocks Phase 1 (Ingot) or Phase 2 (Billet) implementation. All three are Phase 3 (Bloom) concerns or future-policy concerns.
+- **Minisign key rotation policy** → `OPERATIONS.md` documents the normal annual rotation cadence (≥14-day parallel-key transition window) and the emergency-compromise procedure (no overlap, compromised key omitted from next release). The parallel-key transition primitive lives in `loran-core::signing::verify_any`; the active trust set is `pipeline::UpdateOpts::public_keys: Vec<String>`. Closed by WP-P3.05.
+
+**Still open:**
+
+1. **`pairs_with` reciprocity.** Should `loran validate` warn on non-reciprocal pairings, or accept asymmetry as intentional?
+2. **`DescribeIngestor` trust list.** Allowlist baked into the upstream tarball (current leaning)? Self-declaration via SFRS `describe`? Cryptographic attestation?
+
+Neither blocks Phase 1 (Ingot), Phase 2 (Billet), or Phase 3 (Bloom) implementation. Both are future-policy concerns.
 
 ---
 

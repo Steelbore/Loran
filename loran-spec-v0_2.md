@@ -642,12 +642,12 @@ The following questions from earlier drafts have been resolved and integrated in
 - **Overlay distribution** → each per-distro overlay's source-of-truth lives in its own project repo, surfaced into Loran via the upstream tarball pipeline (documented in §5.1).
 - **i18n directory layout** → tldr-pages `pages.<lang>/` directory layout, not inline translations (documented in §6.1).
 - **Nested category UX threshold** → ~50 catalog entries is the threshold at which a nested renderer becomes worth implementing; data model is already forward-compatible (documented in §6.2).
+- **Minisign key rotation** → documented in `OPERATIONS.md` (resolved by WP-P3.05). Annual planned rotation with a ≥14-day parallel-key transition window; emergency rotation omits the overlap window and ships the compromised key out of the next Loran release. The parallel-key transition primitive lives in `loran-core::signing::verify_any` and is consumed by `pipeline::UpdateOpts::public_keys: Vec<String>`.
 
 Remaining open questions:
 
-1. **Minisign key rotation** — trust-pinned public keys baked into the binary mean rotation requires a new Loran release. Acceptable cadence? Emergency-rotation procedure? Multiple parallel keys for transition windows?
-2. **`pairs_with` reciprocity** — current spec treats it as non-reciprocal. Should `loran validate` warn when A claims `pairs_with = ["B"]` but B does not reciprocate? Or accept asymmetry as intentional?
-3. **`DescribeIngestor` security model** — Phase 3 wants to spawn `<tool> describe --json` against Steelbore-native binaries. How does Loran decide which binaries are trusted to spawn? Allowlist baked into upstream pages tarball? Self-declaration via SFRS `describe`?
+1. **`pairs_with` reciprocity** — current spec treats it as non-reciprocal. Should `loran validate` warn when A claims `pairs_with = ["B"]` but B does not reciprocate? Or accept asymmetry as intentional?
+2. **`DescribeIngestor` security model** — Phase 3 wants to spawn `<tool> describe --json` against Steelbore-native binaries. How does Loran decide which binaries are trusted to spawn? Allowlist baked into upstream pages tarball? Self-declaration via SFRS `describe`?
 
 ---
 
