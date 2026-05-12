@@ -17,8 +17,10 @@
 
 mod app;
 mod markdown;
+mod prompt;
 mod terminal;
 pub mod theme;
 
 pub use app::{App, run};
+pub use prompt::{NewPromptValues, PromptOutcome, run_new_prompt};
 pub use terminal::{TerminalGuard, TuiError};

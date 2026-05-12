@@ -49,27 +49,6 @@ struct NewData<'a> {
 }
 
 pub(crate) fn run(cli: &Cli, args: &NewArgs) -> ExitCode {
-    let category = match args.category.as_deref() {
-        Some(c) => c.trim(),
-        None => {
-            return emit_usage(
-                cli,
-                args,
-                "missing required --category flag",
-                "loran new <tool> --category <slug> --summary <one-liner>",
-            );
-        }
-    };
-
-    let Some(summary) = args.summary.as_deref() else {
-        return emit_usage(
-            cli,
-            args,
-            "missing required --summary flag",
-            "loran new <tool> --category <slug> --summary <one-liner>",
-        );
-    };
-
     let tool = args.tool.trim();
     if tool.is_empty() {
         return emit_usage(
@@ -80,13 +59,50 @@ pub(crate) fn run(cli: &Cli, args: &NewArgs) -> ExitCode {
         );
     }
 
-    let rendered = render_template(
-        tool,
-        category,
-        summary,
-        &args.replaces,
-        &args.safe_alias_for,
-    );
+    // Decide between non-interactive and interactive (WP-P2.15) paths.
+    let category_flag = args.category.as_deref().map(str::trim).map(str::to_owned);
+    let summary_flag = args.summary.as_deref().map(str::to_owned);
+    let needs_prompt = (category_flag.is_none() || summary_flag.is_none())
+        && should_prompt_interactively(cli, args);
+
+    let (category, summary, replaces, prompted) = if needs_prompt {
+        match run_interactive_prompt(tool, args, category_flag.as_ref(), summary_flag.as_ref()) {
+            PromptResult::Filled {
+                category,
+                summary,
+                replaces,
+            } => (category, summary, replaces, true),
+            PromptResult::Cancelled => {
+                eprintln!("loran new: cancelled (no file written)");
+                return ExitCode::from(LoranExit::Success.to_process_code());
+            }
+            PromptResult::Failed(err) => {
+                eprintln!("loran new: interactive prompt failed: {err}");
+                return ExitCode::from(LoranExit::GeneralError.to_process_code());
+            }
+        }
+    } else {
+        // Non-interactive: both flags required.
+        let Some(category) = category_flag else {
+            return emit_usage(
+                cli,
+                args,
+                "missing required --category flag",
+                "loran new <tool> --category <slug> --summary <one-liner>",
+            );
+        };
+        let Some(summary) = summary_flag else {
+            return emit_usage(
+                cli,
+                args,
+                "missing required --summary flag",
+                "loran new <tool> --category <slug> --summary <one-liner>",
+            );
+        };
+        (category, summary, args.replaces.clone(), false)
+    };
+
+    let rendered = render_template(tool, &category, &summary, &replaces, &args.safe_alias_for);
 
     // Validate before touching disk — a malformed page never lands.
     if let Err(err) = Page::parse(&rendered) {
@@ -103,7 +119,7 @@ pub(crate) fn run(cli: &Cli, args: &NewArgs) -> ExitCode {
         }
     };
 
-    let target = overlay_root.join(category).join(format!("{tool}.md"));
+    let target = overlay_root.join(&category).join(format!("{tool}.md"));
 
     if target.exists() {
         emit_conflict(cli, args, &target);
@@ -121,13 +137,17 @@ pub(crate) fn run(cli: &Cli, args: &NewArgs) -> ExitCode {
         tracing::debug!("user-template seed skipped: {err}");
     }
 
-    let edited = if args.edit {
+    // Editor: opens after writing when `--edit` was passed OR when
+    // the interactive prompt fired and `--no-edit` wasn't explicitly
+    // set.
+    let should_edit = args.edit || (prompted && !args.no_edit);
+    let edited = if should_edit {
         open_editor(&target).is_ok()
     } else {
         false
     };
 
-    emit_success(cli, args, tool, category, summary, &target, edited)
+    emit_success(cli, args, tool, &category, &summary, &target, edited)
 }
 
 /// Resolve the overlay root for `scope`. The `User` scope returns
@@ -291,6 +311,80 @@ fn emit_success(
         }
     }
     ExitCode::from(0)
+}
+
+/// Outcome of the interactive prompt, lifted to the local module so
+/// the caller does not need to reach into `loran-tui` types.
+enum PromptResult {
+    Filled {
+        category: String,
+        summary: String,
+        replaces: Vec<String>,
+    },
+    Cancelled,
+    Failed(String),
+}
+
+/// Should `loran new` drop into the ratatui prompt when fields are
+/// missing? `false` for the explicit non-interactive cascade — pipes,
+/// agent runners, `--json`, `--no-edit`, and the `upstream` scope.
+fn should_prompt_interactively(cli: &Cli, args: &NewArgs) -> bool {
+    use is_terminal::IsTerminal as _;
+
+    if args.no_edit {
+        return false;
+    }
+    if cli.global.json || cli.global.format == Some(crate::cli::Format::Json) {
+        return false;
+    }
+    if matches!(args.scope, NewScope::Upstream) {
+        // The publisher path is for scripted releases — never prompt.
+        return false;
+    }
+    for var in &[
+        "AI_AGENT",
+        "AGENT",
+        "CI",
+        "CLAUDECODE",
+        "CURSOR_AGENT",
+        "GEMINI_CLI",
+    ] {
+        if std::env::var(var).is_ok_and(|v| !v.is_empty()) {
+            return false;
+        }
+    }
+    std::io::stdout().is_terminal()
+}
+
+fn run_interactive_prompt(
+    tool: &str,
+    args: &NewArgs,
+    category_flag: Option<&String>,
+    summary_flag: Option<&String>,
+) -> PromptResult {
+    let categories = bundled_category_slugs();
+    let palette = loran_tui::theme::Palette::from_env();
+    let prefill = loran_tui::NewPromptValues {
+        category: category_flag.cloned().unwrap_or_default(),
+        summary: summary_flag.cloned().unwrap_or_default(),
+        replaces: args.replaces.clone(),
+    };
+
+    match loran_tui::run_new_prompt(tool, categories, palette, prefill) {
+        Ok(loran_tui::PromptOutcome::Filled(values)) => PromptResult::Filled {
+            category: values.category,
+            summary: values.summary,
+            replaces: values.replaces,
+        },
+        Ok(loran_tui::PromptOutcome::Cancelled) => PromptResult::Cancelled,
+        Err(err) => PromptResult::Failed(err.to_string()),
+    }
+}
+
+fn bundled_category_slugs() -> Vec<String> {
+    loran_core::bundled_categories()
+        .map(|cats| cats.iter().map(|(slug, _)| slug.to_owned()).collect())
+        .unwrap_or_default()
 }
 
 fn emit_usage(cli: &Cli, args: &NewArgs, msg: &str, hint: &str) -> ExitCode {
