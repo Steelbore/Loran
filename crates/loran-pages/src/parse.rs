@@ -59,7 +59,7 @@ impl Page {
 /// The opening fence must be the first non-empty line of the file.
 /// A leading UTF-8 BOM is tolerated by trimming `input` before the fence
 /// search.
-fn split_frontmatter(input: &str) -> Result<(&str, &str), PageError> {
+pub(crate) fn split_frontmatter(input: &str) -> Result<(&str, &str), PageError> {
     let trimmed = input.strip_prefix('\u{feff}').unwrap_or(input);
 
     // Locate the opening fence at the very start (after optional whitespace
@@ -116,12 +116,7 @@ fn validate(raw: RawPage, body: &str) -> Result<Page, PageError> {
     let category = raw.category.ok_or(PageError::MissingField("category"))?;
     let summary = raw.summary.ok_or(PageError::MissingField("summary"))?;
 
-    let summary_chars = summary.chars().count();
-    if summary_chars > SUMMARY_MAX_CHARS {
-        return Err(PageError::SummaryTooLong {
-            actual_chars: summary_chars,
-        });
-    }
+    validate_summary_length(&summary)?;
 
     validate_category(&category)?;
 
@@ -149,8 +144,20 @@ fn validate(raw: RawPage, body: &str) -> Result<Page, PageError> {
     })
 }
 
+/// Enforce the summary-length cap. Shared between [`Page::parse`] and
+/// [`crate::OverlayPage::parse`].
+pub(crate) fn validate_summary_length(summary: &str) -> Result<(), PageError> {
+    let summary_chars = summary.chars().count();
+    if summary_chars > SUMMARY_MAX_CHARS {
+        return Err(PageError::SummaryTooLong {
+            actual_chars: summary_chars,
+        });
+    }
+    Ok(())
+}
+
 /// Enforce category well-formedness per Spec §6.1.
-fn validate_category(value: &str) -> Result<(), PageError> {
+pub(crate) fn validate_category(value: &str) -> Result<(), PageError> {
     let make_err = |reason: &'static str| PageError::InvalidCategory {
         value: value.to_owned(),
         reason,

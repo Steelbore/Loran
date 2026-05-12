@@ -833,6 +833,7 @@ version = "0.0.0"
 dependencies = [
  "loran-pages",
  "serde",
+ "tempfile",
  "thiserror",
  "walkdir",
 ]

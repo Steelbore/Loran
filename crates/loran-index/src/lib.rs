@@ -27,12 +27,18 @@
 //!   [`IndexError::DuplicateName`]. The caller is expected to surface
 //!   this as a `PAGE_PARSE_ERROR` (Spec §9 code 8).
 
+mod distro;
 mod error;
 mod index;
 mod ingestor;
 mod markdown;
+mod overlay;
 
+pub use distro::{
+    DEFAULT_OS_RELEASE_PATH, DISTRO_GENERIC, detect_distro_id, detect_distro_id_from,
+};
 pub use error::{IndexError, IngestError};
 pub use index::Index;
 pub use ingestor::Ingestor;
 pub use markdown::MarkdownPagesIngestor;
+pub use overlay::{LayeredIngestor, OverlayLayer};

@@ -29,8 +29,10 @@
 //! went wrong.
 
 mod error;
+mod overlay;
 mod page;
 mod parse;
 
 pub use error::PageError;
+pub use overlay::OverlayPage;
 pub use page::Page;
