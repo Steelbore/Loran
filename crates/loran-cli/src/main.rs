@@ -18,6 +18,7 @@ mod cmd;
 mod color;
 mod envelope;
 mod exit;
+mod index_loader;
 mod logging;
 mod summary;
 mod version;

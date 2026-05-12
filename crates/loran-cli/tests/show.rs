@@ -74,6 +74,77 @@ fn show_hit_json_envelope_has_intro_and_body_blocks() {
 }
 
 #[test]
+fn show_surfaces_user_overlay_override() {
+    let xdg = tempfile::TempDir::new().unwrap();
+    let user_overlay = xdg
+        .path()
+        .join("loran")
+        .join("overlays")
+        .join("user")
+        .join("file-listing");
+    std::fs::create_dir_all(&user_overlay).unwrap();
+    std::fs::write(
+        user_overlay.join("eza.md"),
+        "+++\nname = \"eza\"\nsummary = \"User-pinned summary.\"\n+++\n",
+    )
+    .unwrap();
+
+    let assert = loran()
+        .args(["show", "eza", "--json"])
+        .env("XDG_DATA_HOME", xdg.path())
+        .env("LORAN_DISTRO_OVERRIDE", "generic")
+        .assert()
+        .success();
+    let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
+    let envelope: serde_json::Value = serde_json::from_str(&stdout).unwrap();
+    assert_eq!(
+        envelope.pointer("/data/summary").and_then(|v| v.as_str()),
+        Some("User-pinned summary."),
+        "user overlay must override bundled summary"
+    );
+    // Category survives — the overlay didn't touch it.
+    assert_eq!(
+        envelope.pointer("/data/category").and_then(|v| v.as_str()),
+        Some("file-listing")
+    );
+}
+
+#[test]
+fn show_surfaces_user_overlay_introduced_tool() {
+    let xdg = tempfile::TempDir::new().unwrap();
+    let user_overlay = xdg
+        .path()
+        .join("loran")
+        .join("overlays")
+        .join("user")
+        .join("system-monitoring");
+    std::fs::create_dir_all(&user_overlay).unwrap();
+    std::fs::write(
+        user_overlay.join("btop.md"),
+        "+++\n\
+         name = \"btop\"\n\
+         category = \"system-monitoring\"\n\
+         summary = \"Resource monitor.\"\n\
+         +++\n",
+    )
+    .unwrap();
+
+    let assert = loran()
+        .args(["show", "btop", "--json"])
+        .env("XDG_DATA_HOME", xdg.path())
+        .env("LORAN_DISTRO_OVERRIDE", "generic")
+        .assert()
+        .success();
+    let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
+    let envelope: serde_json::Value = serde_json::from_str(&stdout).unwrap();
+    assert_eq!(
+        envelope.pointer("/data/name").and_then(|v| v.as_str()),
+        Some("btop"),
+        "user overlay must introduce wholly new pages"
+    );
+}
+
+#[test]
 fn show_miss_text_mode_emits_canonical_no_entry_diagnostic() {
     let assert = loran()
         .args(["show", "definitely-not-in-the-catalog"])

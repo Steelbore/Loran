@@ -9,10 +9,8 @@ use std::io::Write as _;
 use std::process::ExitCode;
 
 use loran_core::{
-    BodyBlock, BundledPagesIngestor, IntroBlock, NoTldr, ShowResult, TldrCache, TldrLookup,
-    resolve_show_with_tldr,
+    BodyBlock, IntroBlock, NoTldr, ShowResult, TldrCache, TldrLookup, resolve_show_with_tldr,
 };
-use loran_index::{Index, Ingestor};
 use loran_pages::Page;
 use loran_render::render_text;
 use serde::Serialize;
@@ -20,6 +18,7 @@ use serde::Serialize;
 use crate::cli::{Cli, Format, ShowArgs};
 use crate::envelope::{Envelope, ErrorEnvelope, JsonEmitter};
 use crate::exit::{ErrorContext, ExitCode as LoranExit};
+use crate::index_loader::build_layered_index;
 
 /// `loran show` data payload — Spec §8 envelope shape.
 ///
@@ -68,7 +67,7 @@ impl<'a> ShowData<'a> {
 }
 
 pub(crate) fn run(cli: &Cli, args: &ShowArgs) -> ExitCode {
-    let index = match build_index() {
+    let index = match build_layered_index() {
         Ok(idx) => idx,
         Err(msg) => {
             emit_index_failure(cli, &msg, &args.tool);
@@ -90,13 +89,6 @@ pub(crate) fn run(cli: &Cli, args: &ShowArgs) -> ExitCode {
         ShowResult::IndexHit { page, intro, body } => emit_hit(cli, &page, intro, body),
         ShowResult::NoEntry { tool, hint } => emit_no_entry(cli, &tool, &hint),
     }
-}
-
-fn build_index() -> Result<Index, String> {
-    let pages = BundledPagesIngestor::new()
-        .ingest()
-        .map_err(|e| format!("bundled-pages ingest failed: {e}"))?;
-    Index::build(pages).map_err(|e| format!("index build failed: {e}"))
 }
 
 fn emit_hit(cli: &Cli, page: &Page, intro: IntroBlock, body: BodyBlock) -> ExitCode {

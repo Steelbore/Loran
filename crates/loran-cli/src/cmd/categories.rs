@@ -6,13 +6,13 @@
 use std::io::Write as _;
 use std::process::ExitCode;
 
-use loran_core::{BundledPagesIngestor, bundled_categories};
-use loran_index::{Index, Ingestor};
+use loran_core::bundled_categories;
 use serde::Serialize;
 
 use crate::cli::{CategoriesArgs, Cli, Format};
 use crate::envelope::{Envelope, ErrorEnvelope, JsonEmitter};
 use crate::exit::{ErrorContext, ExitCode as LoranExit};
+use crate::index_loader::build_layered_index;
 
 /// One row in the `loran categories` data array.
 #[derive(Serialize)]
@@ -28,7 +28,7 @@ struct CategoryRow<'a> {
 }
 
 pub(crate) fn run(cli: &Cli, _args: &CategoriesArgs) -> ExitCode {
-    let index = match build_index() {
+    let index = match build_layered_index() {
         Ok(idx) => idx,
         Err(msg) => {
             emit_index_failure(cli, &msg);
@@ -60,13 +60,6 @@ pub(crate) fn run(cli: &Cli, _args: &CategoriesArgs) -> ExitCode {
     }
 
     ExitCode::from(0)
-}
-
-fn build_index() -> Result<Index, String> {
-    let pages = BundledPagesIngestor::new()
-        .ingest()
-        .map_err(|e| format!("bundled-pages ingest failed: {e}"))?;
-    Index::build(pages).map_err(|e| format!("index build failed: {e}"))
 }
 
 fn emit_text(rows: &[CategoryRow<'_>]) {

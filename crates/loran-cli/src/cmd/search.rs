@@ -6,13 +6,13 @@
 use std::io::Write as _;
 use std::process::ExitCode;
 
-use loran_core::{BundledPagesIngestor, SearchResult, resolve_search};
-use loran_index::{Index, Ingestor};
+use loran_core::{SearchResult, resolve_search};
 use serde::Serialize;
 
 use crate::cli::{Cli, Format, SearchArgs};
 use crate::envelope::{Envelope, ErrorEnvelope, JsonEmitter};
 use crate::exit::{ErrorContext, ExitCode as LoranExit};
+use crate::index_loader::build_layered_index;
 use crate::summary::PageSummary;
 
 /// JSON projection of [`SearchResult`] — replaces each match's `Page`
@@ -46,7 +46,7 @@ impl<'a> From<&'a SearchResult> for SearchData<'a> {
 }
 
 pub(crate) fn run(cli: &Cli, args: &SearchArgs) -> ExitCode {
-    let index = match build_index() {
+    let index = match build_layered_index() {
         Ok(idx) => idx,
         Err(msg) => {
             emit_index_failure(cli, &msg, &args.query);
@@ -62,13 +62,6 @@ pub(crate) fn run(cli: &Cli, args: &SearchArgs) -> ExitCode {
     }
 
     ExitCode::from(0)
-}
-
-fn build_index() -> Result<Index, String> {
-    let pages = BundledPagesIngestor::new()
-        .ingest()
-        .map_err(|e| format!("bundled-pages ingest failed: {e}"))?;
-    Index::build(pages).map_err(|e| format!("index build failed: {e}"))
 }
 
 fn emit_text(result: &SearchResult) {

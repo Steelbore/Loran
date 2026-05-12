@@ -65,9 +65,12 @@ impl OverlayLayer {
 ///
 /// Layers are processed in the order they're supplied: lowest
 /// precedence first. The result of [`Ingestor::ingest`] is the merged
-/// catalog.
+/// catalog. Optional pre-parsed `base` pages seed the merge at the
+/// lowest precedence — used by the CLI to combine the bundled
+/// in-memory upstream layer with on-disk overlays.
 #[derive(Debug, Clone)]
 pub struct LayeredIngestor {
+    base: Vec<Page>,
     layers: Vec<OverlayLayer>,
 }
 
@@ -75,7 +78,18 @@ impl LayeredIngestor {
     /// Build a layered ingestor from `layers`, lowest-precedence first.
     #[must_use]
     pub fn new(layers: Vec<OverlayLayer>) -> Self {
-        Self { layers }
+        Self {
+            base: Vec::new(),
+            layers,
+        }
+    }
+
+    /// Build a layered ingestor that starts from `base` pages
+    /// (treated as the lowest-precedence, already-validated layer) and
+    /// applies `layers` on top.
+    #[must_use]
+    pub fn with_base_pages(base: Vec<Page>, layers: Vec<OverlayLayer>) -> Self {
+        Self { base, layers }
     }
 
     /// Inspect the ordered layer list. Useful for diagnostics + tests.
@@ -88,6 +102,10 @@ impl LayeredIngestor {
 impl Ingestor for LayeredIngestor {
     fn ingest(&self) -> Result<Vec<Page>, IngestError> {
         let mut merged: HashMap<String, Page> = HashMap::new();
+
+        for page in &self.base {
+            merged.insert(page.name.clone(), page.clone());
+        }
 
         for layer in &self.layers {
             ingest_layer(layer, &mut merged)?;
@@ -384,6 +402,36 @@ mod tests {
             IngestError::Page { path, .. } => assert!(path.contains("[upstream]")),
             other => panic!("expected IngestError::Page, got {other:?}"),
         }
+    }
+
+    #[test]
+    fn base_pages_seed_lowest_precedence_layer() {
+        // Bundled base provides `eza`; user overlay overrides summary.
+        let base = vec![Page::parse(upstream_eza()).unwrap()];
+        let user = TempDir::new().unwrap();
+        write(
+            user.path(),
+            "eza.md",
+            "+++\nname = \"eza\"\nsummary = \"User-pinned.\"\n+++\n",
+        );
+
+        let pages =
+            LayeredIngestor::with_base_pages(base, vec![OverlayLayer::new("user", user.path())])
+                .ingest()
+                .unwrap();
+        let eza = find_page(&pages, "eza");
+        assert_eq!(eza.summary, "User-pinned.");
+        assert_eq!(eza.category, "file-listing");
+    }
+
+    #[test]
+    fn base_pages_alone_pass_through_when_no_layers() {
+        let base = vec![Page::parse(upstream_eza()).unwrap()];
+        let pages = LayeredIngestor::with_base_pages(base, Vec::new())
+            .ingest()
+            .unwrap();
+        assert_eq!(pages.len(), 1);
+        assert_eq!(pages[0].name, "eza");
     }
 
     #[test]
