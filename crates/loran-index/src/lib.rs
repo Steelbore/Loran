@@ -27,6 +27,7 @@
 //!   [`IndexError::DuplicateName`]. The caller is expected to surface
 //!   this as a `PAGE_PARSE_ERROR` (Spec §9 code 8).
 
+mod describe;
 mod distro;
 mod error;
 mod index;
@@ -34,6 +35,10 @@ mod ingestor;
 mod markdown;
 mod overlay;
 
+pub use describe::{
+    DEFAULT_TIMEOUT as DESCRIBE_DEFAULT_TIMEOUT, DescribeError, DescribeIngestor, RealRunner,
+    Runner, SYNTH_CATEGORY,
+};
 pub use distro::{
     DEFAULT_OS_RELEASE_PATH, DISTRO_GENERIC, detect_distro_id, detect_distro_id_from,
 };
