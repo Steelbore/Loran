@@ -110,6 +110,8 @@ pub struct App {
     /// Optional modal overlay (search). When `Some`, it captures
     /// keystrokes; when `None`, the active `view` handles them.
     search: Option<SearchOverlay>,
+    /// Whether the static in-app help overlay is visible.
+    help_visible: bool,
     should_quit: bool,
 }
 
@@ -134,6 +136,7 @@ impl App {
             tool_state,
             view: View::Browse,
             search: None,
+            help_visible: false,
             should_quit: false,
         };
         app.sync_tool_selection();
@@ -231,24 +234,42 @@ impl App {
     }
 
     fn handle_key(&mut self, key: KeyEvent) {
-        // Ctrl-C / Ctrl-D always quit; `q` only when not typing in a
-        // search overlay (so a query containing `q` stays intact).
+        // Ctrl-C / Ctrl-D always quit.
         if matches!(key.modifiers, KeyModifiers::CONTROL)
             && matches!(key.code, KeyCode::Char('c' | 'd'))
         {
             self.should_quit = true;
             return;
         }
-        if self.search.is_none()
-            && matches!(key.code, KeyCode::Char('q'))
-            && !matches!(key.modifiers, KeyModifiers::SHIFT)
-        {
+
+        // Search overlay captures everything (including `q` and `?`)
+        // so the query stays literal. Help can't open from inside
+        // search; the user must Esc out first.
+        if self.search.is_some() {
+            self.handle_search_key(key);
+            return;
+        }
+
+        // Help overlay is on top of every non-search view. Any key
+        // closes it (so the user can press a binding they just read
+        // and have it apply immediately).
+        if self.help_visible {
+            self.help_visible = false;
+            // Esc / `?` are the dedicated dismiss bindings; they
+            // shouldn't ALSO fire the underlying view's behaviour.
+            if matches!(key.code, KeyCode::Esc | KeyCode::Char('?')) {
+                return;
+            }
+            // Other keys fall through to the underlying view.
+        }
+
+        if matches!(key.code, KeyCode::Char('q')) && key.modifiers.is_empty() {
             self.should_quit = true;
             return;
         }
 
-        if self.search.is_some() {
-            self.handle_search_key(key);
+        if matches!(key.code, KeyCode::Char('?')) {
+            self.help_visible = true;
             return;
         }
 
@@ -365,7 +386,78 @@ impl App {
         }
         if let Some(overlay) = self.search.clone() {
             self.render_search_overlay(frame, &overlay);
+        } else if self.help_visible {
+            self.render_help_overlay(frame);
         }
+    }
+
+    fn render_help_overlay(&self, frame: &mut Frame<'_>) {
+        let area = centered_rect(frame.area(), 60, 60);
+        frame.render_widget(Clear, area);
+
+        let palette = self.palette;
+        let chrome = Style::default()
+            .fg(palette.foreground)
+            .bg(palette.background);
+        let muted = Style::default().fg(palette.muted).bg(palette.background);
+        let key_style = Style::default()
+            .fg(palette.accent)
+            .bg(palette.background)
+            .add_modifier(Modifier::BOLD);
+
+        let block = Block::default()
+            .borders(Borders::ALL)
+            .title(" help ")
+            .style(chrome);
+        frame.render_widget(block, area);
+
+        let inner = area.inner(Margin {
+            horizontal: 2,
+            vertical: 1,
+        });
+        let chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([Constraint::Min(0), Constraint::Length(1)])
+            .split(inner);
+
+        let rows: Vec<Line<'static>> = help_table()
+            .into_iter()
+            .map(|(label, cua, vim)| {
+                Line::from(vec![
+                    Span::styled(format!("{label:<18}"), muted),
+                    Span::styled(format!("{cua:<14}"), key_style),
+                    Span::styled(vim.to_owned(), key_style),
+                ])
+            })
+            .collect();
+
+        frame.render_widget(
+            Paragraph::new(rows).style(chrome).block(
+                Block::default()
+                    .borders(Borders::BOTTOM)
+                    .title(Line::from(vec![
+                        Span::styled("action", muted),
+                        Span::raw("            "),
+                        Span::styled("CUA", muted),
+                        Span::raw("           "),
+                        Span::styled("Vim", muted),
+                    ]))
+                    .style(chrome),
+            ),
+            chunks[0],
+        );
+
+        frame.render_widget(
+            Paragraph::new(Line::from(vec![
+                Span::styled("Esc", key_style),
+                Span::styled(" or ", muted),
+                Span::styled("?", key_style),
+                Span::styled(" dismiss", muted),
+            ]))
+            .alignment(Alignment::Center)
+            .style(chrome),
+            chunks[1],
+        );
     }
 
     fn render_search_overlay(&self, frame: &mut Frame<'_>, overlay: &SearchOverlay) {
@@ -843,12 +935,12 @@ impl App {
         Line::from(vec![
             Span::styled("Tab", key),
             Span::styled(" focus  ·  ", muted),
-            Span::styled("j/k ↑↓", key),
-            Span::styled(" move  ·  ", muted),
             Span::styled("Enter", key),
             Span::styled(" open  ·  ", muted),
             Span::styled("/", key),
             Span::styled(" search  ·  ", muted),
+            Span::styled("?", key),
+            Span::styled(" help  ·  ", muted),
             Span::styled("q", key),
             Span::styled(" quit", muted),
         ])
@@ -915,6 +1007,24 @@ fn frontmatter_lines(page: &Page, palette: Palette) -> Vec<Line<'static>> {
 
 fn quote(value: &str) -> String {
     format!("\"{value}\"")
+}
+
+/// Static help table — `(action, CUA-binding, Vim-binding)`.
+fn help_table() -> Vec<(&'static str, &'static str, &'static str)> {
+    vec![
+        ("move down", "↓", "j"),
+        ("move up", "↑", "k"),
+        ("first item", "Home", "g"),
+        ("last item", "End", "G"),
+        ("focus left", "←", "h"),
+        ("focus right", "→", "l"),
+        ("toggle focus", "Tab", "Tab"),
+        ("open / confirm", "Enter", "Enter"),
+        ("search", "/", "/"),
+        ("help", "?", "?"),
+        ("back", "Esc", "Esc"),
+        ("quit", "Ctrl-C", "q"),
+    ]
 }
 
 /// Centre a rectangle of `pct_x` % width × `pct_y` % height inside
@@ -1132,6 +1242,51 @@ mod tests {
         let app = App::new(empty_index(), Palette::monochrome());
         assert_eq!(app.cat_state.selected(), None);
         assert_eq!(app.tool_state.selected(), None);
+    }
+
+    #[test]
+    fn question_mark_opens_help_overlay() {
+        let mut app = App::new(two_category_index(), Palette::monochrome());
+        app.handle_key(key(KeyCode::Char('?')));
+        assert!(app.help_visible);
+    }
+
+    #[test]
+    fn esc_dismisses_help_overlay() {
+        let mut app = App::new(two_category_index(), Palette::monochrome());
+        app.handle_key(key(KeyCode::Char('?')));
+        app.handle_key(key(KeyCode::Esc));
+        assert!(!app.help_visible);
+        assert!(!app.should_quit, "Esc on help must NOT quit the app");
+    }
+
+    #[test]
+    fn question_mark_again_dismisses_help_overlay() {
+        let mut app = App::new(two_category_index(), Palette::monochrome());
+        app.handle_key(key(KeyCode::Char('?')));
+        app.handle_key(key(KeyCode::Char('?')));
+        assert!(!app.help_visible);
+    }
+
+    #[test]
+    fn help_question_inside_search_is_literal_query_char() {
+        let mut app = App::new(two_category_index(), Palette::monochrome());
+        app.handle_key(key(KeyCode::Char('/')));
+        app.handle_key(key(KeyCode::Char('?')));
+        assert!(!app.help_visible);
+        assert_eq!(app.search.as_ref().unwrap().query, "?");
+    }
+
+    #[test]
+    fn help_opens_from_detail_view() {
+        let mut app = App::new(two_category_index(), Palette::monochrome());
+        app.handle_key(key(KeyCode::Tab));
+        app.handle_key(key(KeyCode::Enter));
+        assert!(matches!(app.view, View::Detail { .. }));
+        app.handle_key(key(KeyCode::Char('?')));
+        assert!(app.help_visible);
+        // Underlying view is preserved.
+        assert!(matches!(app.view, View::Detail { .. }));
     }
 
     #[test]
