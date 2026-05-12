@@ -339,6 +339,69 @@ fn validate_catches_hand_edited_breakage() {
         .code(8);
 }
 
+/// `--overlay <name>` pins the active distro layer from the CLI,
+/// overriding the `LORAN_DISTRO_OVERRIDE` env var. Users on Bravais
+/// can preview Ferrite's curation with `loran show foo --overlay ferrite`.
+#[test]
+fn overlay_flag_pins_distro_layer_above_env() {
+    let xdg = xdg();
+    let ferrite_dir = xdg
+        .path()
+        .join("loran")
+        .join("overlays")
+        .join("ferrite")
+        .join("file-listing");
+    write(
+        &ferrite_dir,
+        "eza.md",
+        "+++\nname = \"eza\"\nsummary = \"Ferrite-tuned ls.\"\n+++\n",
+    );
+
+    // Env says `bravais`, but the flag must beat it.
+    let assert = loran()
+        .args(["show", "eza", "--json", "--overlay", "ferrite"])
+        .env("XDG_DATA_HOME", xdg.path())
+        .env("LORAN_DISTRO_OVERRIDE", "bravais")
+        .assert()
+        .success();
+    let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
+    let envelope: serde_json::Value = serde_json::from_str(&stdout).unwrap();
+    assert_eq!(
+        envelope.pointer("/data/summary").and_then(|v| v.as_str()),
+        Some("Ferrite-tuned ls.")
+    );
+}
+
+/// Without `--overlay`, the env var controls the layer name.
+#[test]
+fn overlay_env_var_used_when_flag_absent() {
+    let xdg = xdg();
+    let bravais_dir = xdg
+        .path()
+        .join("loran")
+        .join("overlays")
+        .join("bravais")
+        .join("file-listing");
+    write(
+        &bravais_dir,
+        "eza.md",
+        "+++\nname = \"eza\"\nsummary = \"Bravais-tuned ls.\"\n+++\n",
+    );
+
+    let assert = loran()
+        .args(["show", "eza", "--json"])
+        .env("XDG_DATA_HOME", xdg.path())
+        .env("LORAN_DISTRO_OVERRIDE", "bravais")
+        .assert()
+        .success();
+    let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
+    let envelope: serde_json::Value = serde_json::from_str(&stdout).unwrap();
+    assert_eq!(
+        envelope.pointer("/data/summary").and_then(|v| v.as_str()),
+        Some("Bravais-tuned ls.")
+    );
+}
+
 /// `loran categories` counts include overlay-introduced tools.
 #[test]
 fn categories_count_reflects_overlay_additions() {

@@ -62,7 +62,7 @@ fn main() -> ExitCode {
         // interactively, otherwise fall back to a usage hint so pipes
         // and agent runners get something readable.
         if should_launch_tui(&cli) {
-            launch_tui()
+            launch_tui(&cli)
         } else {
             eprintln!(
                 "loran: no sub-command given. Try `loran --help` for the \
@@ -100,8 +100,9 @@ fn should_launch_tui(cli: &Cli) -> bool {
     std::io::stdout().is_terminal()
 }
 
-fn launch_tui() -> ExitCode {
-    let index = match index_loader::build_layered_index() {
+fn launch_tui(cli: &Cli) -> ExitCode {
+    let index = match index_loader::build_layered_index_with_overlay(cli.global.overlay.as_deref())
+    {
         Ok(idx) => idx,
         Err(msg) => {
             eprintln!("loran: index unavailable: {msg}");

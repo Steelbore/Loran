@@ -26,11 +26,17 @@ use loran_index::{
     DescribeIngestor, Index, Ingestor, LayeredIngestor, OverlayLayer, detect_distro_id,
 };
 
-/// Build the merged read-side index.
+/// Build the merged read-side index, optionally overriding the
+/// active distro overlay name.
 ///
-/// Returns a string error so the caller (every read-verb handler) can
-/// emit a `INDEX_NOT_BUILT` envelope without further conversion.
-pub(crate) fn build_layered_index() -> Result<Index, String> {
+/// Precedence for the distro layer name (highest first):
+/// 1. `overlay_override` — the `--overlay <NAME>` CLI flag.
+/// 2. `LORAN_DISTRO_OVERRIDE` env var.
+/// 3. `/etc/os-release` `ID=` line.
+/// 4. `"generic"` fallback.
+pub(crate) fn build_layered_index_with_overlay(
+    overlay_override: Option<&str>,
+) -> Result<Index, String> {
     // Auto-synthesised pages (Phase 3 `DescribeIngestor`) sit
     // *underneath* the bundled curated catalog: curated entries
     // always overlay on top, so the synthesis is purely a fallback
@@ -57,7 +63,7 @@ pub(crate) fn build_layered_index() -> Result<Index, String> {
     }
     let merged_base: Vec<loran_pages::Page> = by_name.into_values().collect();
 
-    let layers = on_disk_overlay_layers();
+    let layers = on_disk_overlay_layers(overlay_override);
     let ingestor = LayeredIngestor::with_base_pages(merged_base, layers);
     let pages = ingestor
         .ingest()
@@ -69,22 +75,30 @@ pub(crate) fn build_layered_index() -> Result<Index, String> {
 /// Resolve the on-disk overlay layers (distro first, then user) under
 /// `$XDG_DATA_HOME/loran/overlays/`. Returns an empty vec when no
 /// data dir exists on this platform.
-fn on_disk_overlay_layers() -> Vec<OverlayLayer> {
+fn on_disk_overlay_layers(overlay_override: Option<&str>) -> Vec<OverlayLayer> {
     let Some(data_dir) = dirs::data_dir() else {
         return Vec::new();
     };
     let overlays = data_dir.join("loran").join("overlays");
-    let distro = active_distro();
+    let distro = active_distro(overlay_override);
     vec![
         OverlayLayer::new("distro", overlays.join(&distro)),
         OverlayLayer::new("user", overlays.join("user")),
     ]
 }
 
-/// Active-distro overlay name. Honours `LORAN_DISTRO_OVERRIDE` so
-/// tests can pin a specific layer without writing to
-/// `/etc/os-release`.
-fn active_distro() -> String {
+/// Active-distro overlay name. Precedence:
+/// 1. `overlay_override` — the `--overlay <NAME>` CLI flag.
+/// 2. `LORAN_DISTRO_OVERRIDE` env var (used by tests).
+/// 3. `/etc/os-release` `ID=` line.
+/// 4. `"generic"` fallback.
+fn active_distro(overlay_override: Option<&str>) -> String {
+    if let Some(name) = overlay_override {
+        let trimmed = name.trim();
+        if !trimmed.is_empty() {
+            return trimmed.to_owned();
+        }
+    }
     if let Ok(override_id) = std::env::var("LORAN_DISTRO_OVERRIDE") {
         if !override_id.is_empty() {
             return override_id;

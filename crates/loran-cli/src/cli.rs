@@ -82,6 +82,13 @@ pub(crate) struct GlobalFlags {
     /// Assume "yes" to confirmation prompts.
     #[arg(long, global = true)]
     pub yes: bool,
+
+    /// Pin the active distro overlay layer by name (e.g. `bravais`,
+    /// `ferrite`). Highest-precedence override — beats
+    /// `LORAN_DISTRO_OVERRIDE` and `/etc/os-release`. Useful for
+    /// previewing another distro's curation from a different host.
+    #[arg(long, value_name = "NAME", global = true)]
+    pub overlay: Option<String>,
 }
 
 /// Top-level CLI surface.

@@ -17,10 +17,10 @@ use loran_mcp::{Handler, serve_stdio};
 
 use crate::cli::{Cli, McpArgs};
 use crate::exit::ExitCode as LoranExit;
-use crate::index_loader::build_layered_index;
+use crate::index_loader::build_layered_index_with_overlay;
 
-pub(crate) fn run(_cli: &Cli, _args: &McpArgs) -> ExitCode {
-    let index = match build_layered_index() {
+pub(crate) fn run(cli: &Cli, _args: &McpArgs) -> ExitCode {
+    let index = match build_layered_index_with_overlay(cli.global.overlay.as_deref()) {
         Ok(idx) => idx,
         Err(msg) => {
             eprintln!("loran mcp: index unavailable: {msg}");

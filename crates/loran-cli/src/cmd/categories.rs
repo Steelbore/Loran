@@ -12,7 +12,7 @@ use serde::Serialize;
 use crate::cli::{CategoriesArgs, Cli, Format};
 use crate::envelope::{Envelope, ErrorEnvelope, JsonEmitter};
 use crate::exit::{ErrorContext, ExitCode as LoranExit};
-use crate::index_loader::build_layered_index;
+use crate::index_loader::build_layered_index_with_overlay;
 
 /// One row in the `loran categories` data array.
 #[derive(Serialize)]
@@ -28,7 +28,7 @@ struct CategoryRow<'a> {
 }
 
 pub(crate) fn run(cli: &Cli, _args: &CategoriesArgs) -> ExitCode {
-    let index = match build_layered_index() {
+    let index = match build_layered_index_with_overlay(cli.global.overlay.as_deref()) {
         Ok(idx) => idx,
         Err(msg) => {
             emit_index_failure(cli, &msg);

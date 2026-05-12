@@ -11,12 +11,12 @@ use loran_pages::Page;
 use crate::cli::{Cli, Format, ListArgs};
 use crate::envelope::{Envelope, ErrorEnvelope, JsonEmitter};
 use crate::exit::{ErrorContext, ExitCode as LoranExit};
-use crate::index_loader::build_layered_index;
+use crate::index_loader::build_layered_index_with_overlay;
 use crate::summary::PageSummary;
 use loran_index::Index;
 
 pub(crate) fn run(cli: &Cli, args: &ListArgs) -> ExitCode {
-    let index = match build_layered_index() {
+    let index = match build_layered_index_with_overlay(cli.global.overlay.as_deref()) {
         Ok(idx) => idx,
         Err(msg) => {
             emit_index_failure(cli, &msg);
