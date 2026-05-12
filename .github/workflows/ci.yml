@@ -1,14 +1,21 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # SPDX-FileCopyrightText: 2026 Mohamed Hammad
 #
-# Loran CI pipeline (Phase 0 scope: Linux x86_64 only).
+# Loran CI pipeline — multi-platform matrix (LOR-P000-038/039/040).
 #
-# Steps: cargo fmt --check → cargo clippy -D warnings → cargo test
-#      → cargo audit → cargo xtask check-spdx.
+# Tier 1 (blocks merge, fail-fast: false so every target reports):
+#   - x86_64-unknown-linux-gnu   (ubuntu-latest)      — full pipeline
+#   - x86_64-unknown-linux-musl  (ubuntu-latest)      — build + test
+#   - aarch64-unknown-linux-gnu  (ubuntu-24.04-arm)   — build + test on native ARM
+#   - x86_64-unknown-freebsd     (ubuntu-latest)      — cross-compile build only
 #
-# Multi-platform Tier 1 (musl, aarch64, FreeBSD) and Tier 2 (macOS arm64)
-# are intentionally deferred to a Phase 1+ cross-cutting WP. Tracked in
-# loran-todo-v0_1.md LOR-P000-038/039/040.
+# Tier 2 (informational, continue-on-error):
+#   - aarch64-apple-darwin       (macos-latest)       — build + test
+#
+# The "full pipeline" entry is the only one that runs the release-mode
+# NFR test, the bench compile-check, `cargo audit`, and the SPDX
+# header gate. The other entries cover their target's compile + test
+# surface and trust the canonical entry for the cross-cutting checks.
 
 name: ci
 
@@ -22,53 +29,114 @@ env:
   RUSTFLAGS: "-D warnings"
 
 jobs:
-  ci:
-    name: fmt + clippy + test + audit + spdx (linux x86_64)
-    runs-on: ubuntu-latest
+  tier1:
+    name: "tier1 (${{ matrix.label }})"
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      # fail-fast: false so a single broken target doesn't mask the
+      # others. CI minutes are cheap; diagnostic clarity is not.
+      fail-fast: false
+      matrix:
+        include:
+          - label: linux-gnu
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            full: true
+          - label: linux-musl
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            apt: musl-tools
+          - label: linux-aarch64
+            runner: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+          - label: freebsd-build
+            runner: ubuntu-latest
+            target: x86_64-unknown-freebsd
+            build_only: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Rust toolchain (1.88.0)
+      - name: Install Rust toolchain (1.88.0) for ${{ matrix.target }}
         uses: dtolnay/rust-toolchain@1.88.0
         with:
           components: rustfmt, clippy
+          targets: ${{ matrix.target }}
+
+      - name: Install apt prerequisites
+        if: matrix.apt
+        run: sudo apt-get update && sudo apt-get install -y ${{ matrix.apt }}
 
       - name: Cache Cargo registry + target
         uses: Swatinem/rust-cache@v2
-
-      - name: Install cargo-audit
-        uses: taiki-e/install-action@v2
         with:
-          tool: cargo-audit
+          key: ${{ matrix.target }}
 
       - name: cargo fmt --check
         run: cargo fmt --all -- --check
 
-      - name: cargo clippy --workspace --all-targets -- -D warnings
+      - name: cargo clippy --workspace --all-targets
+        run: cargo clippy --workspace --all-targets --target ${{ matrix.target }} -- -D warnings
+
+      - name: cargo test --workspace
+        if: '!matrix.build_only'
+        run: cargo test --workspace --target ${{ matrix.target }} --no-fail-fast
+
+      - name: cargo build (build-only target)
+        if: matrix.build_only
+        run: cargo build --workspace --target ${{ matrix.target }}
+
+      - name: cargo test --release (NFR thresholds enforced)
+        if: matrix.full
+        # NFR-001 (`resolve_show` ≤ 50 ms) and NFR-002 (1k-page index
+        # build + list ≤ 100 ms) enforce their production-tight
+        # thresholds in release builds. Debug runs use a 10×
+        # relaxation in the same test file.
+        run: cargo test --release -p loran-core --test nfr --target ${{ matrix.target }}
+
+      - name: cargo bench --no-run (compile-check benchmarks)
+        if: matrix.full
+        # Wall-clock numbers from a GitHub-hosted runner are too noisy
+        # to gate on. Compile so benchmark code doesn't bit-rot.
+        run: cargo bench --no-run --workspace --target ${{ matrix.target }}
+
+      - name: Install cargo-audit
+        if: matrix.full
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-audit
+
+      - name: cargo audit
+        if: matrix.full
+        run: cargo audit --deny warnings
+
+      - name: cargo xtask check-spdx
+        if: matrix.full
+        run: cargo xtask check-spdx
+
+  tier2-macos:
+    name: "tier2 (macos-arm64)"
+    # Tier 2 in a separate job so `continue-on-error: true` doesn't
+    # leak onto Tier 1 entries that share a matrix.
+    runs-on: macos-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain (1.88.0) for aarch64-apple-darwin
+        uses: dtolnay/rust-toolchain@1.88.0
+        with:
+          components: rustfmt, clippy
+          targets: aarch64-apple-darwin
+
+      - name: Cache Cargo registry + target
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: aarch64-apple-darwin
+
+      - name: cargo clippy --workspace --all-targets
         run: cargo clippy --workspace --all-targets -- -D warnings
 
       - name: cargo test --workspace
         run: cargo test --workspace --no-fail-fast
-
-      - name: cargo test --release (NFR thresholds enforced)
-        # NFR-001 (`resolve_show` ≤ 50 ms) and NFR-002
-        # (1k-page index build + list ≤ 100 ms) only enforce their
-        # production-tight thresholds in release builds. Debug runs
-        # use a 10× relaxation in the same test file.
-        run: cargo test --release -p loran-core --test nfr
-
-      - name: cargo bench --no-run (compile-check benchmarks)
-        # We don't run benchmarks in CI — wall-clock numbers from a
-        # GitHub-hosted runner are too noisy to gate on. Compile so
-        # benchmark code doesn't bit-rot.
-        run: cargo bench --no-run --workspace
-
-      - name: cargo audit
-        # Don't fail CI on advisories that have no fix available; record
-        # them as warnings. Hard advisories (ones with patched versions
-        # available) will surface as the audit binary's exit code.
-        run: cargo audit --deny warnings
-
-      - name: cargo xtask check-spdx
-        run: cargo xtask check-spdx
