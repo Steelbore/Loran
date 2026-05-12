@@ -156,7 +156,7 @@ pub(crate) fn run(cli: &Cli, args: &NewArgs) -> ExitCode {
 /// until the proper config-file plumbing lands.
 fn overlay_root_for(scope: NewScope) -> Result<PathBuf, String> {
     match scope {
-        NewScope::User => dirs::data_dir()
+        NewScope::User => loran_core::data_home()
             .map(|d| d.join("loran").join("overlays").join("user"))
             .ok_or_else(|| "no $XDG_DATA_HOME / data directory on this platform".to_owned()),
         NewScope::Upstream => match std::env::var("LORAN_UPSTREAM_PATH") {
@@ -244,7 +244,7 @@ fn atomic_write(target: &Path, body: &str) -> Result<(), String> {
 }
 
 fn seed_user_template() -> Result<(), String> {
-    let template_dir = dirs::data_dir()
+    let template_dir = loran_core::data_home()
         .map(|d| d.join("loran").join("templates"))
         .ok_or_else(|| "no data dir".to_owned())?;
     let template_path = template_dir.join("tool.md");

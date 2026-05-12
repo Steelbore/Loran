@@ -268,14 +268,14 @@ pub fn update_pages(
 /// target. Mirrors the layout in `loran-spec-v0_2.md` §5.
 #[must_use]
 pub fn default_pages_target() -> Option<std::path::PathBuf> {
-    dirs::data_dir().map(|d| d.join("loran").join("pages"))
+    crate::xdg::data_home().map(|d| d.join("loran").join("pages"))
 }
 
 /// Canonical tldr-pages extracted-tree target:
 /// `$XDG_CACHE_HOME/loran/tldr/extracted/` (Spec §5).
 #[must_use]
 pub fn default_tldr_target() -> Option<std::path::PathBuf> {
-    dirs::cache_dir().map(|d| d.join("loran").join("tldr").join("extracted"))
+    crate::xdg::cache_home().map(|d| d.join("loran").join("tldr").join("extracted"))
 }
 
 #[allow(dead_code)] // helper for callers wiring sub-phase 2B+

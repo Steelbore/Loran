@@ -82,9 +82,15 @@ jobs:
         if: '!matrix.build_only'
         run: cargo test --workspace --target ${{ matrix.target }} --no-fail-fast
 
-      - name: cargo build (build-only target)
+      - name: cargo check (check-only target)
         if: matrix.build_only
-        run: cargo build --workspace --target ${{ matrix.target }}
+        # `cargo check` runs the type-checker and catches FreeBSD-
+        # incompatible code (cfg drift, missing libc symbols at the
+        # source level) without invoking the linker. The linker
+        # otherwise needs a FreeBSD sysroot we don't ship; building
+        # in the full sense requires `cross` and a docker image,
+        # which is out of scope for this matrix.
+        run: cargo check --workspace --target ${{ matrix.target }}
 
       - name: cargo test --release (NFR thresholds enforced)
         if: matrix.full

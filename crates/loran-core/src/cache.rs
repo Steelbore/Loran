@@ -80,7 +80,7 @@ impl Cache {
     /// Windows). Returns [`CacheError::NoCacheDir`] when no cache
     /// directory can be resolved.
     pub fn with_default_path() -> Result<Self, CacheError> {
-        let dir = dirs::cache_dir().ok_or(CacheError::NoCacheDir)?;
+        let dir = crate::xdg::cache_home().ok_or(CacheError::NoCacheDir)?;
         Ok(Self::with_path(dir.join("loran").join(CACHE_FILENAME)))
     }
 

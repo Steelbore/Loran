@@ -81,7 +81,7 @@ pub struct SourceMetaStore {
 impl SourceMetaStore {
     /// Resolve the canonical path: `$XDG_CACHE_HOME/loran/sources.toml`.
     pub fn with_default_path() -> Result<Self, MetaError> {
-        let dir = dirs::cache_dir().ok_or(MetaError::NoCacheDir)?;
+        let dir = crate::xdg::cache_home().ok_or(MetaError::NoCacheDir)?;
         Ok(Self::with_path(dir.join("loran").join(META_FILENAME)))
     }
 

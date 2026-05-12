@@ -43,7 +43,7 @@ impl TldrCache {
     /// cache directory can be located.
     #[must_use]
     pub fn with_default_path() -> Option<Self> {
-        let dir = dirs::cache_dir()?;
+        let dir = crate::xdg::cache_home()?;
         Some(Self::with_path(
             dir.join("loran").join("tldr").join("extracted"),
         ))

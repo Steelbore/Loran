@@ -58,7 +58,7 @@ struct ValidateData {
 }
 
 pub(crate) fn run(cli: &Cli, _args: &ValidateArgs) -> ExitCode {
-    let Some(data_dir) = dirs::data_dir() else {
+    let Some(data_dir) = loran_core::data_home() else {
         emit_no_data_dir(cli);
         return ExitCode::from(LoranExit::PermissionDenied.to_process_code());
     };

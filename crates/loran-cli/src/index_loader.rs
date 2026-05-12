@@ -76,7 +76,7 @@ pub(crate) fn build_layered_index_with_overlay(
 /// `$XDG_DATA_HOME/loran/overlays/`. Returns an empty vec when no
 /// data dir exists on this platform.
 fn on_disk_overlay_layers(overlay_override: Option<&str>) -> Vec<OverlayLayer> {
-    let Some(data_dir) = dirs::data_dir() else {
+    let Some(data_dir) = loran_core::data_home() else {
         return Vec::new();
     };
     let overlays = data_dir.join("loran").join("overlays");
