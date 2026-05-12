@@ -991,6 +991,16 @@ dependencies = [
 [[package]]
 name = "loran-mcp"
 version = "0.0.0"
+dependencies = [
+ "loran-core",
+ "loran-index",
+ "loran-pages",
+ "schemars",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror",
+]
 
 [[package]]
 name = "loran-pages"

@@ -13,5 +13,17 @@ repository.workspace = true
 homepage.workspace = true
 readme.workspace = true
 
+[dependencies]
+loran-core = { path = "../loran-core" }
+loran-index = { path = "../loran-index" }
+loran-pages = { path = "../loran-pages" }
+schemars = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+
 [lints]
 workspace = true

@@ -5,14 +5,23 @@
 
 //! Loran MCP — read-only Model Context Protocol server.
 //!
-//! Phase 0 placeholder. The MCP surface lands in Phase 3 (Bloom) per
-//! WP-P3.02. The surface is strictly read-only by design — only `list`,
-//! `show`, `find`, `search`, and `categories` are exposed. Write verbs
-//! (`update`, `new`, `validate`) and the subprocess-spawning `help` verb
-//! are deliberately excluded (Spec §12.2).
+//! Implements the Model Context Protocol (2024-11-05 spec) over
+//! newline-delimited JSON-RPC 2.0 on stdio. Five read-only verbs are
+//! exposed (`list`, `show`, `find`, `search`, `categories`); write
+//! verbs (`update`, `new`, `validate`) and the subprocess-spawning
+//! `help` verb are deliberately excluded (Spec §12.2).
 //!
-//! This is the one crate where `tokio` is permitted; everywhere else,
-//! Loran is synchronous.
+//! Sync from end to end. There is no `tokio` — MCP stdio is a strict
+//! request/response loop with one in-flight RPC at a time, so a blocking
+//! read on stdin is correct and avoids dragging an async runtime into
+//! the workspace.
 
-/// Placeholder used to verify the workspace builds cleanly during Phase 0.
-pub const fn placeholder() {}
+mod handler;
+mod protocol;
+mod server;
+mod tools;
+
+pub use handler::Handler;
+pub use protocol::{JsonRpcError, JsonRpcRequest, JsonRpcResponse, error_codes};
+pub use server::{ServerError, serve_stdio};
+pub use tools::ToolDefinition;
