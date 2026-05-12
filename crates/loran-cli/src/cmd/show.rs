@@ -8,7 +8,10 @@
 use std::io::Write as _;
 use std::process::ExitCode;
 
-use loran_core::{BodyBlock, BundledPagesIngestor, IntroBlock, ShowResult, resolve_show};
+use loran_core::{
+    BodyBlock, BundledPagesIngestor, IntroBlock, NoTldr, ShowResult, TldrCache, TldrLookup,
+    resolve_show_with_tldr,
+};
 use loran_index::{Index, Ingestor};
 use loran_pages::Page;
 use loran_render::render_text;
@@ -73,7 +76,17 @@ pub(crate) fn run(cli: &Cli, args: &ShowArgs) -> ExitCode {
         }
     };
 
-    match resolve_show(&index, &args.tool) {
+    // Resolve the tldr cache: use the real `TldrCache` rooted under
+    // `$XDG_CACHE_HOME/loran/tldr/extracted/` when one is available,
+    // otherwise fall through with a `NoTldr` stub. We avoid an
+    // expensive read at handler entry — `TldrCache::lookup` only
+    // touches disk if `resolve_show_with_tldr` actually calls it.
+    let tldr: Box<dyn TldrLookup> = match TldrCache::with_default_path() {
+        Some(cache) => Box::new(cache),
+        None => Box::new(NoTldr),
+    };
+
+    match resolve_show_with_tldr(&index, &args.tool, tldr.as_ref()) {
         ShowResult::IndexHit { page, intro, body } => emit_hit(cli, &page, intro, body),
         ShowResult::NoEntry { tool, hint } => emit_no_entry(cli, &tool, &hint),
     }
