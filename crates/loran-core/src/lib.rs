@@ -27,6 +27,8 @@ mod extract;
 mod fetch;
 mod find;
 mod help;
+mod meta;
+mod pipeline;
 mod search;
 mod show;
 mod signing;
@@ -42,6 +44,12 @@ pub use find::{FindResult, resolve_find};
 pub use help::{
     HELP_TIMEOUT, HelpError, HelpFlag, HelpOpts, HelpResult, PagerSource, capture_help,
     resolve_pager,
+};
+pub use meta::{MetaError, SourceMeta, SourceMetaFile, SourceMetaStore};
+pub use pipeline::{
+    PUBLISHER_PAGES_MANIFEST_URL, PUBLISHER_PAGES_SIG_URL, PUBLISHER_PAGES_TARBALL_URL,
+    PUBLISHER_PUBLIC_KEY, SOURCE_UPSTREAM_PAGES, UpdateError, UpdateOpts, UpdateOutcome,
+    default_pages_target, update_pages,
 };
 pub use search::{ScoredMatch, SearchResult, resolve_search};
 pub use show::{BodyBlock, IntroBlock, ShowResult, resolve_show};
