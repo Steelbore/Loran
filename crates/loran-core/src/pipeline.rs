@@ -33,7 +33,7 @@
 
 use std::path::Path;
 
-use crate::extract::{ExtractError, extract_tarball};
+use crate::extract::{ExtractError, extract_tarball, extract_zip};
 use crate::fetch::{FetchClient, FetchError, FetchOutcome};
 use crate::meta::{MetaError, SourceMetaStore};
 use crate::signing::{SignError, verify};
@@ -41,6 +41,13 @@ use crate::signing::{SignError, verify};
 /// Canonical name for the upstream Steelbore pages source. Used as the
 /// key in `sources.toml` and the JSON `data.source` field.
 pub const SOURCE_UPSTREAM_PAGES: &str = "upstream-pages";
+
+/// Canonical name for the tldr-pages mirror.
+pub const SOURCE_TLDR_PAGES: &str = "tldr-pages";
+
+/// tldr-pages archive URL (Spec §11). The archive is unsigned — no
+/// minisign step.
+pub const TLDR_PAGES_URL: &str = "https://tldr-pages.github.io/assets/tldr.zip";
 
 /// Publisher manifest URL.
 ///
@@ -231,8 +238,118 @@ pub fn default_pages_target() -> Option<std::path::PathBuf> {
     dirs::data_dir().map(|d| d.join("loran").join("pages"))
 }
 
+/// Canonical tldr-pages extracted-tree target:
+/// `$XDG_CACHE_HOME/loran/tldr/extracted/` (Spec §5).
+#[must_use]
+pub fn default_tldr_target() -> Option<std::path::PathBuf> {
+    dirs::cache_dir().map(|d| d.join("loran").join("tldr").join("extracted"))
+}
+
 #[allow(dead_code)] // helper for callers wiring sub-phase 2B+
 fn _data_dir_unused(_p: &Path) {}
+
+/// Caller-supplied knobs for [`update_tldr`].
+///
+/// Unlike [`UpdateOpts`], this carries no `signature_url` or
+/// `public_key` because tldr-pages doesn't sign its archive (Spec §11).
+/// The pipeline still applies the body-size limit from
+/// [`crate::FetchClient`] and the path-traversal protection inside
+/// [`extract_zip`].
+#[derive(Debug, Clone)]
+pub struct UpdateTldrOpts {
+    /// Override the zip URL.
+    pub archive_url: String,
+    /// Where to install the extracted tree. Typically
+    /// `$XDG_CACHE_HOME/loran/tldr/extracted/`.
+    pub target_dir: std::path::PathBuf,
+    /// Source name for the meta-store record. Defaults to
+    /// `"tldr-pages"`.
+    pub source_name: String,
+    /// Plan but don't install.
+    pub dry_run: bool,
+    /// Ignore the cached `ETag` and re-fetch unconditionally.
+    pub force_refresh: bool,
+}
+
+impl UpdateTldrOpts {
+    #[must_use]
+    pub fn default_publisher(target_dir: impl Into<std::path::PathBuf>) -> Self {
+        Self {
+            archive_url: TLDR_PAGES_URL.to_owned(),
+            target_dir: target_dir.into(),
+            source_name: SOURCE_TLDR_PAGES.to_owned(),
+            dry_run: false,
+            force_refresh: false,
+        }
+    }
+}
+
+/// Refresh the tldr-pages mirror.
+///
+/// Pipeline (no minisign step — tldr-pages doesn't sign):
+///
+/// 1. Read the previous `ETag` from `meta_store` for `tldr-pages`.
+/// 2. `client.fetch_bytes(archive_url, prev_etag)` — short-circuits to
+///    [`UpdateOutcome::NotModified`] on 304.
+/// 3. `extract_zip(bytes, target_dir)` — atomic install with path-
+///    traversal protection.
+/// 4. Update `meta_store` with the new `ETag` + `fetched_at`. (No
+///    version: tldr-pages doesn't ship a manifest.)
+///
+/// On `opts.dry_run = true`, steps 1–2 run and the call returns
+/// [`UpdateOutcome::DryRun`] with an empty version field.
+pub fn update_tldr(
+    client: &FetchClient,
+    meta_store: &SourceMetaStore,
+    opts: &UpdateTldrOpts,
+) -> Result<UpdateOutcome, UpdateError> {
+    let meta_file = meta_store.load()?;
+    let prev_etag = if opts.force_refresh {
+        None
+    } else {
+        meta_file
+            .sources
+            .get(&opts.source_name)
+            .and_then(|m| m.etag.as_deref())
+    };
+
+    let bytes_outcome = client.fetch_bytes(&opts.archive_url, prev_etag)?;
+    let bytes = match bytes_outcome {
+        FetchOutcome::NotModified => return Ok(UpdateOutcome::NotModified),
+        FetchOutcome::Fresh(b) => b,
+    };
+
+    // tldr-pages doesn't publish a version. Use a fingerprint of the
+    // archive bytes as a stand-in so the meta-store record can
+    // distinguish refreshes.
+    let synthetic_version = format!("sha256:{}", crate::sha256_hex(&bytes));
+
+    if opts.dry_run {
+        return Ok(UpdateOutcome::DryRun {
+            version: synthetic_version,
+            etag: String::new(), // no ETag inspection without a real fetch this round
+        });
+    }
+
+    extract_zip(&bytes, &opts.target_dir)?;
+
+    let now = jiff::Timestamp::now();
+    let source_name = opts.source_name.clone();
+    let synth = synthetic_version.clone();
+    meta_store.update_source(&source_name, move |m| {
+        // We don't surface the server's ETag because fetch_bytes doesn't
+        // return headers in this version; the synthetic version field
+        // doubles as the cache invalidator.
+        m.etag = Some(synth.clone());
+        m.version = Some(synth);
+        m.fetched_at = Some(now);
+    })?;
+
+    Ok(UpdateOutcome::Updated {
+        version: synthetic_version,
+        etag: String::new(),
+    })
+}
 
 #[cfg(test)]
 mod tests {

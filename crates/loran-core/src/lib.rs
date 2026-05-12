@@ -32,11 +32,12 @@ mod pipeline;
 mod search;
 mod show;
 mod signing;
+mod tldr;
 
 pub use bundled::BundledPagesIngestor;
 pub use cache::{CACHE_FORMAT_VERSION, Cache, CacheError};
 pub use categories::{Categories, CategoryEntry, bundled_categories};
-pub use extract::{ExtractError, extract_tarball};
+pub use extract::{ExtractError, extract_tarball, extract_zip};
 pub use fetch::{
     DEFAULT_BODY_LIMIT_BYTES, FetchClient, FetchError, FetchOutcome, Manifest, sha256_hex,
 };
@@ -48,9 +49,11 @@ pub use help::{
 pub use meta::{MetaError, SourceMeta, SourceMetaFile, SourceMetaStore};
 pub use pipeline::{
     PUBLISHER_PAGES_MANIFEST_URL, PUBLISHER_PAGES_SIG_URL, PUBLISHER_PAGES_TARBALL_URL,
-    PUBLISHER_PUBLIC_KEY, SOURCE_UPSTREAM_PAGES, UpdateError, UpdateOpts, UpdateOutcome,
-    default_pages_target, update_pages,
+    PUBLISHER_PUBLIC_KEY, SOURCE_TLDR_PAGES, SOURCE_UPSTREAM_PAGES, TLDR_PAGES_URL, UpdateError,
+    UpdateOpts, UpdateOutcome, UpdateTldrOpts, default_pages_target, default_tldr_target,
+    update_pages, update_tldr,
 };
 pub use search::{ScoredMatch, SearchResult, resolve_search};
 pub use show::{BodyBlock, IntroBlock, ShowResult, resolve_show};
 pub use signing::{SignError, verify as verify_minisign};
+pub use tldr::{DEFAULT_PLATFORMS, NoTldr, TldrCache, TldrLookup};

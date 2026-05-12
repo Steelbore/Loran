@@ -65,9 +65,10 @@ is-terminal = "0.4"
 #   - postcard: compact binary cache for the Index (WP-P2.01).
 #   - dirs: XDG_CACHE_HOME / DATA / CONFIG resolution (WP-P2.01).
 #   - ureq + rustls: tarball / manifest fetch (WP-P2.07).
-#   - tar + flate2: atomic extraction (WP-P2.08).
+#   - tar + flate2: atomic gzip-tar extraction (WP-P2.08).
 #   - minisign-verify: ed25519 signature verification (WP-P2.09).
 #   - sha2: tarball hash check (WP-P2.08).
+#   - zip: tldr-pages archive extraction (WP-P2.11).
 postcard = { version = "1", features = ["alloc"] }
 dirs = "6"
 ureq = { version = "3", default-features = false, features = ["rustls"] }
@@ -75,6 +76,7 @@ tar = "0.4"
 flate2 = "1"
 minisign-verify = "0.2"
 sha2 = "0.10"
+zip = { version = "2", default-features = false, features = ["deflate"] }
 
 # Test-only deps (dev-dependencies in member crates).
 assert_cmd = "2"

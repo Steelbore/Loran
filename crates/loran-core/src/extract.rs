@@ -1,27 +1,41 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2026 Mohamed Hammad
 
-//! Atomic gzipped-tarball extraction for the `loran update` pipeline.
+//! Atomic archive extraction for the `loran update` pipeline.
 //!
-//! Per Spec §11 the catalog is shipped as a single `.tar.gz`. This
-//! module decodes the gzip stream, unpacks the tar entries into a
-//! sibling temp directory, and atomically renames the temp directory
-//! over the target so concurrent readers either see the previous
-//! catalog or the new one — never a partially-extracted tree.
+//! Two archive formats are supported:
 //!
-//! ## Safety against malicious tarballs
+//! - **gzipped tarball** ([`extract_tarball`]) — the Steelbore upstream
+//!   pages format per Spec §11. Decoded with `flate2::GzDecoder` →
+//!   `tar::Archive`.
+//! - **zip** ([`extract_zip`]) — the tldr-pages format per Spec §11.
+//!   Decoded with the `zip` crate.
 //!
-//! - **Path traversal:** every entry's path is canonicalised by the
-//!   [`tar`] crate's `unpack_in` against the temp root; entries that
-//!   would escape (`..`, absolute, symlinks pointing outside) are
-//!   rejected before any file is written.
-//! - **Bomb defence:** the upstream tarball has already passed the
-//!   `WP-P2.07` body-size limit and SHA-256 check. A signature
-//!   verification step (`WP-P2.09`) gates extraction at a higher
-//!   layer so a malicious unsigned tarball never reaches this code.
+//! Both formats share the staging + atomic-rename install logic in
+//! [`with_staging`]: each call creates a sibling `<target>.staging-<rand>`
+//! directory, runs the format-specific unpack into it, then atomically
+//! renames the staging directory over the target. The previous target
+//! (if any) is moved aside to `<target>.previous-<rand>` and removed
+//! after the swap succeeds. A failure during unpack cleans up the
+//! staging directory; a failure during rename restores the previous
+//! target so the system never ends up with no catalog.
+//!
+//! ## Safety against malicious archives
+//!
+//! - **Path traversal:** every entry's path is canonicalised against
+//!   the staging root. For tar, this is done by the `tar` crate's
+//!   `unpack` directly. For zip, [`extract_zip`] computes the resolved
+//!   path manually and rejects any entry whose normalised form would
+//!   escape (`..`, absolute paths, drive letters, …).
+//! - **Bomb defence:** upstream archives have already passed the
+//!   `WP-P2.07` body-size limit and a SHA-256 check before reaching
+//!   this layer; the signature verify step in `WP-P2.09` gates the
+//!   pages tarball at a higher layer. The tldr archive carries no
+//!   signature per Spec §11, but the body limit still applies.
 
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::io::{Read, Seek};
+use std::path::{Component, Path, PathBuf};
 
 use flate2::read::GzDecoder;
 use tar::Archive;
@@ -68,6 +82,100 @@ pub enum ExtractError {
 ///    target-move-aside but before the staging-rename leaves the
 ///    previous directory in place for caller inspection.
 pub fn extract_tarball(tarball: &[u8], target: &Path) -> Result<(), ExtractError> {
+    with_staging(target, |staging| {
+        let reader = GzDecoder::new(tarball);
+        let mut archive = Archive::new(reader);
+        archive.set_overwrite(true);
+        archive.unpack(staging).map_err(|err| {
+            if is_path_escape(&err) {
+                ExtractError::PathEscape(err.to_string())
+            } else {
+                ExtractError::Io(err)
+            }
+        })
+    })
+}
+
+/// Atomically extract a zip archive into `target`.
+///
+/// Mirrors [`extract_tarball`]'s staging+rename semantics. Path-
+/// traversal protection is hand-rolled (the `zip` crate doesn't enforce
+/// it for us): every entry's resolved path must be a descendant of the
+/// staging root, with no `..` parents or absolute roots in its
+/// components.
+pub fn extract_zip(zip_bytes: &[u8], target: &Path) -> Result<(), ExtractError> {
+    with_staging(target, |staging| {
+        let cursor = std::io::Cursor::new(zip_bytes);
+        let mut archive = zip::ZipArchive::new(cursor)
+            .map_err(|e| ExtractError::Io(std::io::Error::other(e.to_string())))?;
+        for i in 0..archive.len() {
+            let mut entry = archive
+                .by_index(i)
+                .map_err(|e| ExtractError::Io(std::io::Error::other(e.to_string())))?;
+            let Some(entry_path) = entry.enclosed_name() else {
+                return Err(ExtractError::PathEscape(format!(
+                    "zip entry name `{}` is not a safe relative path",
+                    entry.name()
+                )));
+            };
+            // Belt-and-braces re-check on the resolved path.
+            if !is_within_staging(&entry_path) {
+                return Err(ExtractError::PathEscape(format!(
+                    "zip entry resolves outside staging: `{}`",
+                    entry_path.display()
+                )));
+            }
+            let dest = staging.join(&entry_path);
+            if entry.is_dir() {
+                fs::create_dir_all(&dest)?;
+            } else {
+                if let Some(parent) = dest.parent() {
+                    fs::create_dir_all(parent)?;
+                }
+                let mut writer = fs::File::create(&dest)?;
+                copy_zip_entry(&mut entry, &mut writer)?;
+            }
+        }
+        Ok(())
+    })
+}
+
+/// Copy a zip entry's body into `writer`. Wraps `std::io::copy` so the
+/// caller can pass `&mut zip::read::ZipFile` without dealing with the
+/// reader-type plumbing inline.
+fn copy_zip_entry<R: Read, W: std::io::Write>(
+    reader: &mut R,
+    writer: &mut W,
+) -> Result<(), ExtractError> {
+    std::io::copy(reader, writer)
+        .map(|_| ())
+        .map_err(ExtractError::Io)
+}
+
+#[allow(dead_code)] // kept for potential future Seek-bearing zip backends
+fn _seek_typed<R: Read + Seek>(_r: &mut R) {}
+
+/// Reject `..`, absolute roots, and drive-letter prefixes in the
+/// resolved relative path.
+fn is_within_staging(path: &Path) -> bool {
+    for component in path.components() {
+        match component {
+            Component::ParentDir | Component::RootDir | Component::Prefix(_) => return false,
+            Component::CurDir | Component::Normal(_) => {}
+        }
+    }
+    true
+}
+
+/// Common staging + atomic-install scaffolding. The closure is
+/// responsible for the format-specific unpack and may return any
+/// [`ExtractError`] variant — typically [`ExtractError::Io`] or
+/// [`ExtractError::PathEscape`]. Errors are surfaced after the
+/// staging directory is cleaned up.
+fn with_staging<F>(target: &Path, unpack: F) -> Result<(), ExtractError>
+where
+    F: FnOnce(&Path) -> Result<(), ExtractError>,
+{
     let parent = target.parent().unwrap_or(Path::new("."));
     fs::create_dir_all(parent)?;
 
@@ -79,22 +187,11 @@ pub fn extract_tarball(tarball: &[u8], target: &Path) -> Result<(), ExtractError
     ));
     fs::create_dir_all(&staging)?;
 
-    // Unpack into the staging directory. The `tar` crate enforces
-    // path-traversal protection: entries whose absolute / `..`-bearing
-    // paths would escape `staging` are rejected at unpack time.
-    let reader = GzDecoder::new(tarball);
-    let mut archive = Archive::new(reader);
-    archive.set_overwrite(true);
-    if let Err(err) = archive.unpack(&staging) {
-        // Clean up partial staging directory.
+    if let Err(err) = unpack(&staging) {
         let _ = fs::remove_dir_all(&staging);
-        if is_path_escape(&err) {
-            return Err(ExtractError::PathEscape(err.to_string()));
-        }
-        return Err(ExtractError::Io(err));
+        return Err(err);
     }
 
-    // Atomic install.
     let previous = if target.exists() {
         let prev = parent.join(format!(
             "{}.previous-{}",
@@ -112,7 +209,6 @@ pub fn extract_tarball(tarball: &[u8], target: &Path) -> Result<(), ExtractError
     };
 
     if let Err(source) = fs::rename(&staging, target) {
-        // Restore the previous target if we moved it aside.
         if let Some(prev) = &previous {
             let _ = fs::rename(prev, target);
         }
@@ -123,7 +219,6 @@ pub fn extract_tarball(tarball: &[u8], target: &Path) -> Result<(), ExtractError
         });
     }
 
-    // Best-effort cleanup of the previous directory.
     if let Some(prev) = previous {
         let _ = fs::remove_dir_all(prev);
     }
@@ -151,12 +246,16 @@ fn is_path_escape(err: &std::io::Error) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use std::io::Write as _;
+
     use flate2::Compression;
     use flate2::write::GzEncoder;
     use tar::{Builder, Header};
     use tempfile::tempdir;
+    use zip::ZipWriter;
+    use zip::write::SimpleFileOptions;
 
-    use super::{ExtractError, extract_tarball};
+    use super::{ExtractError, extract_tarball, extract_zip};
 
     /// Build an in-memory `.tar.gz` whose entries are `(path, body)`
     /// pairs.
@@ -274,5 +373,88 @@ mod tests {
             leftovers.is_empty(),
             "success path must clean up .previous/.staging: {leftovers:?}"
         );
+    }
+
+    // ─── zip path ────────────────────────────────────────────────────
+
+    /// Build an in-memory zip from `(path, body)` pairs.
+    fn make_zip(entries: &[(&str, &[u8])]) -> Vec<u8> {
+        let buf: Vec<u8> = Vec::new();
+        let cursor = std::io::Cursor::new(buf);
+        let mut writer = ZipWriter::new(cursor);
+        let opts =
+            SimpleFileOptions::default().compression_method(zip::CompressionMethod::Deflated);
+        for (path, body) in entries {
+            writer.start_file(*path, opts).unwrap();
+            writer.write_all(body).unwrap();
+        }
+        writer.finish().unwrap().into_inner()
+    }
+
+    #[test]
+    fn extract_zip_round_trips_a_simple_archive() {
+        let dir = tempdir().unwrap();
+        let target = dir.path().join("tldr");
+        let archive = make_zip(&[
+            ("pages/common/cat.md", b"# cat\n\nConcatenate.\n"),
+            ("pages/linux/cat.md", b"# cat (linux)\n"),
+        ]);
+
+        extract_zip(&archive, &target).expect("extract zip");
+
+        let common = target.join("pages").join("common").join("cat.md");
+        assert!(common.is_file());
+        assert!(
+            std::fs::read_to_string(&common)
+                .unwrap()
+                .contains("Concatenate")
+        );
+        let linux = target.join("pages").join("linux").join("cat.md");
+        assert!(linux.is_file());
+    }
+
+    #[test]
+    fn extract_zip_cleans_up_staging_on_corrupt_payload() {
+        let dir = tempdir().unwrap();
+        let target = dir.path().join("tldr");
+        let _ = extract_zip(b"this is not a zip", &target);
+
+        let leftovers: Vec<_> = std::fs::read_dir(dir.path())
+            .unwrap()
+            .filter_map(Result::ok)
+            .map(|e| e.file_name().to_string_lossy().into_owned())
+            .filter(|n| n.contains(".staging-"))
+            .collect();
+        assert!(
+            leftovers.is_empty(),
+            "failed zip extract left .staging behind: {leftovers:?}"
+        );
+    }
+
+    #[test]
+    fn extract_zip_rejects_path_traversal_entry() {
+        // Hand-build a malicious zip entry whose path contains `..`.
+        let archive = make_zip(&[("../etc/passwd", b"x")]);
+        let dir = tempdir().unwrap();
+        let target = dir.path().join("tldr");
+        let result = extract_zip(&archive, &target);
+        match result {
+            Err(ExtractError::PathEscape(_)) => {}
+            other => panic!("expected PathEscape, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn extract_zip_replaces_existing_target_atomically() {
+        let dir = tempdir().unwrap();
+        let target = dir.path().join("tldr");
+        std::fs::create_dir_all(&target).unwrap();
+        std::fs::write(target.join("old.md"), b"stale").unwrap();
+
+        let archive = make_zip(&[("new.md", b"fresh")]);
+        extract_zip(&archive, &target).expect("extract");
+
+        assert!(target.join("new.md").is_file());
+        assert!(!target.join("old.md").exists(), "old.md must be replaced");
     }
 }

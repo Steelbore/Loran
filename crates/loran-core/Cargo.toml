@@ -31,6 +31,7 @@ toml = { workspace = true }
 ureq = { workspace = true }
 wait-timeout = { workspace = true }
 which = { workspace = true }
+zip = { workspace = true }
 
 [build-dependencies]
 loran-pages = { path = "../loran-pages" }
