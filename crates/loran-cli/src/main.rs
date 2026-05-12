@@ -48,12 +48,13 @@ fn main() -> ExitCode {
             Command::Find(args) => cmd::find::run(&cli, args),
             Command::Help(args) => cmd::help::run(&cli, args),
             Command::List(args) => cmd::list::run(&cli, args),
+            Command::New(args) => cmd::new::run(&cli, args),
             Command::Schema(args) => cmd::schema::run(&cli, args),
             Command::Search(args) => cmd::search::run(&cli, args),
             Command::Show(args) => cmd::show::run(&cli, args),
             Command::Update(args) => cmd::update::run(&cli, args),
             Command::Validate(args) => cmd::validate::run(&cli, args),
-            _ => {
+            Command::Mcp(_) => {
                 let name = cmd.name();
                 eprintln!(
                     "loran {name}: not yet implemented in this Phase 1 milestone. \
