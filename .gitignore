@@ -15,6 +15,11 @@ Cargo.lock.bak
 Chat.txt
 2026-*-this-session-is-being-continued-from-a-previous-c.txt
 
+# Agent context files — kept local, not redistributed via the repo.
+# Author your own AGENTS.md / CLAUDE.md per agent's conventions.
+AGENTS.md
+CLAUDE.md
+
 # Other agents
 .gemini/
 
