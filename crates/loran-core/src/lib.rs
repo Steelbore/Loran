@@ -21,6 +21,7 @@
 
 mod bundled;
 mod bundled_data;
+mod cache;
 mod categories;
 mod find;
 mod help;
@@ -28,6 +29,7 @@ mod search;
 mod show;
 
 pub use bundled::BundledPagesIngestor;
+pub use cache::{CACHE_FORMAT_VERSION, Cache, CacheError};
 pub use categories::{Categories, CategoryEntry, bundled_categories};
 pub use find::{FindResult, resolve_find};
 pub use help::{

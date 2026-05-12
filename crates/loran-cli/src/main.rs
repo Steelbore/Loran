@@ -19,6 +19,7 @@ mod color;
 mod envelope;
 mod exit;
 mod logging;
+mod summary;
 mod version;
 
 use std::process::ExitCode;

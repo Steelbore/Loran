@@ -15,6 +15,7 @@ readme.workspace = true
 
 [dependencies]
 loran-pages = { path = "../loran-pages" }
+serde = { workspace = true }
 thiserror = { workspace = true }
 walkdir = { workspace = true }
 

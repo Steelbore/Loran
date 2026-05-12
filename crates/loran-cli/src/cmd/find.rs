@@ -8,10 +8,31 @@ use std::process::ExitCode;
 
 use loran_core::{BundledPagesIngestor, FindResult, resolve_find};
 use loran_index::{Index, Ingestor};
+use serde::Serialize;
 
 use crate::cli::{Cli, FindArgs, Format};
 use crate::envelope::{Envelope, ErrorEnvelope, JsonEmitter};
 use crate::exit::{ErrorContext, ExitCode as LoranExit};
+use crate::summary::PageSummary;
+
+/// JSON projection of [`FindResult`] — replaces `Vec<Page>` with a
+/// `Vec<PageSummary>` so list-shaped output stays metadata-only.
+#[derive(Serialize)]
+struct FindData<'a> {
+    query: &'a str,
+    safe_alias_only: bool,
+    matches: Vec<PageSummary<'a>>,
+}
+
+impl<'a> From<&'a FindResult> for FindData<'a> {
+    fn from(result: &'a FindResult) -> Self {
+        Self {
+            query: result.query.as_str(),
+            safe_alias_only: result.safe_alias_only,
+            matches: result.matches.iter().map(PageSummary::from).collect(),
+        }
+    }
+}
 
 pub(crate) fn run(cli: &Cli, args: &FindArgs) -> ExitCode {
     let index = match build_index() {
@@ -61,7 +82,8 @@ fn emit_text(result: &FindResult) {
 }
 
 fn emit_json(result: &FindResult) {
-    let envelope = Envelope::new(format!("loran find {}", result.query), result);
+    let data = FindData::from(result);
+    let envelope = Envelope::new(format!("loran find {}", result.query), data);
     let _ = JsonEmitter::stdio().emit_data(&envelope);
 }
 

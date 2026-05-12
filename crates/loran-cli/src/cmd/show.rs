@@ -19,12 +19,49 @@ use crate::envelope::{Envelope, ErrorEnvelope, JsonEmitter};
 use crate::exit::{ErrorContext, ExitCode as LoranExit};
 
 /// `loran show` data payload — Spec §8 envelope shape.
+///
+/// Projects [`Page`] metadata explicitly (rather than via
+/// `#[serde(flatten)]`) so the nested `body: BodyBlock` field never
+/// collides with the raw `Page::body` markdown string.
 #[derive(Serialize)]
-struct ShowData {
-    #[serde(flatten)]
-    page: Page,
+struct ShowData<'a> {
+    name: &'a str,
+    category: &'a str,
+    summary: &'a str,
+    replaces: &'a [String],
+    safe_alias_for: &'a [String],
+    pairs_with: &'a [String],
+    official: Option<&'a str>,
+    tldr_page: Option<&'a str>,
+    tags: &'a [String],
+    written_in: Option<&'a str>,
+    language: Option<&'a str>,
+    since: Option<&'a str>,
+    aliases: &'a [String],
     intro: IntroBlock,
     body: BodyBlock,
+}
+
+impl<'a> ShowData<'a> {
+    fn from_parts(page: &'a Page, intro: IntroBlock, body: BodyBlock) -> Self {
+        Self {
+            name: &page.name,
+            category: &page.category,
+            summary: &page.summary,
+            replaces: &page.replaces,
+            safe_alias_for: &page.safe_alias_for,
+            pairs_with: &page.pairs_with,
+            official: page.official.as_deref(),
+            tldr_page: page.tldr_page.as_deref(),
+            tags: &page.tags,
+            written_in: page.written_in.as_deref(),
+            language: page.language.as_deref(),
+            since: page.since.as_deref(),
+            aliases: &page.aliases,
+            intro,
+            body,
+        }
+    }
 }
 
 pub(crate) fn run(cli: &Cli, args: &ShowArgs) -> ExitCode {
@@ -79,14 +116,7 @@ fn emit_hit_human(page: &Page, intro: &IntroBlock, body: &BodyBlock) {
 
 fn emit_hit_json(page: &Page, intro: IntroBlock, body: BodyBlock) {
     let command = format!("loran show {}", page.name);
-    let envelope = Envelope::new(
-        command,
-        ShowData {
-            page: page.clone(),
-            intro,
-            body,
-        },
-    );
+    let envelope = Envelope::new(command, ShowData::from_parts(page, intro, body));
     let _ = JsonEmitter::stdio().emit_data(&envelope);
 }
 

@@ -61,6 +61,21 @@ wait-timeout = "0.2"
 # TTY detection for the agent-env cascade (Phase 1B — loran-cli).
 is-terminal = "0.4"
 
+# Phase 2 (Billet) foundation:
+#   - postcard: compact binary cache for the Index (WP-P2.01).
+#   - dirs: XDG_CACHE_HOME / DATA / CONFIG resolution (WP-P2.01).
+#   - ureq + rustls: tarball / manifest fetch (WP-P2.07).
+#   - tar + flate2: atomic extraction (WP-P2.08).
+#   - minisign-verify: ed25519 signature verification (WP-P2.09).
+#   - sha2: tarball hash check (WP-P2.08).
+postcard = { version = "1", features = ["alloc"] }
+dirs = "6"
+ureq = { version = "3", default-features = false, features = ["rustls"] }
+tar = "0.4"
+flate2 = "1"
+minisign-verify = "0.2"
+sha2 = "0.10"
+
 # Test-only deps (dev-dependencies in member crates).
 assert_cmd = "2"
 predicates = "3"
@@ -94,6 +109,10 @@ missing_panics_doc = "allow"
 # Placeholder crates don't carry `keywords` / `categories` yet — re-enable
 # this lint per crate once each crate is publication-ready.
 cargo_common_metadata = "allow"
+# Phase 2 deps (postcard) bring in multiple `embedded-io` versions
+# through transitive paths we don't control. Allow until upstream
+# coalesces.
+multiple_crate_versions = "allow"
 
 [profile.release]
 lto = "thin"

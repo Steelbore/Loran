@@ -6,6 +6,7 @@
 use std::collections::BTreeMap;
 
 use loran_pages::Page;
+use serde::{Deserialize, Serialize};
 
 use crate::error::IndexError;
 
@@ -22,7 +23,7 @@ use crate::error::IndexError;
 /// references to `Page` values, keeping the index trivially `Clone`-able
 /// and avoiding self-referential lifetime gymnastics. Callers retrieve
 /// full `Page` data via [`Index::get`].
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[allow(clippy::struct_field_names)] // the `by_` prefix names the lookup axis
 pub struct Index {
     by_name: BTreeMap<String, Page>,

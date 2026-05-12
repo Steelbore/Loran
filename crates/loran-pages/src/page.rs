@@ -14,10 +14,20 @@ use serde::{Deserialize, Serialize};
 ///
 /// See [`crate`] for the parsing contract.
 ///
-/// `Serialize` is implemented so the resolution chain (`loran-core`) can
-/// drop `Page` values straight into the SFRS JSON envelope without
-/// projection — `data.body.page` in the `loran show` envelope is a `Page`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+/// `Serialize` + `Deserialize` are implemented so the resolution chain
+/// can drop `Page` values straight into the JSON envelope **and** the
+/// postcard binary cache (Phase 2 `loran-core::cache`). Callers that
+/// want a metadata-only projection (omitting the raw markdown body)
+/// build a DTO at their layer rather than asking `Page` to vary its
+/// serialised shape — see `loran-cli::cmd::show::ShowData` for the
+/// `loran show` envelope and `loran-cli::cmd::list::PageSummary` for
+/// the `loran list` array entries.
+///
+/// **Direct deserialisation bypasses [`Page::parse`]'s schema-validation
+/// invariants.** The cache layer only deserialises values written by a
+/// previously-validated serialise round-trip; external code paths
+/// should still go through `Page::parse`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Page {
     /// Canonical binary name, lower-kebab-case (Spec §6.1). Required.
     pub name: String,
@@ -82,14 +92,13 @@ pub struct Page {
     /// downstream renderers handle trimming according to their own
     /// presentation rules.
     ///
-    /// **Serialization:** skipped. When a `Page` is flattened into the
-    /// `loran show` envelope, the raw body is surfaced via
-    /// `data.body.body_md` (a `BodyBlock` in `loran-core`) — not at the
-    /// top level — so the structured payload's top-level shape matches
-    /// Spec §8 (metadata fields + nested `intro`/`body` objects).
-    /// `loran list`'s JSON output similarly carries only metadata,
-    /// keeping the list payload compact.
-    #[serde(skip_serializing)]
+    /// **Serialization shape:** the field is serde-`Serialize`d as
+    /// `"body"`, which collides with the nested `"body": BodyBlock` in
+    /// the `loran show` envelope. Output callers therefore project to
+    /// purpose-built DTOs (`ShowData`, `PageSummary`) rather than
+    /// flattening a `Page` directly. The postcard cache and any other
+    /// consumer that wants the full structured form keeps using `Page`
+    /// unmodified.
     pub body: String,
 }
 

@@ -13,6 +13,7 @@ use loran_pages::Page;
 use crate::cli::{Cli, Format, ListArgs};
 use crate::envelope::{Envelope, ErrorEnvelope, JsonEmitter};
 use crate::exit::{ErrorContext, ExitCode as LoranExit};
+use crate::summary::PageSummary;
 
 pub(crate) fn run(cli: &Cli, args: &ListArgs) -> ExitCode {
     let index = match build_index() {
@@ -63,8 +64,8 @@ fn filter_pages<'a>(index: &'a Index, args: &ListArgs) -> impl Iterator<Item = &
 }
 
 fn emit_json(pages: &[&Page]) {
-    let owned: Vec<Page> = pages.iter().map(|p| (*p).clone()).collect();
-    let envelope = Envelope::new("loran list", owned);
+    let summaries: Vec<PageSummary<'_>> = pages.iter().map(|p| PageSummary::from(*p)).collect();
+    let envelope = Envelope::new("loran list", summaries);
     let _ = JsonEmitter::stdio().emit_data(&envelope);
 }
 
