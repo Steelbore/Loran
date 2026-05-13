@@ -1,0 +1,97 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Mohamed Hammad
+#
+# One-shot release-binary workflow.
+#
+# Builds Loran from a specified tag against three Linux targets that
+# map to the supported Tier 1 CI matrix entries (gnu, musl, aarch64),
+# tarballs each binary with LICENSE + README, computes a SHA-256 sum,
+# and uploads everything to the matching GitHub Release. macOS and
+# FreeBSD are intentionally out of scope here: macOS is Tier 2
+# informational, and FreeBSD is cross-check-only (no sysroot for
+# linking).
+
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build binaries for (e.g. v0.3.0-bloom)'
+        required: true
+        default: 'v0.3.0-bloom'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: linux-gnu
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - label: linux-musl
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            apt: musl-tools
+          - label: linux-aarch64
+            runner: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+
+      - name: Install Rust toolchain (1.88.0) for ${{ matrix.target }}
+        uses: dtolnay/rust-toolchain@1.88.0
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install apt prerequisites
+        if: matrix.apt
+        run: sudo apt-get update && sudo apt-get install -y ${{ matrix.apt }}
+
+      - name: Cache Cargo registry + target
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: release-${{ matrix.target }}-${{ inputs.tag }}
+
+      - name: Build release binary
+        run: cargo build --release --target ${{ matrix.target }} -p loran
+
+      - name: Resolve version
+        id: version
+        run: |
+          v=$(cargo metadata --format-version=1 --no-deps \
+            | python3 -c 'import json,sys; data=json.load(sys.stdin); print(next(p["version"] for p in data["packages"] if p["name"]=="loran"))')
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
+      - name: Package
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          set -euo pipefail
+          stage="loran-${VERSION}-${TARGET}"
+          mkdir -p "staging/${stage}"
+          cp "target/${TARGET}/release/loran" "staging/${stage}/"
+          cp LICENSE README.md "staging/${stage}/"
+          tar -C staging -czf "${stage}.tar.gz" "${stage}"
+          sha256sum "${stage}.tar.gz" > "${stage}.tar.gz.sha256"
+
+      - name: Upload to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          stage="loran-${VERSION}-${TARGET}"
+          gh release upload "${{ inputs.tag }}" \
+            "${stage}.tar.gz" \
+            "${stage}.tar.gz.sha256" \
+            --clobber
