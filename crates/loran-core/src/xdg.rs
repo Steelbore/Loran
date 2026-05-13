@@ -46,7 +46,7 @@ fn env_path(key: &str) -> Option<PathBuf> {
 }
 
 // Integration coverage lives in the per-verb tests under
-// `crates/loran-cli/tests/`, which set `XDG_DATA_HOME` /
+// `crates/loran/tests/`, which set `XDG_DATA_HOME` /
 // `XDG_CACHE_HOME` to per-test tempdirs and assert the resulting
 // path on every platform in the CI matrix. Adding unit tests here
 // would require `unsafe { std::env::set_var(..) }` which this crate

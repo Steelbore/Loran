@@ -1,5 +1,5 @@
 ---
-source: crates/loran-cli/tests/snapshots.rs
+source: crates/loran/tests/snapshots.rs
 expression: normalise(&stdout)
 ---
 data-processing	Data processing	4

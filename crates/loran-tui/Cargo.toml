@@ -12,12 +12,14 @@ license.workspace = true
 repository.workspace = true
 homepage.workspace = true
 readme.workspace = true
+keywords = ["man", "help", "tldr", "tui", "ratatui"]
+categories = ["command-line-interface", "development-tools"]
 
 [dependencies]
 crossterm = { workspace = true }
-loran-core = { path = "../loran-core" }
-loran-index = { path = "../loran-index" }
-loran-pages = { path = "../loran-pages" }
+loran-core = { path = "../loran-core", version = "0.3.0" }
+loran-index = { path = "../loran-index", version = "0.3.0" }
+loran-pages = { path = "../loran-pages", version = "0.3.0" }
 pulldown-cmark = { workspace = true }
 ratatui = { workspace = true }
 thiserror = { workspace = true }

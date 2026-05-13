@@ -20,7 +20,7 @@ fn version_human_contains_attribution_block() {
         .arg("--version")
         .assert()
         .success()
-        .stdout(contains("loran 0.0.0"))
+        .stdout(contains("loran 0.3.0"))
         .stdout(contains(MAINTAINER_LINE))
         .stdout(contains(PROJECT_URL_LINE));
 }

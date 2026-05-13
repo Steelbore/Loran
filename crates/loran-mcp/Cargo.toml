@@ -12,11 +12,13 @@ license.workspace = true
 repository.workspace = true
 homepage.workspace = true
 readme.workspace = true
+keywords = ["man", "help", "mcp", "agent", "jsonrpc"]
+categories = ["api-bindings", "development-tools"]
 
 [dependencies]
-loran-core = { path = "../loran-core" }
-loran-index = { path = "../loran-index" }
-loran-pages = { path = "../loran-pages" }
+loran-core = { path = "../loran-core", version = "0.3.0" }
+loran-index = { path = "../loran-index", version = "0.3.0" }
+loran-pages = { path = "../loran-pages", version = "0.3.0" }
 schemars = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

@@ -925,8 +925,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5e5032e24019045c762d3c0f28f5b6b8bbf38563a65908389bf7978758920897"
 
 [[package]]
-name = "loran-cli"
-version = "0.0.0"
+name = "loran"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -953,7 +953,7 @@ dependencies = [
 
 [[package]]
 name = "loran-core"
-version = "0.0.0"
+version = "0.3.0"
 dependencies = [
  "criterion",
  "dirs",
@@ -980,7 +980,7 @@ dependencies = [
 
 [[package]]
 name = "loran-index"
-version = "0.0.0"
+version = "0.3.0"
 dependencies = [
  "loran-pages",
  "serde",
@@ -994,7 +994,7 @@ dependencies = [
 
 [[package]]
 name = "loran-mcp"
-version = "0.0.0"
+version = "0.3.0"
 dependencies = [
  "loran-core",
  "loran-index",
@@ -1008,7 +1008,7 @@ dependencies = [
 
 [[package]]
 name = "loran-pages"
-version = "0.0.0"
+version = "0.3.0"
 dependencies = [
  "schemars",
  "serde",
@@ -1018,18 +1018,18 @@ dependencies = [
 
 [[package]]
 name = "loran-render"
-version = "0.0.0"
+version = "0.3.0"
 dependencies = [
  "pulldown-cmark",
 ]
 
 [[package]]
 name = "loran-tldr"
-version = "0.0.0"
+version = "0.3.0"
 
 [[package]]
 name = "loran-tui"
-version = "0.0.0"
+version = "0.3.0"
 dependencies = [
  "crossterm",
  "loran-core",
@@ -2340,7 +2340,7 @@ dependencies = [
 
 [[package]]
 name = "xtask"
-version = "0.0.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
 ]

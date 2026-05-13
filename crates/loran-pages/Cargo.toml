@@ -12,6 +12,8 @@ license.workspace = true
 repository.workspace = true
 homepage.workspace = true
 readme.workspace = true
+keywords = ["man", "tldr", "markdown", "toml", "frontmatter"]
+categories = ["parser-implementations", "text-processing"]
 
 [dependencies]
 schemars = { workspace = true }

@@ -20,8 +20,8 @@ use serde::{Deserialize, Serialize};
 /// postcard binary cache (Phase 2 `loran-core::cache`). Callers that
 /// want a metadata-only projection (omitting the raw markdown body)
 /// build a DTO at their layer rather than asking `Page` to vary its
-/// serialised shape — see `loran-cli::cmd::show::ShowData` for the
-/// `loran show` envelope and `loran-cli::cmd::list::PageSummary` for
+/// serialised shape — see `loran::cmd::show::ShowData` for the
+/// `loran show` envelope and `loran::cmd::list::PageSummary` for
 /// the `loran list` array entries.
 ///
 /// **Direct deserialisation bypasses [`Page::parse`]'s schema-validation

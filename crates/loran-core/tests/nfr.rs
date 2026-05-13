@@ -9,7 +9,7 @@
 //! These tests time the resolution path directly (not the whole CLI
 //! binary spawn), so they bound the *algorithmic* cost rather than
 //! `cargo run` start-up overhead. The CLI itself is exercised by the
-//! integration tests in `loran-cli/tests/`.
+//! integration tests in `loran/tests/`.
 //!
 //! Thresholds are intentionally generous in debug builds (10x) because
 //! `cargo test` defaults to debug and we don't want spurious failures.

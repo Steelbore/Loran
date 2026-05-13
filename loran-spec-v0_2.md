@@ -95,16 +95,15 @@ loran/
 ├── CLAUDE.md                        # Claude Code-specific context
 ├── SKILL.md                         # capability surface for Steelbore Skills
 ├── crates/
-│   ├── loran-cli/                   # clap binary, dispatcher, exit codes
+│   ├── loran/                       # clap binary, dispatcher, exit codes (publishes as `loran` on crates.io)
 │   ├── loran-core/                  # orchestration, resolution chains
+│   │   └── pages/                   # bundled curated pages (built into binary; shipped in the `loran-core` crate tarball)
 │   ├── loran-index/                 # index builder + Ingestor trait
 │   ├── loran-pages/                 # page parser (TOML frontmatter + body)
 │   ├── loran-render/                # Markdown → terminal renderer
 │   ├── loran-tldr/                  # tldr tarball fetch + cache + lookup
 │   ├── loran-tui/                   # ratatui app (browse, detail, search)
 │   └── loran-mcp/                   # MCP server surface (Phase 3, read-only)
-├── pages/                           # bundled fallback pages (built into binary)
-│   └── …
 └── xtask/                           # build/release/index-validate helpers
 ```
 

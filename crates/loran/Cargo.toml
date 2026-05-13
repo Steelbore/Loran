@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2026 Mohamed Hammad
 
 [package]
-name = "loran-cli"
+name = "loran"
 description = "Loran — the Steelbore reference manual (CLI binary)."
 version.workspace = true
 authors.workspace = true
@@ -12,6 +12,8 @@ license.workspace = true
 repository.workspace = true
 homepage.workspace = true
 readme.workspace = true
+keywords = ["man", "help", "info", "tldr", "cli"]
+categories = ["command-line-utilities", "development-tools"]
 
 [[bin]]
 name = "loran"
@@ -24,12 +26,12 @@ dirs = { workspace = true }
 is-terminal = { workspace = true }
 jiff = { workspace = true }
 schemars = { workspace = true }
-loran-core = { path = "../loran-core" }
-loran-index = { path = "../loran-index" }
-loran-mcp = { path = "../loran-mcp" }
-loran-pages = { path = "../loran-pages" }
-loran-render = { path = "../loran-render" }
-loran-tui = { path = "../loran-tui" }
+loran-core = { path = "../loran-core", version = "0.3.0" }
+loran-index = { path = "../loran-index", version = "0.3.0" }
+loran-mcp = { path = "../loran-mcp", version = "0.3.0" }
+loran-pages = { path = "../loran-pages", version = "0.3.0" }
+loran-render = { path = "../loran-render", version = "0.3.0" }
+loran-tui = { path = "../loran-tui", version = "0.3.0" }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tracing = { workspace = true }

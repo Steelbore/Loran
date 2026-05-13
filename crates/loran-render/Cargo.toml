@@ -12,6 +12,8 @@ license.workspace = true
 repository.workspace = true
 homepage.workspace = true
 readme.workspace = true
+keywords = ["markdown", "rendering", "terminal", "tui", "cli"]
+categories = ["text-processing", "rendering"]
 
 [dependencies]
 pulldown-cmark = { workspace = true }

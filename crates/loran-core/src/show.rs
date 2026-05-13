@@ -4,7 +4,7 @@
 //! `loran show <tool>` resolution chain — curated-or-fail per Spec §4.1.
 //!
 //! There is no live `--help` fallback. If the tool is not in the index,
-//! the caller (the `loran-cli` `show` handler) must surface the
+//! the caller (the `loran` CLI's `show` handler) must surface the
 //! [`ShowResult::NoEntry`] hint and exit with `NOT_FOUND`. Live capture
 //! lives behind the separate `loran help` verb (Spec §2 decision #7).
 

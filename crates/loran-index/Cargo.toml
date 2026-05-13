@@ -12,9 +12,11 @@ license.workspace = true
 repository.workspace = true
 homepage.workspace = true
 readme.workspace = true
+keywords = ["man", "help", "info", "tldr", "index"]
+categories = ["parser-implementations", "development-tools"]
 
 [dependencies]
-loran-pages = { path = "../loran-pages" }
+loran-pages = { path = "../loran-pages", version = "0.3.0" }
 serde = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }

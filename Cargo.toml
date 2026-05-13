@@ -3,7 +3,7 @@
 
 [workspace]
 members = [
-    "crates/loran-cli",
+    "crates/loran",
     "crates/loran-core",
     "crates/loran-index",
     "crates/loran-pages",
@@ -16,7 +16,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "0.0.0"
+version = "0.3.0"
 authors = ["Mohamed Hammad <Mohamed.Hammad@Steelbore.com>"]
 edition = "2024"
 rust-version = "1.88"
@@ -58,7 +58,7 @@ nucleo-matcher = "0.3"
 which = "7"
 wait-timeout = "0.2"
 
-# TTY detection for the agent-env cascade (Phase 1B — loran-cli).
+# TTY detection for the agent-env cascade (Phase 1B — loran).
 is-terminal = "0.4"
 
 # Phase 2 TUI (Billet — loran-tui, WP-P2.02 onwards).
