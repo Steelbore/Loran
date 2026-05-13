@@ -3,12 +3,17 @@
 
 //! Build script for `loran-core`.
 //!
-//! Walks the workspace-root `pages/` directory, validates every
-//! `*.md` file via [`loran_pages::Page::parse`] at compile time
+//! Walks the in-crate `pages/` directory (sibling to `src/`), validates
+//! every `*.md` file via [`loran_pages::Page::parse`] at compile time
 //! (Spec §6.1 fail-loud policy: a malformed bundled page must fail
 //! the build, never silently land in a shipped binary), and emits a
 //! generated `bundled_pages.rs` into `OUT_DIR` that the runtime
 //! [`crate::BundledPagesIngestor`] reads via `include_str!`.
+//!
+//! Pages live inside `crates/loran-core/pages/` rather than at the
+//! workspace root so they ship in the `loran-core` crate tarball when
+//! `cargo publish` packages this crate. (Workspace-root assets are not
+//! included by `cargo package` since they live outside the crate dir.)
 //!
 //! [`crate::BundledPagesIngestor`]: loran_core::BundledPagesIngestor
 
@@ -17,7 +22,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 fn main() {
-    let pages_dir = workspace_root().join("pages");
+    let pages_dir = manifest_dir().join("pages");
     println!("cargo:rerun-if-changed={}", pages_dir.display());
 
     let entries = collect_md_files(&pages_dir);
@@ -70,16 +75,10 @@ fn main() {
         .unwrap_or_else(|e| panic!("writing {}: {e}", out_path.display()));
 }
 
-fn workspace_root() -> PathBuf {
-    // CARGO_MANIFEST_DIR points at crates/loran-core/. Going up two
-    // levels lands at the workspace root.
+fn manifest_dir() -> PathBuf {
     let manifest_dir =
         std::env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR set by cargo");
     PathBuf::from(manifest_dir)
-        .parent()
-        .and_then(Path::parent)
-        .expect("crate dir has a workspace root parent")
-        .to_path_buf()
 }
 
 fn collect_md_files(root: &Path) -> Vec<PathBuf> {

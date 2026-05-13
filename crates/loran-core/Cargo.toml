@@ -14,6 +14,14 @@ homepage.workspace = true
 readme.workspace = true
 keywords = ["man", "help", "info", "tldr", "agent"]
 categories = ["development-tools", "api-bindings"]
+include = [
+    "src/**/*.rs",
+    "build.rs",
+    "benches/**/*.rs",
+    "pages/**/*.md",
+    "pages/categories.toml",
+    "Cargo.toml",
+]
 
 [dependencies]
 loran-pages = { path = "../loran-pages", version = "0.3.0" }
