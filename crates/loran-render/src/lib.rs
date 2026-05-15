@@ -7,7 +7,7 @@
 //!
 //! v1 ships a single mode: ANSI-free plain text suitable for any
 //! POSIX terminal **and** for piping into `grep` / `awk` / `cut` / `sed`
-//! (PRD quality goal Q-03, NFR-050). TUI rendering with the Steelbore
+//! (PRD quality goal Q-03, NFR-050). TUI rendering with the Spacecraft Software
 //! palette is deferred to Phase 2 (Billet).
 //!
 //! Output rules (Spec §10, kept minimal so the same renderer can drive
@@ -20,7 +20,7 @@
 //! - Lists are emitted with `- ` bullets, with two spaces of
 //!   indentation per nesting level. Numbered lists are still bullet-
 //!   formatted; numerical ordering is not preserved in v1 because the
-//!   Steelbore catalog content does not rely on it.
+//!   Spacecraft Software catalog content does not rely on it.
 //! - Code blocks indent every contained line by four spaces. Fence
 //!   info-strings are dropped.
 //! - Inline code becomes `` `text` ``.

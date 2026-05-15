@@ -220,7 +220,7 @@ category = \"file-listing\"
 replaces = [\"ls\"]
 safe_alias_for = []
 pairs_with = [\"bat\", \"fd\"]
-summary = \"Modern ls replacement. Steelbore default for file listing.\"
+summary = \"Modern ls replacement. Spacecraft Software default for file listing.\"
 official = \"https://eza.rocks\"
 tldr_page = \"eza\"
 written_in = \"rust\"
@@ -229,9 +229,9 @@ tags = [\"filesystem\", \"tui-friendly\"]
 aliases = [\"exa\"]
 +++
 
-## Steelbore Notes
+## Spacecraft Software Notes
 
-eza is the Steelbore-canonical file lister.
+eza is the Spacecraft Software-canonical file lister.
 ";
         let page = Page::parse(src).expect("full-schema page must parse");
         assert_eq!(page.name, "eza");
@@ -244,7 +244,7 @@ eza is the Steelbore-canonical file lister.
         assert_eq!(page.since.as_deref(), Some("bravais@0.1"));
         assert_eq!(page.tags, vec!["filesystem", "tui-friendly"]);
         assert_eq!(page.aliases, vec!["exa"]);
-        assert!(page.body.starts_with("\n## Steelbore Notes"));
+        assert!(page.body.starts_with("\n## Spacecraft Software Notes"));
     }
 
     #[test]

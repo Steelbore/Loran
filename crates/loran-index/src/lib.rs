@@ -14,7 +14,7 @@
 //! ([`MarkdownPagesIngestor`], which walks a directory of `*.md`
 //! files); Phase 3 will add a `DescribeIngestor` that synthesises
 //! entries by invoking `<tool> describe --json` against SFRS-compliant
-//! Steelbore CLIs on `$PATH`.
+//! Spacecraft Software CLIs on `$PATH`.
 //!
 //! ## Failure policy
 //!

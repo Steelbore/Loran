@@ -1,7 +1,7 @@
 +++
 name = "rg"
 category = "text-search"
-summary = "ripgrep — recursively search files for a regex pattern. The Steelbore default."
+summary = "ripgrep — recursively search files for a regex pattern. The Spacecraft Software default."
 replaces = ["grep"]
 safe_alias_for = []
 pairs_with = ["fd", "bat"]
@@ -13,9 +13,9 @@ tags = ["search", "regex"]
 aliases = ["ripgrep"]
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`rg` is the canonical Steelbore replacement for `grep`. It is dramatically faster than `grep -r` on real codebases, honours `.gitignore` by default, and has a more ergonomic default flag set.
+`rg` is the canonical Spacecraft Software replacement for `grep`. It is dramatically faster than `grep -r` on real codebases, honours `.gitignore` by default, and has a more ergonomic default flag set.
 
 `safe_alias_for` is empty: `rg`'s defaults (recursive, gitignore-aware, hidden-file-skipping) differ enough from `grep`'s defaults that `alias grep=rg` will silently change the meaning of shell scripts. Use `rg` explicitly; keep `grep` for `grep`-flavour invocations.
 

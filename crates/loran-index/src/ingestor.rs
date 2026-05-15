@@ -18,8 +18,8 @@ use crate::error::IngestError;
 /// Future implementations (Phase 3):
 ///
 /// - `DescribeIngestor` — invokes `<tool> describe --json` against
-///   SFRS-compliant Steelbore binaries on `$PATH` and synthesises
-///   baseline entries. Lets the Steelbore ecosystem self-document by
+///   SFRS-compliant Spacecraft Software binaries on `$PATH` and synthesises
+///   baseline entries. Lets the Spacecraft Software ecosystem self-document by
 ///   default; curated pages overlay on top where they exist.
 pub trait Ingestor {
     /// Produce every page this source can produce, in unspecified order.

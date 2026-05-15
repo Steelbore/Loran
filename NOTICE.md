@@ -21,11 +21,11 @@ This restates and is bound by section 16 of the GNU General Public License v3.
 
 ## Posture
 
-Loran is a personal hobby project per [Steelbore Standard v1.1 §5.1](https://Steelbore.com/standard/). There is no service-level commitment, no guaranteed response time, no support channel beyond best-effort communication with the maintainer, and no roadmap obligation. Forks are encouraged. Contributions are welcome but acceptance is at the maintainer's sole discretion (Standard §5.4).
+Loran is a personal hobby project per [Spacecraft Software Standard v1.1 §5.1](https://SpacecraftSoftware.org/standard/). There is no service-level commitment, no guaranteed response time, no support channel beyond best-effort communication with the maintainer, and no roadmap obligation. Forks are encouraged. Contributions are welcome but acceptance is at the maintainer's sole discretion (Standard §5.4).
 
 ## Trademarks
 
-"Steelbore" and "Loran" (in the project sense) refer to artifacts maintained by Mohamed Hammad. No trademark rights are claimed beyond the goodwill associated with the open-source release.
+"Spacecraft Software" and "Loran" (in the project sense) refer to artifacts maintained by Mohamed Hammad. No trademark rights are claimed beyond the goodwill associated with the open-source release.
 
 ## Cryptographic trust
 
@@ -33,4 +33,4 @@ Upstream tarballs distributed by the Loran publisher pipeline (Phase 2 and later
 
 ---
 
-*Forged in Steelbore.*
+*Forged in Spacecraft Software.*

@@ -65,7 +65,7 @@ fn full_document() -> Value {
     }
     json!({
         "$schema": DRAFT_2020_12,
-        "$id": "https://Loran.Steelbore.com/schema/v1.json",
+        "$id": "https://Loran.SpacecraftSoftware.org/schema/v1.json",
         "title": "Loran data-type registry",
         "description":
             "JSON Schema Draft 2020-12 covering every public Loran data type. \

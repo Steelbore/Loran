@@ -13,9 +13,9 @@ tags = ["text"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`sd` is Steelbore's preferred substitution tool for the 95 % case where you want literal find-and-replace without `sed`'s sublanguage. The argument order — `sd <find> <replace> <files...>` — reads left-to-right and never requires escaping a delimiter.
+`sd` is Spacecraft Software's preferred substitution tool for the 95 % case where you want literal find-and-replace without `sed`'s sublanguage. The argument order — `sd <find> <replace> <files...>` — reads left-to-right and never requires escaping a delimiter.
 
 `safe_alias_for` is empty: `sd`'s flags and stream semantics differ from `sed` enough that scripts using `sed` patterns will not work with `sd`.
 

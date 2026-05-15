@@ -13,9 +13,9 @@ tags = ["process", "monitoring"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`procs` is the Steelbore-canonical replacement for `ps`. It surfaces the same kernel data with sane column defaults, colour, fuzzy filtering, and a tree-view mode that `ps` requires extension flags to approximate.
+`procs` is the Spacecraft Software-canonical replacement for `ps`. It surfaces the same kernel data with sane column defaults, colour, fuzzy filtering, and a tree-view mode that `ps` requires extension flags to approximate.
 
 `safe_alias_for` is empty: `ps` has decades of stable BSD/SysV-style flag behaviour that scripts depend on. `procs` is the modern surface for interactive use; keep `ps` in scripts.
 

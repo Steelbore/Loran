@@ -15,7 +15,7 @@ This file records the Standard §14 + Spec §13 + PRD §19 compliance audits per
 **Commit at audit time**: branch `main`, post-Sub-phase 1E.
 **Catalog**: 8 seed pages spanning 7 categories (Spec M-01 target is 25+; partial — Phase 1B `WP-P1.03` content tail deferred).
 
-### Steelbore Standard v1.1 §14 + Spec §13 row-by-row
+### Spacecraft Software Standard v1.1 §14 + Spec §13 row-by-row
 
 | § | Requirement | Status | Evidence |
 |---|---|---|---|
@@ -29,11 +29,11 @@ This file records the Standard §14 + Spec §13 + PRD §19 compliance audits per
 | 6.1 | POSIX-compliant CLI | ✓ | Default text output is tab-separated, ANSI-free, and parseable with `cut`/`awk`/`grep`/`sed` alone. `--print0` flag wired (Phase 1B). No locale-dependent output. |
 | 7 | PFA: no tracking, minimal perms, local | ✓ | Zero telemetry. Filesystem reads only (within `$XDG_DATA_HOME`/`$XDG_CACHE_HOME`/`$XDG_CONFIG_HOME` semantics — Phase 2 enforces). Outbound HTTPS reserved for `loran update` (Phase 2). All data local. |
 | 8 | CUA + Vim bindings | N/A (Phase 1) | TUI deferred to Phase 2. Text-mode CLI has no key-bindings to honour either scheme. |
-| 9 | Steelbore palette; Void Navy bg | N/A (Phase 1) | TUI deferred to Phase 2. Phase 1 deliberately emits no ANSI escapes (PRD NFR-050). `loran help` capture frame is deliberately de-themed (monochrome ASCII) per Spec §2 decision #11 — brand boundary holds. |
+| 9 | Spacecraft Software palette; Void Navy bg | N/A (Phase 1) | TUI deferred to Phase 2. Phase 1 deliberately emits no ANSI escapes (PRD NFR-050). `loran help` capture frame is deliberately de-themed (monochrome ASCII) per Spec §2 decision #11 — brand boundary holds. |
 | 10 | Material Design / WCAG 2.1 AA | N/A | No GUI surface in v1. |
 | 11 | FOSS fonts | N/A | Terminal app, uses user's terminal font. |
 | 12 | ISO 8601 UTC, Z suffix, 24h, metric | ✓ | All timestamps in the JSON envelope, `live_help` captures, and stored data carry the `Z` suffix. Asserted by `debug_assert!` in `loran_cli::envelope::serialize_timestamp` and verified in every integration test that inspects a timestamp. `jiff` is the only time crate (no `chrono`, no `time`). |
-| 13 | Attribution (maintainer, URL, copyright) | ✓ | `--version` (human) prints `Maintained by Mohamed Hammad <…@…> / Project: https://Loran.Steelbore.com/ / Source: https://github.com/Steelbore/Loran`. `--version --json` carries the same as `metadata.maintainer` / `metadata.website` / `metadata.source`. `--help` long footer carries the same. README "Maintainer" section + copyright year present. |
+| 13 | Attribution (maintainer, URL, copyright) | ✓ | `--version` (human) prints `Maintained by Mohamed Hammad <…@…> / Project: https://Loran.SpacecraftSoftware.org/ / Source: https://github.com/Spacecraft-Software/Loran`. `--version --json` carries the same as `metadata.maintainer` / `metadata.website` / `metadata.source`. `--help` long footer carries the same. README "Maintainer" section + copyright year present. |
 
 ### Spec §13 compliance audit
 
@@ -51,7 +51,7 @@ All rows match Standard §14 above with no Spec-specific deviations.
 | G-06 catalog refresh via signed source | Phase 2 | `loran update` is a stub today; minisign-verified tarball fetch lands in WP-P2.07–WP-P2.10. |
 | G-07 overlay layers | Phase 2 | `BundledPagesIngestor` is the only ingester live in Phase 1. Overlay machinery + `MarkdownPagesIngestor`-on-overlays land in WP-P2.13. |
 | G-08 page authoring workflow | Phase 2 | `loran new` is a stub today; scaffolding lands in WP-P2.14/15. |
-| G-09 inter-CLI integration (`loran show <self>`) | Future | No other Steelbore CLI references `loran show <self>` in its `--help` yet — adoption is downstream. |
+| G-09 inter-CLI integration (`loran show <self>`) | Future | No other Spacecraft Software CLI references `loran show <self>` in its `--help` yet — adoption is downstream. |
 | G-10 JSON Schema for agent function-calling | Partial (Page only) | `loran schema --json` emits a Draft 2020-12 schema for `Page` with `meta.placeholder = true`. Full schema (every command's data shape + exit codes + envelope) lands in Phase 3 WP-P3.01. |
 | Q-01 sub-50 ms cold `show` | ✓ | NFR test asserts; release-mode passes well under the limit. |
 | Q-02 100 % Rust, no `unsafe` outside FFI | ✓ | Zero `unsafe` blocks in the entire workspace; all crates forbid or deny `unsafe_code`. |

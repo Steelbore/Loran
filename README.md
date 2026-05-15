@@ -5,23 +5,23 @@ SPDX-FileCopyrightText: 2026 Mohamed Hammad
 
 # Loran
 
-[![CI](https://github.com/Steelbore/Loran/actions/workflows/ci.yml/badge.svg)](https://github.com/Steelbore/Loran/actions/workflows/ci.yml)
+[![CI](https://github.com/Spacecraft-Software/Loran/actions/workflows/ci.yml/badge.svg)](https://github.com/Spacecraft-Software/Loran/actions/workflows/ci.yml)
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.88%2B-orange.svg)](rust-toolchain.toml)
 [![crates.io](https://img.shields.io/crates/v/loran.svg)](https://crates.io/crates/loran)
 
-> The Steelbore reference manual — agent-native from day one.
+> The Spacecraft Software reference manual — agent-native from day one.
 
-**Loran** is the canonical reference tool for Steelbore-based systems (Bravais, Ferrite OS, future distros). It is to Steelbore what `man` is to Unix and `info` is to GNU — a system-level handbook for every tool the system ships and recommends — with one critical difference: it is agent-native (`--json`, `schema`, stdio MCP) from the first commit.
+**Loran** is the canonical reference tool for Spacecraft Software-based systems (Bravais, Ferrite OS, future distros). It is to Spacecraft Software what `man` is to Unix and `info` is to GNU — a system-level handbook for every tool the system ships and recommends — with one critical difference: it is agent-native (`--json`, `schema`, stdio MCP) from the first commit.
 
-The name is a heritage engineering acronym: **LO**ng **RA**nge **N**avigation, the radio navigation infrastructure used by ships and aircraft from the 1940s until GPS retired it in 2010. Loran the tool is the precision reference grid for a Steelbore system.
+The name is a heritage engineering acronym: **LO**ng **RA**nge **N**avigation, the radio navigation infrastructure used by ships and aircraft from the 1940s until GPS retired it in 2010. Loran the tool is the precision reference grid for a Spacecraft Software system.
 
 ## Overview
 
-Loran answers three questions about the tool catalog of a Steelbore system:
+Loran answers three questions about the tool catalog of a Spacecraft Software system:
 
 1. **What tools are available here?** — categorised browse of the curated catalog.
-2. **What does this tool do, and what does it replace?** — Steelbore-curated intro, with tldr-pages fallback.
+2. **What does this tool do, and what does it replace?** — Spacecraft Software-curated intro, with tldr-pages fallback.
 3. **What replaces the legacy tool I know?** — reverse lookup (`loran find ls` → `eza`).
 
 A separate verb (`loran help <tool>`) captures live `--help` output from any binary on `$PATH`, rendered in a deliberately de-themed monochrome frame so curated content stays visually distinct from uncurated passthroughs.
@@ -32,9 +32,9 @@ A separate verb (`loran help <tool>`) captures live `--help` output from any bin
 
 | Tag | Codename | Scope | Tagged |
 |---|---|---|---|
-| [`v0.1.0-ingot`](https://github.com/Steelbore/Loran/releases/tag/v0.1.0-ingot) | Ingot | Text-mode binary; 6 read verbs; bundled catalog. | 2026-05-12 |
-| [`v0.2.0-billet`](https://github.com/Steelbore/Loran/releases/tag/v0.2.0-billet) | Billet | TUI; signed tarball updates; overlays; authoring. The 1.0-equivalent milestone. | 2026-05-12 |
-| [`v0.3.0-bloom`](https://github.com/Steelbore/Loran/releases/tag/v0.3.0-bloom) | Bloom | Read-only MCP; JSON Schema; SFRS auto-ingestion; key-rotation primitive. | 2026-05-12 |
+| [`v0.1.0-ingot`](https://github.com/Spacecraft-Software/Loran/releases/tag/v0.1.0-ingot) | Ingot | Text-mode binary; 6 read verbs; bundled catalog. | 2026-05-12 |
+| [`v0.2.0-billet`](https://github.com/Spacecraft-Software/Loran/releases/tag/v0.2.0-billet) | Billet | TUI; signed tarball updates; overlays; authoring. The 1.0-equivalent milestone. | 2026-05-12 |
+| [`v0.3.0-bloom`](https://github.com/Spacecraft-Software/Loran/releases/tag/v0.3.0-bloom) | Bloom | Read-only MCP; JSON Schema; SFRS auto-ingestion; key-rotation primitive. | 2026-05-12 |
 
 Twelve sub-commands functional, 26 curated pages bundled across 10 categories, full ratatui TUI, synchronous stdio JSON-RPC 2.0 MCP server, multi-platform CI matrix green (Linux gnu/musl/aarch64, FreeBSD cross-check, macOS arm64).
 
@@ -53,7 +53,7 @@ The crate is named `loran`; the installed binary is also `loran`.
 The host's `$CFLAGS` typically carries `-flto=auto`, which corrupts `ring`'s C objects and breaks linking. Build inside a clean gcc env via Nix:
 
 ```sh
-git clone https://github.com/Steelbore/Loran
+git clone https://github.com/Spacecraft-Software/Loran
 cd Loran
 nix shell nixpkgs#gcc -c env -u CFLAGS bash -c 'cargo install --path crates/loran'
 ```
@@ -75,7 +75,7 @@ Add `--json` to any read verb to get a structured envelope (per SFRS §6). Set `
 
 ## Features
 
-- **Two distinct verbs by design.** `loran show` is curated-or-fail (Steelbore palette + intro block); `loran help` is always-live `--help` capture in a deliberately de-themed monochrome frame. Brand cues stay reserved for curated content.
+- **Two distinct verbs by design.** `loran show` is curated-or-fail (Spacecraft Software palette + intro block); `loran help` is always-live `--help` capture in a deliberately de-themed monochrome frame. Brand cues stay reserved for curated content.
 - **Three-layer overlays** with field-by-field merge: `upstream < distro < user`. Distro layer resolves from `/etc/os-release` (`ID=bravais`, `ID=ferrite`, …) and is overridable with `--overlay <name>` or `LORAN_DISTRO_OVERRIDE`.
 - **Signed tarball updates** — minisign + ed25519, trust-pinned at build time, parallel-key rotation via `loran-core::signing::verify_any` (see [`OPERATIONS.md`](OPERATIONS.md)).
 - **Agent-native by default** — `--json` on every read verb, `loran schema` emits Draft 2020-12 JSON Schema for every public type, `loran mcp` exposes a read-only MCP stdio server with the five read verbs.
@@ -216,11 +216,11 @@ Contributions are welcome but acceptance is at the maintainer's discretion (Stan
 - Pre-commit gate green (see [Building from source](#building-from-source)).
 - See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full guide.
 
-Agents working on Loran should read [`AGENTS.md`](AGENTS.md) (tool-agnostic), [`CLAUDE.md`](CLAUDE.md) (Claude Code-specific), and [`SKILL.md`](SKILL.md) (Steelbore skill surface). The four governing documents (`loran-{prd,spec,plan,todo}-v0_X.md`) are canonical.
+Agents working on Loran should read [`AGENTS.md`](AGENTS.md) (tool-agnostic), [`CLAUDE.md`](CLAUDE.md) (Claude Code-specific), and [`SKILL.md`](SKILL.md) (Spacecraft Software skill surface). The four governing documents (`loran-{prd,spec,plan,todo}-v0_X.md`) are canonical.
 
 ## License & posture
 
-Loran is a **personal hobby project** under the Steelbore umbrella. Per Steelbore Standard v1.1 §5.1:
+Loran is a **personal hobby project** under Spacecraft Software. Per Spacecraft Software Standard v1.1 §5.1:
 
 | Aspect         | Stance                                                         |
 |----------------|----------------------------------------------------------------|
@@ -238,15 +238,15 @@ Loran is licensed under [GPL-3.0-or-later](LICENSE). SPDX headers on every sourc
 
 ## Maintainer
 
-**Mohamed Hammad** &lt;Mohamed.Hammad@Steelbore.com&gt;
+**Mohamed Hammad** &lt;Mohamed.Hammad@SpacecraftSoftware.org&gt;
 
-- Project: <https://Loran.Steelbore.com/>
-- Repository: <https://github.com/Steelbore/Loran>
-- Issues: <https://github.com/Steelbore/Loran/issues>
+- Project: <https://Loran.SpacecraftSoftware.org/>
+- Repository: <https://github.com/Spacecraft-Software/Loran>
+- Issues: <https://github.com/Spacecraft-Software/Loran/issues>
 - Crates: <https://crates.io/crates/loran>
 
 Copyright © 2026 Mohamed Hammad.
 
 ---
 
-*Forged in Steelbore.*
+*Forged in Spacecraft Software.*

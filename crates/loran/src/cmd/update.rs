@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2026 Mohamed Hammad
 
-//! `loran update` — refresh both the upstream Steelbore pages tarball
+//! `loran update` — refresh both the upstream Spacecraft Software pages tarball
 //! and the tldr-pages mirror in a single invocation.
 //!
 //! Composes the Sub-phase 2A/2B primitives via

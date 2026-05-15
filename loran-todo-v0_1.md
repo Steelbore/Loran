@@ -12,7 +12,7 @@ Copyright (c) 2026 Mohamed Hammad
 | **Version**     | 0.1.0 (Phase 0 + Phase 1 decomposed; Phase 2/3 stubbed)    |
 | **Date**        | 2026-05-11                                                  |
 | **Author**      | Mohamed Hammad                                              |
-| **Maintainer**  | Mohamed Hammad <Mohamed.Hammad@Steelbore.com>               |
+| **Maintainer**  | Mohamed Hammad <Mohamed.Hammad@SpacecraftSoftware.org>               |
 | **Copyright**   | (c) 2026 Mohamed Hammad                                     |
 | **License**     | GPL-3.0-or-later                                            |
 | **Plan**        | `loran-plan-v0_1.md`                                        |
@@ -53,7 +53,7 @@ This document is the operational checklist for building Loran. Each task is size
 
 `LOR-PXXX-NNN` where:
 
-- `LOR` — Loran project prefix (matches Steelbore convention)
+- `LOR` — Loran project prefix (matches Spacecraft Software convention)
 - `PXXX` — three-digit phase number (`P000` = Pre-Phase, `P001` = Ingot, `P002` = Billet, `P003` = Bloom)
 - `NNN` — three-digit sequential task number within the phase (zero-padded)
 
@@ -112,8 +112,8 @@ Update this table whenever the document is revised.
 **Sizing:** XS | **Critical Path:** No | **Plan §:** 4 | **Deps:** WP-P0.02
 
 - [x] **LOR-P000-013** — Author `AGENTS.md` listing every coding invariant: Rust-only, GPL-3.0-or-later + SPDX, run `cargo fmt && cargo clippy -- -D warnings && cargo test` before commit, no `unsafe` outside review, Nushell/Ion/POSIX-sh shells only (no Bash-isms), conventional-commits, DCO sign-off
-- [x] **LOR-P000-014** — Author `CLAUDE.md` referencing the four governing skills (`steelbore-standard`, `steelbore-cli-standard`, `steelbore-agentic-cli`, `rust-guidelines`) and the three governing documents (spec, PRD, plan)
-- [x] **LOR-P000-015** — Author `SKILL.md` with Loran capability-surface metadata for the Steelbore Skills system
+- [x] **LOR-P000-014** — Author `CLAUDE.md` referencing the four governing skills (`spacecraft-standard`, `spacecraft-cli-standard`, `spacecraft-agentic-cli`, `rust-guidelines`) and the three governing documents (spec, PRD, plan)
+- [x] **LOR-P000-015** — Author `SKILL.md` with Loran capability-surface metadata for the Spacecraft Software Skills system
 
 ### WP-P0.04 — Cargo workspace skeleton
 
@@ -234,16 +234,16 @@ Update this table whenever the document is revised.
 - [x] **LOR-P001-051** — Define `HelpError` enum: `BinaryNotFound`, `Timeout`, `SpawnFailed(io::Error)`, `AllFlagsFailed`
 - [x] **LOR-P001-052** — Implement PATH resolution in `loran-core/src/help.rs` using the `which` crate; reject anything that looks like a path (contains `/` or `\\`)
 - [x] **LOR-P001-053** — Implement subprocess spawn with `std::process::Command`, `argv = [tool_path, flag]`, no shell, no `arg("--help &&")` etc.
-- [x] **LOR-P001-054** — Implement the spec §4.2.1 pager-selection cascade: `opts.pager` override (`--pager <cmd>`, with `""` meaning "disable") → `$MANPAGER` → `$PAGER` → `bat -pp` if `which("bat").is_ok()` → `moor` if `which("moor").is_ok()` → `cat`. When `opts.skip_user_env_pager` is set (from the `--pager=loran` sentinel intercept), bypass the `$MANPAGER` and `$PAGER` steps. Set the resolved value on both `PAGER` and `MANPAGER` in the subprocess env. Clear `LESS` only when a Steelbore default-chain step (`bat -pp`, `moor`, or `cat`) fired; leave `LESS` untouched when honouring the user's pre-existing `$PAGER` / `$MANPAGER` so a user-tuned `LESS` (e.g. `-RFX`) still applies. Record which step won in `HelpResult.pager_source`.
+- [x] **LOR-P001-054** — Implement the spec §4.2.1 pager-selection cascade: `opts.pager` override (`--pager <cmd>`, with `""` meaning "disable") → `$MANPAGER` → `$PAGER` → `bat -pp` if `which("bat").is_ok()` → `moor` if `which("moor").is_ok()` → `cat`. When `opts.skip_user_env_pager` is set (from the `--pager=loran` sentinel intercept), bypass the `$MANPAGER` and `$PAGER` steps. Set the resolved value on both `PAGER` and `MANPAGER` in the subprocess env. Clear `LESS` only when a Spacecraft Software default-chain step (`bat -pp`, `moor`, or `cat`) fired; leave `LESS` untouched when honouring the user's pre-existing `$PAGER` / `$MANPAGER` so a user-tuned `LESS` (e.g. `-RFX`) still applies. Record which step won in `HelpResult.pager_source`.
 - [x] **LOR-P001-054a** — Surface `HelpResult.pager_command` and `HelpResult.pager_source` in the `--format json` envelope as `data.body.pager_command` and `data.body.pager_source` (FR-024a).
-- [x] **LOR-P001-054b** — Wire `--pager <cmd>` as a `loran help` sub-command flag in `loran-cli`. Two reserved sentinel values: `--pager=""` disables pagination (cat-equivalent); `--pager=loran` is intercepted at the CLI layer to set `HelpOpts.skip_user_env_pager = true` and pass `opts.pager = None`, forcing the Steelbore default chain (`bat -pp` → `moor` → `cat`). Document both sentinels in the `--help` text for `loran help`.
+- [x] **LOR-P001-054b** — Wire `--pager <cmd>` as a `loran help` sub-command flag in `loran-cli`. Two reserved sentinel values: `--pager=""` disables pagination (cat-equivalent); `--pager=loran` is intercepted at the CLI layer to set `HelpOpts.skip_user_env_pager = true` and pass `opts.pager = None`, forcing the Spacecraft Software default chain (`bat -pp` → `moor` → `cat`). Document both sentinels in the `--help` text for `loran help`.
 - [x] **LOR-P001-055** — Implement 5-second wall-clock timeout using thread + `try_wait()` polling or via `wait-timeout` crate; on overrun, `child.kill()` and return `HelpError::Timeout`
 - [x] **LOR-P001-056** — Implement retry sequence: try `--help` first; on non-zero exit or empty output, try `-h`; if still bad, try `help` (subcommand); prefer first non-empty success
 - [x] **LOR-P001-057** — Capture stdout + stderr separately; prefer stdout if non-empty, fall back to stderr
 - [x] **LOR-P001-058** — Record `captured_at` as `jiff::Timestamp::now()` and format as `YYYY-MM-DDTHH:MM:SSZ` for output
 - [x] **LOR-P001-059** — Implement `capture_help(tool: &str, opts: HelpOpts) -> Result<HelpResult, HelpError>` as the public entry point
 - [x] **LOR-P001-060** — Add unit tests using fixture shell scripts (e.g., `tests/fixtures/echo-help.sh`) that exercise timeout, retry, and capture paths
-- [x] **LOR-P001-060a** — Add unit tests covering every step of the pager cascade: explicit `--pager <cmd>` override, `--pager=""` disable, `--pager=loran` sentinel (asserts `$MANPAGER` / `$PAGER` are bypassed even when set), `$MANPAGER` precedence over `$PAGER`, `$PAGER` fallback, `bat -pp` Steelbore default when `bat` is on PATH, `moor` fallback when `bat` is absent but `moor` is present, and `cat` final fallback when both are absent. Each test asserts both the subprocess env (`PAGER` / `MANPAGER` / `LESS` values) and the `HelpResult.pager_source` enum.
+- [x] **LOR-P001-060a** — Add unit tests covering every step of the pager cascade: explicit `--pager <cmd>` override, `--pager=""` disable, `--pager=loran` sentinel (asserts `$MANPAGER` / `$PAGER` are bypassed even when set), `$MANPAGER` precedence over `$PAGER`, `$PAGER` fallback, `bat -pp` Spacecraft Software default when `bat` is on PATH, `moor` fallback when `bat` is absent but `moor` is present, and `cat` final fallback when both are absent. Each test asserts both the subprocess env (`PAGER` / `MANPAGER` / `LESS` values) and the `HelpResult.pager_source` enum.
 - [x] **LOR-P001-061** — Add unit tests that confirm path-traversal rejection (`loran help ../etc/passwd` → `BinaryNotFound`)
 
 ### WP-P1.06 — Markdown → terminal text renderer (`loran-render`, text mode)
@@ -335,7 +335,7 @@ Update this table whenever the document is revised.
 - [x] **LOR-P001-109** — Implement `loran help` handler in `loran-cli/src/cmd/help.rs`
 - [x] **LOR-P001-110** — Dispatch to `loran-core::capture_help`
 - [x] **LOR-P001-111** — Text mode: wrap captured output in monochrome ASCII frame with `LIVE OUTPUT — uncurated, captured from <tool> --help at <ISO 8601 UTC>` header
-- [x] **LOR-P001-112** — Ensure NO Steelbore palette tokens are used in the help frame (visual brand boundary)
+- [x] **LOR-P001-112** — Ensure NO Spacecraft Software palette tokens are used in the help frame (visual brand boundary)
 - [x] **LOR-P001-113** — JSON mode: emit envelope with `body.kind = "live_help"`, `body.captured_text`, `body.captured_at`
 - [x] **LOR-P001-114** — On `Timeout`: emit `ExitCode::LIVE_HELP_TIMEOUT = 9` with hint `loran new <tool> --edit`
 - [x] **LOR-P001-115** — Add integration tests with a fixture binary on PATH covering: happy path, retry (-h fallback), timeout, binary-not-found
@@ -556,4 +556,4 @@ This TODO is a living document. Versioning policy:
 
 ---
 
-*Forged in Steelbore.*
+*Forged in Spacecraft Software.*

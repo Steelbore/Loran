@@ -13,9 +13,9 @@ tags = ["http", "tui-friendly"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`xh` is Steelbore's default HTTP CLI. It is binary-compatible with most HTTPie command lines but boots in milliseconds, statically links, and ships colourful output with `bat`-like syntax highlighting on the response body.
+`xh` is Spacecraft Software's default HTTP CLI. It is binary-compatible with most HTTPie command lines but boots in milliseconds, statically links, and ships colourful output with `bat`-like syntax highlighting on the response body.
 
 `safe_alias_for` is empty because `curl` / `wget` argument grammars are utterly different; scripts that parse `curl -v` output would not understand `xh`.
 

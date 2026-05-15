@@ -17,7 +17,7 @@ ed25519 over a trust-pinned key baked into the binary).
 ## Audience
 
 - Loran release engineers: every section.
-- Steelbore Operations: §3 (emergency rotation).
+- Spacecraft Software Operations: §3 (emergency rotation).
 - Downstream operators (Bravais OS, Ferrite OS, …): §1.4 reading list
   so an in-the-wild compromise is recognisable from the user side.
 
@@ -60,7 +60,7 @@ or by editing the embedded constant set to a `Vec` of base64 strings.
   version against the [release advisories](#5-release-advisories) —
   a parallel-key window means a stale Loran has been left running past
   the cut-over.
-- A signed Steelbore release announcement is the only authoritative
+- A signed Spacecraft Software release announcement is the only authoritative
   source for the active publisher key. Operators should not import
   keys obtained any other way.
 
@@ -76,7 +76,7 @@ drops the outgoing key.
 1. Generate the new keypair with the upstream-blessed `minisign`
    binary (Nix-provided to avoid supply-chain drift):
    `nix shell nixpkgs#minisign -c minisign -G`
-2. Store the secret key in the Steelbore release vault. The public
+2. Store the secret key in the Spacecraft Software release vault. The public
    key is committed verbatim to a new release-notes draft.
 3. Open a tracking issue. Announce the planned cut-over date and the
    parallel-key window length (≥14 days recommended).
@@ -164,7 +164,7 @@ All publisher-key advisories — planned and emergency — are published
 to:
 
 1. The Loran GitHub repository's `Security` tab.
-2. The Steelbore release-notes feed.
+2. The Spacecraft Software release-notes feed.
 3. The Bravais OS and Ferrite OS distribution advisory channels for
    downstream amplification.
 

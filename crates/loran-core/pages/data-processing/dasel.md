@@ -13,9 +13,9 @@ tags = ["json", "yaml", "toml"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`dasel` is the Steelbore default when the format is YAML or TOML rather than JSON. One selector grammar works across JSON / YAML / TOML / XML, so you stop context-switching between `jaq` (JSON-only) and `yq` (YAML, with several incompatible forks).
+`dasel` is the Spacecraft Software default when the format is YAML or TOML rather than JSON. One selector grammar works across JSON / YAML / TOML / XML, so you stop context-switching between `jaq` (JSON-only) and `yq` (YAML, with several incompatible forks).
 
 ```sh
 dasel -f Cargo.toml '.package.name'

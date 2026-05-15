@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2026 Mohamed Hammad
 
-//! Steelbore palette tokens used by the TUI (Standard §9).
+//! Spacecraft Software palette tokens used by the TUI (Standard §9).
 //!
 //! The palette **only** applies to curated content; the `loran help`
 //! live-capture frame stays monochrome (Spec §2 decision #11). When
@@ -22,7 +22,7 @@ pub const FORGE_GLOW: Color = Color::Rgb(0xff, 0x6a, 0x00);
 pub const SLATE_IRON: Color = Color::Rgb(0x1f, 0x29, 0x37);
 
 /// Token set the TUI reads when colouring chrome and content. The
-/// [`Palette::full`] constructor returns the Steelbore palette;
+/// [`Palette::full`] constructor returns the Spacecraft Software palette;
 /// [`Palette::monochrome`] returns terminal-default values for the
 /// `NO_COLOR=1` cascade.
 #[derive(Debug, Clone, Copy)]
@@ -35,7 +35,7 @@ pub struct Palette {
 }
 
 impl Palette {
-    /// Steelbore palette (Standard §9).
+    /// Spacecraft Software palette (Standard §9).
     #[must_use]
     pub const fn full() -> Self {
         Self {
@@ -79,7 +79,7 @@ mod tests {
     use ratatui::style::Color;
 
     #[test]
-    fn full_palette_uses_steelbore_tokens() {
+    fn full_palette_uses_spacecraft_software_tokens() {
         let p = Palette::full();
         assert_eq!(p.background, super::VOID_NAVY);
         assert_eq!(p.foreground, super::MOLTEN_AMBER);

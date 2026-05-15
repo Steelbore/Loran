@@ -19,8 +19,8 @@ fn show_hit_text_mode_renders_intro_and_body() {
         .success()
         .stdout(contains("EZA"))
         .stdout(contains("Modern ls replacement"))
-        .stdout(contains("From Steelbore curation"))
-        .stdout(contains("STEELBORE NOTES"));
+        .stdout(contains("From Spacecraft Software curation"))
+        .stdout(contains("SPACECRAFT SOFTWARE NOTES"));
 }
 
 #[test]
@@ -48,7 +48,7 @@ fn show_hit_json_envelope_has_intro_and_body_blocks() {
         envelope
             .pointer("/data/intro/source")
             .and_then(|v| v.as_str()),
-        Some("steelbore")
+        Some("spacecraft software")
     );
     assert_eq!(
         envelope.pointer("/data/body/kind").and_then(|v| v.as_str()),
@@ -58,7 +58,7 @@ fn show_hit_json_envelope_has_intro_and_body_blocks() {
         envelope
             .pointer("/data/body/body_md")
             .and_then(|v| v.as_str())
-            .is_some_and(|b| b.contains("Steelbore notes")),
+            .is_some_and(|b| b.contains("Spacecraft Software notes")),
         "body.body_md should contain the page body"
     );
 

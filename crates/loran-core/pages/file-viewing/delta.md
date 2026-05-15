@@ -13,9 +13,9 @@ tags = ["git", "diff", "tui-friendly"]
 aliases = ["git-delta"]
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`delta` is the Steelbore-canonical viewer for any diff-shaped output — `git diff`, `git log -p`, `git show`, and even `diff --color`. It replaces nothing per se because the underlying `git` and `diff` binaries still produce the data; `delta` just renders it.
+`delta` is the Spacecraft Software-canonical viewer for any diff-shaped output — `git diff`, `git log -p`, `git show`, and even `diff --color`. It replaces nothing per se because the underlying `git` and `diff` binaries still produce the data; `delta` just renders it.
 
 Wire it into git globally:
 

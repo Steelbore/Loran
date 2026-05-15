@@ -13,9 +13,9 @@ tags = ["filesystem", "tui-friendly"]
 aliases = ["br"]
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`broot` is the Steelbore go-to when a directory tree is too large to skim with `eza --tree`. It opens a TUI, surfaces matches as you type, and can `cd` the parent shell to the selected directory via the `br` shell function it installs on first run.
+`broot` is the Spacecraft Software go-to when a directory tree is too large to skim with `eza --tree`. It opens a TUI, surfaces matches as you type, and can `cd` the parent shell to the selected directory via the `br` shell function it installs on first run.
 
 `safe_alias_for` is empty because `broot` is an interactive TUI and `tree` is a one-shot text emitter; the output formats are not interchangeable.
 

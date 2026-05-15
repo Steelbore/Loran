@@ -2,13 +2,14 @@
 // SPDX-FileCopyrightText: 2026 Mohamed Hammad
 
 //! Integration tests asserting the `--version` and `--help` surfaces
-//! match Steelbore Standard v1.1 §13.2 attribution requirements.
+//! match Spacecraft Software Standard v1.1 §13.2 attribution requirements.
 
 use assert_cmd::Command;
 use predicates::str::contains;
 
-const MAINTAINER_LINE: &str = "Maintained by Mohamed Hammad <Mohamed.Hammad@Steelbore.com>";
-const PROJECT_URL_LINE: &str = "Project: https://Loran.Steelbore.com/";
+const MAINTAINER_LINE: &str =
+    "Maintained by Mohamed Hammad <Mohamed.Hammad@SpacecraftSoftware.org>";
+const PROJECT_URL_LINE: &str = "Project: https://Loran.SpacecraftSoftware.org/";
 
 fn loran() -> Command {
     Command::cargo_bin("loran").expect("loran binary built")
@@ -20,7 +21,7 @@ fn version_human_contains_attribution_block() {
         .arg("--version")
         .assert()
         .success()
-        .stdout(contains("loran 0.3.0"))
+        .stdout(contains("loran 0.4.0"))
         .stdout(contains(MAINTAINER_LINE))
         .stdout(contains(PROJECT_URL_LINE));
 }
@@ -36,11 +37,11 @@ fn version_json_envelope_carries_metadata_maintainer_and_website() {
     assert_eq!(metadata.get("tool").and_then(|v| v.as_str()), Some("loran"));
     assert_eq!(
         metadata.get("maintainer").and_then(|v| v.as_str()),
-        Some("Mohamed Hammad <Mohamed.Hammad@Steelbore.com>")
+        Some("Mohamed Hammad <Mohamed.Hammad@SpacecraftSoftware.org>")
     );
     assert_eq!(
         metadata.get("website").and_then(|v| v.as_str()),
-        Some("https://Loran.Steelbore.com/")
+        Some("https://Loran.SpacecraftSoftware.org/")
     );
 
     let ts = metadata

@@ -37,7 +37,7 @@ pub enum PageError {
 
     /// `summary` exceeded the 120-character cap.
     ///
-    /// The Steelbore Standard requires summaries to fit cleanly into a
+    /// The Spacecraft Software Standard requires summaries to fit cleanly into a
     /// single terminal line on an 80-column display with padding for
     /// formatting — 120 characters is the published ceiling (Spec §6.1).
     #[error("`summary` is {actual_chars} characters; the limit is 120")]

@@ -13,11 +13,11 @@ tags = ["shell", "environment"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
 `direnv` keeps project secrets, language-version pins, and tool paths inside the project they belong to, without leaking into your global shell. When you `cd` into a directory whose `.envrc` you have approved (`direnv allow`), the variables become live; when you `cd` out, they vanish.
 
-Steelbore uses it to scope per-project `PATH` additions (Cargo target dirs, Nix profile bins, language version managers) and to load `.env` files without polluting the parent shell.
+Spacecraft Software uses it to scope per-project `PATH` additions (Cargo target dirs, Nix profile bins, language version managers) and to load `.env` files without polluting the parent shell.
 
 ## Recommended setup
 
@@ -27,7 +27,7 @@ direnv hook bash    >> ~/.bashrc      # or zsh / fish / nu
 ```
 
 ```bash
-# .envrc — Steelbore convention
+# .envrc — Spacecraft Software convention
 layout python 3.13
 PATH_add ./node_modules/.bin
 dotenv .env

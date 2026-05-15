@@ -28,7 +28,7 @@ use std::io::Write;
 
 use crate::cli::Cli;
 
-/// Known agent-runner env vars per `steelbore-agentic-cli` §3. Order
+/// Known agent-runner env vars per `spacecraft-agentic-cli` §3. Order
 /// matters: the first match wins when multiple variables are set.
 const AGENT_ENV_VARS: &[&str] = &[
     "AI_AGENT",

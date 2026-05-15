@@ -11,7 +11,7 @@
 //! 2. Spawns the resolved binary with `argv = [tool, flag]` — no shell, no
 //!    interpolation. Subprocess environment carries `PAGER` / `MANPAGER`
 //!    selected by the §4.2.1 cascade, with `LESS` cleared only when the
-//!    Steelbore default chain (`bat -pp`, `moor`, or `cat`) fires.
+//!    Spacecraft Software default chain (`bat -pp`, `moor`, or `cat`) fires.
 //! 3. Enforces a 5-second wall-clock timeout via `wait-timeout`; SIGKILL on
 //!    overrun.
 //! 4. Retries `--help` → `-h` → `help` (sub-command) on non-zero exit /
@@ -64,9 +64,9 @@ pub enum PagerSource {
     ManpagerEnv,
     /// `$PAGER` environment variable.
     PagerEnv,
-    /// `bat -pp` (Steelbore default; `bat` was found on `$PATH`).
+    /// `bat -pp` (Spacecraft Software default; `bat` was found on `$PATH`).
     Bat,
-    /// `moor` (Steelbore-blessed pure-Rust pager; `moor` was found on `$PATH`).
+    /// `moor` (Spacecraft Software-blessed pure-Rust pager; `moor` was found on `$PATH`).
     Moor,
     /// `cat` — final fallback.
     Cat,

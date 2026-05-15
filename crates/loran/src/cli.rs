@@ -7,11 +7,11 @@
 use clap::{Args, Parser, Subcommand, ValueEnum};
 
 /// Project attribution shown in `--version` and `--help` footers per
-/// Steelbore Standard v1.1 §13.2.
+/// Spacecraft Software Standard v1.1 §13.2.
 pub(crate) const ATTRIBUTION_FOOTER: &str = "\
-Maintained by Mohamed Hammad <Mohamed.Hammad@Steelbore.com>
-Project: https://Loran.Steelbore.com/
-Source: https://github.com/Steelbore/Loran";
+Maintained by Mohamed Hammad <Mohamed.Hammad@SpacecraftSoftware.org>
+Project: https://Loran.SpacecraftSoftware.org/
+Source: https://github.com/Spacecraft-Software/Loran";
 
 /// Output format for sub-commands that emit structured data.
 ///
@@ -101,9 +101,9 @@ pub(crate) struct GlobalFlags {
 #[command(
     name = "loran",
     version = env!("CARGO_PKG_VERSION"),
-    about = "Loran — the Steelbore reference manual.",
+    about = "Loran — the Spacecraft Software reference manual.",
     long_about = "Loran is the canonical, agent-friendly reference tool for \
-        Steelbore-based systems. Browse the curated tool catalog, look up what \
+        Spacecraft Software-based systems. Browse the curated tool catalog, look up what \
         replaces a legacy tool, or capture a binary's live --help output.",
     disable_version_flag = true,
     disable_help_subcommand = true,
@@ -204,7 +204,7 @@ pub(crate) struct HelpArgs {
     ///
     /// Reserved sentinels: `--pager=""` disables pagination
     /// (cat-equivalent passthrough); `--pager=loran` forces the
-    /// Steelbore default chain (`bat -pp` → `moor` → `cat`) and skips
+    /// Spacecraft Software default chain (`bat -pp` → `moor` → `cat`) and skips
     /// the user's `$MANPAGER` / `$PAGER` environment.
     #[arg(long, value_name = "CMD")]
     pub pager: Option<String>,

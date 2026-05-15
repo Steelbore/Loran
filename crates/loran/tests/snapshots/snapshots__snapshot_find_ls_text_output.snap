@@ -2,5 +2,5 @@
 source: crates/loran/tests/snapshots.rs
 expression: normalise(&stdout)
 ---
-eza	file-listing	Modern ls replacement. Steelbore default for file listing.
+eza	file-listing	Modern ls replacement. Spacecraft Software default for file listing.
 lsd	file-listing	Drop-in `ls` replacement with colours and icons. Conservative alternative to eza.

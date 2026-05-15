@@ -13,9 +13,9 @@ tags = ["monitoring", "tui"]
 aliases = ["btm"]
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`bottom` is the Steelbore-canonical interactive system monitor. The binary installs as `btm` to avoid colliding with the shell builtin `bottom`/`top` words. It is a full TUI in the Steelbore palette: CPU, memory, network, disk, and process panes laid out on a single screen, navigable with both Vim keys (`hjkl`) and CUA arrows.
+`bottom` is the Spacecraft Software-canonical interactive system monitor. The binary installs as `btm` to avoid colliding with the shell builtin `bottom`/`top` words. It is a full TUI in the Spacecraft Software palette: CPU, memory, network, disk, and process panes laid out on a single screen, navigable with both Vim keys (`hjkl`) and CUA arrows.
 
 `safe_alias_for` is empty by design — `top`/`htop` are interactive tools, not script primitives, so the alias question doesn't arise. Just learn `btm`.
 

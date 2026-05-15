@@ -120,7 +120,7 @@ fn help_with_loran_sentinel_skips_user_env() {
         .expect("pager_source present");
     assert!(
         ["bat", "moor", "cat"].contains(&source),
-        "`--pager=loran` must force the Steelbore default chain, got `{source}`"
+        "`--pager=loran` must force the Spacecraft Software default chain, got `{source}`"
     );
 }
 

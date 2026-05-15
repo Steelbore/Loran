@@ -13,9 +13,9 @@ tags = ["benchmark", "performance"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`hyperfine` is the Steelbore-canonical command-line benchmark. It runs warmup iterations to settle filesystem caches, then collects ≥10 timed runs, then reports mean / stddev / min / max with an outlier warning. The output beats `time` because the variance you actually need is right there.
+`hyperfine` is the Spacecraft Software-canonical command-line benchmark. It runs warmup iterations to settle filesystem caches, then collects ≥10 timed runs, then reports mean / stddev / min / max with an outlier warning. The output beats `time` because the variance you actually need is right there.
 
 `safe_alias_for` is empty: `time` is a shell keyword that already aliases something specific in most shells; `hyperfine` is a separate binary with different output semantics.
 

@@ -16,13 +16,13 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "0.3.0"
-authors = ["Mohamed Hammad <Mohamed.Hammad@Steelbore.com>"]
+version = "0.4.0"
+authors = ["Mohamed Hammad <Mohamed.Hammad@SpacecraftSoftware.org>"]
 edition = "2024"
 rust-version = "1.88"
 license = "GPL-3.0-or-later"
-repository = "https://github.com/Steelbore/Loran"
-homepage = "https://Loran.Steelbore.com/"
+repository = "https://github.com/Spacecraft-Software/Loran"
+homepage = "https://Loran.SpacecraftSoftware.org/"
 readme = "README.md"
 
 [workspace.dependencies]
@@ -39,7 +39,7 @@ anyhow = "1"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 
-# Time — ISO 8601 UTC with Z suffix everywhere (Steelbore Standard §12)
+# Time — ISO 8601 UTC with Z suffix everywhere (Spacecraft Software Standard §12)
 jiff = { version = "0.2", features = ["serde"] }
 
 # CLI (per SFRS canonical)

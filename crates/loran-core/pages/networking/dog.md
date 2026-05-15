@@ -13,9 +13,9 @@ tags = ["dns", "networking"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`dog` is the Steelbore-canonical DNS lookup tool. It is to `dig` what `bat` is to `cat`: same job, much better defaults — colour, structured output, IPv4/IPv6 parity, DNS-over-TLS and DNS-over-HTTPS support, JSON mode (`--json`) suitable for piping into `jaq`.
+`dog` is the Spacecraft Software-canonical DNS lookup tool. It is to `dig` what `bat` is to `cat`: same job, much better defaults — colour, structured output, IPv4/IPv6 parity, DNS-over-TLS and DNS-over-HTTPS support, JSON mode (`--json`) suitable for piping into `jaq`.
 
 `safe_alias_for` is empty: scripts that parse `dig +short` output by position will not survive being repointed at `dog`. Use `dog` interactively and keep `dig` for legacy parsing.
 

@@ -8,19 +8,19 @@ Copyright (c) 2026 Mohamed Hammad
 | Field          | Value                                                       |
 |----------------|-------------------------------------------------------------|
 | **Project**    | Loran                                                       |
-| **Tagline**    | The Steelbore reference manual.                             |
+| **Tagline**    | The Spacecraft Software reference manual.                             |
 | **Version**    | 0.2.0 (specification draft)                                 |
 | **Date**       | 2026-05-11                                                  |
 | **Author**     | Mohamed Hammad                                              |
-| **Maintainer** | Mohamed Hammad <Mohamed.Hammad@Steelbore.com>               |
+| **Maintainer** | Mohamed Hammad <Mohamed.Hammad@SpacecraftSoftware.org>               |
 | **Copyright**  | (c) 2026 Mohamed Hammad                                     |
 | **License**    | GPL-3.0-or-later                                            |
-| **Website**    | https://Loran.Steelbore.com/                                |
-| **Governed by**| Steelbore Standard v1.1, Steelbore SFRS v1.0.0              |
+| **Website**    | https://Loran.SpacecraftSoftware.org/                                |
+| **Governed by**| Spacecraft Software Standard v1.1, Spacecraft Software SFRS v1.0.0              |
 
 **Revision 2026-05-12 (in-place amendment to v0.2):**
 
-- **Pager-selection cascade** in `loran help`. The previous spec forced `PAGER="bat -pp"` unconditionally, overriding the user's environment. The amendment defines a precedence chain that respects the user's setup first: `--pager <cmd>` flag → `$MANPAGER` → `$PAGER` → `bat -pp` (if `bat` on `$PATH`) → `moor` (if on `$PATH`) → `cat`. The Steelbore default chain (`bat -pp` → `moor` → `cat`) only fires when nothing the user pinned applies. The `--pager` flag also accepts a `loran` sentinel that means "skip user env and use the Steelbore default chain unconditionally" — useful for testing the bundled pager logic on a system where `$PAGER` is already set, and for users who want Loran-consistent rendering regardless of shell environment. See §2 decision #12 (rewritten), §4.2 step 2 + §4.2.1, §7 (added `--pager` flag on `loran help`), and PRD FR-024 (synchronised).
+- **Pager-selection cascade** in `loran help`. The previous spec forced `PAGER="bat -pp"` unconditionally, overriding the user's environment. The amendment defines a precedence chain that respects the user's setup first: `--pager <cmd>` flag → `$MANPAGER` → `$PAGER` → `bat -pp` (if `bat` on `$PATH`) → `moor` (if on `$PATH`) → `cat`. The Spacecraft Software default chain (`bat -pp` → `moor` → `cat`) only fires when nothing the user pinned applies. The `--pager` flag also accepts a `loran` sentinel that means "skip user env and use the Spacecraft Software default chain unconditionally" — useful for testing the bundled pager logic on a system where `$PAGER` is already set, and for users who want Loran-consistent rendering regardless of shell environment. See §2 decision #12 (rewritten), §4.2 step 2 + §4.2.1, §7 (added `--pager` flag on `loran help`), and PRD FR-024 (synchronised).
 
 **Changes since v0.1 (2026-04-29):**
 
@@ -32,24 +32,24 @@ Copyright (c) 2026 Mohamed Hammad
 - **Added** frontmatter field `pairs_with` — non-reciprocal recommendation set for companion tools.
 - **Promoted** page signing from open question to a Phase 2 (Billet) requirement: minisign + ed25519 + `minisign-verify` crate.
 - **Added** exit code `TARBALL_VERIFY_FAILED = 11`.
-- **Added** `Ingestor` trait abstraction in §3 to enable Phase 3 ingestion of SFRS `describe` output from other Steelbore CLIs.
+- **Added** `Ingestor` trait abstraction in §3 to enable Phase 3 ingestion of SFRS `describe` output from other Spacecraft Software CLIs.
 - **Clarified** that `category` is slash-tolerant for future nested-hierarchy UX.
-- **Added** `NOTICE.md` to required posture files per Steelbore Standard v1.1 §5.2.
+- **Added** `NOTICE.md` to required posture files per Spacecraft Software Standard v1.1 §5.2.
 - **Resolved** three former open questions: per-distro overlay source-of-truth (per-distro repos, surfaced via tarball pipeline); i18n directory layout (tldr-pages `pages.<lang>/` precedent); nested-category UX threshold (~50 entries).
 
 ---
 
 ## 1. Purpose
 
-Loran is the canonical, agent-friendly reference tool for Steelbore-based systems (Bravais, Ferrite OS, future distros). It answers three questions in one binary:
+Loran is the canonical, agent-friendly reference tool for Spacecraft Software-based systems (Bravais, Ferrite OS, future distros). It answers three questions in one binary:
 
-1. **What tools are available on this system?** — categorised browse of the Steelbore tool catalog.
-2. **What does this tool do, and what does it replace?** — Steelbore-curated intro, then tldr page as fallback.
+1. **What tools are available on this system?** — categorised browse of the Spacecraft Software tool catalog.
+2. **What does this tool do, and what does it replace?** — Spacecraft Software-curated intro, then tldr page as fallback.
 3. **What replaces the legacy tool I know?** — `loran find ls` → `eza`.
 
-Loran is to Steelbore what `man` is to Unix and `info` is to GNU: a system-level reference. Unlike either, it ships agent-native (`--json`, `schema`, MCP) from day one.
+Loran is to Spacecraft Software what `man` is to Unix and `info` is to GNU: a system-level reference. Unlike either, it ships agent-native (`--json`, `schema`, MCP) from day one.
 
-**The name:** LORAN (LOng RAnge Navigation) was the radio navigation system used by ships and aircraft from the 1940s until 2010, when GPS finally retired it. It was the precision wayfinding infrastructure of its era — the reference grid you trusted when you needed to know exactly where you were. Loran the tool is the precision reference grid for a Steelbore system: the catalog of curated tool knowledge you trust when you need to know what's available and what to use.
+**The name:** LORAN (LOng RAnge Navigation) was the radio navigation system used by ships and aircraft from the 1940s until 2010, when GPS finally retired it. It was the precision wayfinding infrastructure of its era — the reference grid you trusted when you needed to know exactly where you were. Loran the tool is the precision reference grid for a Spacecraft Software system: the catalog of curated tool knowledge you trust when you need to know what's available and what to use.
 
 ---
 
@@ -66,17 +66,17 @@ These are settled and inform the rest of this spec. Listed up front so reviewers
 | 5  | **TUI default with TTY auto-detection** per SFRS §5 cascade. Pipe = `--format json`.                    |
 | 6  | **Tarball update model**, mirroring tldr-pages. No git client dependency at runtime. Tarballs are minisign-signed. |
 | 7  | **Verb split:** `loran show <tool>` is curated-or-fail (no live fallback); `loran help <tool>` is always-live `--help` capture. |
-| 8  | **Resolution order for `show`:** Steelbore intro (always) → custom page → tldr page → no-entry prompt. **Live `--help` is never invoked by `show`.** |
+| 8  | **Resolution order for `show`:** Spacecraft Software intro (always) → custom page → tldr page → no-entry prompt. **Live `--help` is never invoked by `show`.** |
 | 9  | **Page format:** single Markdown file with TOML frontmatter (Hugo/Zola style).                          |
 | 10 | **In-process rendering** of Loran's curated pages via `pulldown-cmark` + `ratatui` + `crossterm`. No `bat` for own pages. |
-| 11 | **De-themed rendering** for `loran help` captures: monochrome frame, NOT the Steelbore palette. Brand cues reserved for curated content. |
-| 12 | **Pager-selection cascade** for the `loran help` subprocess only: `--pager <cmd>` flag → `$MANPAGER` → `$PAGER` → `bat -pp` (if `bat` on `$PATH`) → `moor` (if `moor` on `$PATH`) → `cat`. The Steelbore default chain only fires when the user has not pre-configured a pager. `--pager=loran` is a reserved sentinel meaning "skip the user-env steps and run the Steelbore default chain". `--pager=""` disables pagination (cat passthrough). (See §4.2.1.) |
+| 11 | **De-themed rendering** for `loran help` captures: monochrome frame, NOT the Spacecraft Software palette. Brand cues reserved for curated content. |
+| 12 | **Pager-selection cascade** for the `loran help` subprocess only: `--pager <cmd>` flag → `$MANPAGER` → `$PAGER` → `bat -pp` (if `bat` on `$PATH`) → `moor` (if `moor` on `$PATH`) → `cat`. The Spacecraft Software default chain only fires when the user has not pre-configured a pager. `--pager=loran` is a reserved sentinel meaning "skip the user-env steps and run the Spacecraft Software default chain". `--pager=""` disables pagination (cat passthrough). (See §4.2.1.) |
 | 13 | **`loran new <tool>`** scaffolds pages from a user-editable template, writing to the user overlay by default. |
 | 14 | **`replaces`** (broad set) + **`safe_alias_for`** (strict subset, alias-safe). Validated at index build: `safe_alias_for ⊆ replaces`. |
 | 15 | **`written_in`** in frontmatter (implementation language). **`language`** is reserved for future i18n. |
 | 16 | **`category`** is slash-tolerant: `system/file-listing` is valid today; flat UX in v1, nested UX deferred. |
 | 17 | **MCP surface is read-only.** Agents can `list`, `show`, `find`, `search`, `categories`. No `update`, `new`, or `validate` via MCP. |
-| 18 | **GPL-3.0-or-later**, SPDX headers on all source files (Steelbore Standard §4). Posture files (README, NOTICE, CONTRIBUTING, LICENSE) per Standard v1.1 §5.2. |
+| 18 | **GPL-3.0-or-later**, SPDX headers on all source files (Spacecraft Software Standard §4). Posture files (README, NOTICE, CONTRIBUTING, LICENSE) per Standard v1.1 §5.2. |
 
 ---
 
@@ -93,7 +93,7 @@ loran/
 ├── LICENSE                          # GPL-3.0-or-later verbatim
 ├── AGENTS.md                        # generic agent context
 ├── CLAUDE.md                        # Claude Code-specific context
-├── SKILL.md                         # capability surface for Steelbore Skills
+├── SKILL.md                         # capability surface for Spacecraft Software Skills
 ├── crates/
 │   ├── loran/                       # clap binary, dispatcher, exit codes (publishes as `loran` on crates.io)
 │   ├── loran-core/                  # orchestration, resolution chains
@@ -107,11 +107,11 @@ loran/
 └── xtask/                           # build/release/index-validate helpers
 ```
 
-Crate-prefix naming follows mainstream Rust workspace convention. Project-level metallurgical naming applies at the Steelbore-Standard layer (see §13); internal crates are implementation detail. Release codenames follow the Standard's cast-form list (Ingot → Billet → Bloom).
+Crate-prefix naming follows mainstream Rust workspace convention. Project-level metallurgical naming applies at the Spacecraft Software-Standard layer (see §13); internal crates are implementation detail. Release codenames follow the Standard's cast-form list (Ingot → Billet → Bloom).
 
 ### 3.2 The `Ingestor` Trait
 
-`loran-index` exposes an `Ingestor` trait so the index loader is pluggable rather than hard-coded to a single source format. v1 ships one implementation: `MarkdownPagesIngestor` (TOML frontmatter + Markdown body). Phase 3 adds `DescribeIngestor`, which invokes `<tool> describe --json` against SFRS-compliant Steelbore binaries on `$PATH` and synthesises baseline entries — making the Steelbore ecosystem self-documenting (every new Steelbore CLI gets a Loran entry for free, with curated pages overlaying on top where they exist).
+`loran-index` exposes an `Ingestor` trait so the index loader is pluggable rather than hard-coded to a single source format. v1 ships one implementation: `MarkdownPagesIngestor` (TOML frontmatter + Markdown body). Phase 3 adds `DescribeIngestor`, which invokes `<tool> describe --json` against SFRS-compliant Spacecraft Software binaries on `$PATH` and synthesises baseline entries — making the Spacecraft Software ecosystem self-documenting (every new Spacecraft Software CLI gets a Loran entry for free, with curated pages overlaying on top where they exist).
 
 This abstraction is non-load-bearing in v1 but designed-in from Phase 1 so retrofitting it later doesn't require restructuring the index pipeline.
 
@@ -123,7 +123,7 @@ This abstraction is non-load-bearing in v1 but designed-in from Phase 1 so retro
 | Serialization        | `serde`, `serde_json`, `toml`  | SFRS canonical                                           |
 | Markdown parsing     | `pulldown-cmark`               | CommonMark, fast, no_std-friendly                        |
 | TUI                  | `ratatui` + `crossterm`        | SFRS canonical                                           |
-| Time                 | `jiff`                         | Steelbore Standard §12.5 preferred                       |
+| Time                 | `jiff`                         | Spacecraft Software Standard §12.5 preferred                       |
 | HTTP (tarball)       | `ureq` + `rustls`              | Lean, no async runtime needed for one-shot fetch         |
 | Tar/gzip             | `tar` + `flate2`               | Standard combo                                           |
 | Signing verification | `minisign-verify`              | Pure Rust, small surface, ed25519 detached sigs          |
@@ -139,7 +139,7 @@ No `tokio` in the v1 fast path. Tarball fetch is one synchronous request; everyt
 
 ## 4. Resolution Chains
 
-Two verbs, two distinct flows. The split clarifies brand boundaries: `show` only renders content Steelbore stands behind; `help` is an honest passthrough of upstream tool output.
+Two verbs, two distinct flows. The split clarifies brand boundaries: `show` only renders content Spacecraft Software stands behind; `help` is an honest passthrough of upstream tool output.
 
 ### 4.1 `loran show <tool>` — Curated-Or-Fail
 
@@ -161,7 +161,7 @@ Two verbs, two distinct flows. The split clarifies brand boundaries: `show` only
                      │ yes               │ no
                      ▼                   ▼
         ┌────────────────────┐   ┌──────────────────────────┐
-        │ Render Steelbore   │   │ Emit no-entry diagnostic │
+        │ Render Spacecraft Software   │   │ Emit no-entry diagnostic │
         │ intro block        │   │   error: no Loran entry  │
         │ (always)           │   │   hint: loran new <tool> │
         └─────────┬──────────┘   │         --edit           │
@@ -222,7 +222,7 @@ In `--json` mode, the structured error carries the same hints (`error.hint` plus
               │    Env: PAGER and MANPAGER set     │
               │    via the §4.2.1 pager cascade.   │
               │    LESS cleared only when the      │
-              │    Steelbore default is selected.  │
+              │    Spacecraft Software default is selected.  │
               │    5s wall-clock timeout;          │
               │    SIGKILL on overrun.             │
               │    Try sequence on non-zero exit:  │
@@ -234,7 +234,7 @@ In `--json` mode, the structured error carries the same hints (`error.hint` plus
               │ 3. Render captured output in       │
               │    DE-THEMED frame:                │
               │      - monochrome / dim only       │
-              │      - NOT the Steelbore palette   │
+              │      - NOT the Spacecraft Software palette   │
               │      - header: "LIVE OUTPUT —      │
               │        uncurated, captured from    │
               │        <tool> --help at <ISO 8601  │
@@ -244,7 +244,7 @@ In `--json` mode, the structured error carries the same hints (`error.hint` plus
 
 `body.kind = "live_help"` always for the `help` verb. In `--json`, `data.body.captured_at` carries the ISO 8601 UTC timestamp so agents can cache or invalidate independently.
 
-The de-themed rendering is load-bearing for brand integrity: a user seeing the Steelbore palette should know they are looking at Steelbore-curated content. Live `--help` output is not curated, and its presentation reflects that.
+The de-themed rendering is load-bearing for brand integrity: a user seeing the Spacecraft Software palette should know they are looking at Spacecraft Software-curated content. Live `--help` output is not curated, and its presentation reflects that.
 
 ### 4.2.1 Pager-selection cascade
 
@@ -252,11 +252,11 @@ Loran respects the user's pager configuration. The subprocess spawned by `loran 
 
 | Step | Source | When it wins | Notes |
 |---|---|---|---|
-| 1 | `--pager <cmd>` | Provided on the `loran help` invocation | Highest priority. Two special values: `--pager=""` disables pagination (cat-equivalent passthrough); `--pager=loran` is a reserved sentinel that skips steps 2–3 and runs the Steelbore default chain (steps 4–6) regardless of the user's environment. |
+| 1 | `--pager <cmd>` | Provided on the `loran help` invocation | Highest priority. Two special values: `--pager=""` disables pagination (cat-equivalent passthrough); `--pager=loran` is a reserved sentinel that skips steps 2–3 and runs the Spacecraft Software default chain (steps 4–6) regardless of the user's environment. |
 | 2 | `$MANPAGER` | Set in the user's environment | Closer semantic match — `--help` output is documentation-like. Skipped when step 1 was the `loran` sentinel. |
 | 3 | `$PAGER` | Set in the user's environment | General fallback for users who haven't distinguished `MANPAGER`. Skipped when step 1 was the `loran` sentinel. |
-| 4 | `bat -pp` | `bat` is on `$PATH` and nothing above resolved | Steelbore default. `-pp` disables internal paging+decoration so output streams naturally into the de-themed frame. |
-| 5 | `moor` | `moor` is on `$PATH` and nothing above resolved | Steelbore-blessed pure-Rust alternative (formerly `moar`). Used when `bat` is not installed but the user still wants paging. |
+| 4 | `bat -pp` | `bat` is on `$PATH` and nothing above resolved | Spacecraft Software default. `-pp` disables internal paging+decoration so output streams naturally into the de-themed frame. |
+| 5 | `moor` | `moor` is on `$PATH` and nothing above resolved | Spacecraft Software-blessed pure-Rust alternative (formerly `moar`). Used when `bat` is not installed but the user still wants paging. |
 | 6 | `cat` | Final fallback | Always available. |
 
 The resolved pager value is set on **both** `PAGER` and `MANPAGER` in the subprocess environment so tools that internally consult either variable behave consistently.
@@ -269,7 +269,7 @@ The resolved pager value is set on **both** `PAGER` and `MANPAGER` in the subpro
 
 `--pager=loran` is a sentinel, not an executable name. It is intercepted by the CLI before the env is built; the actual `loran` binary never ends up as a subprocess pager.
 
-**`LESS` handling.** When the cascade selects the user's own `$PAGER` / `$MANPAGER` (steps 2–3), `LESS` is **not** modified — the user has presumably configured `LESS` to pair with their pager. When the cascade falls back to the Steelbore default chain (steps 4–6), `LESS` is cleared to `""` to keep behaviour predictable across systems.
+**`LESS` handling.** When the cascade selects the user's own `$PAGER` / `$MANPAGER` (steps 2–3), `LESS` is **not** modified — the user has presumably configured `LESS` to pair with their pager. When the cascade falls back to the Spacecraft Software default chain (steps 4–6), `LESS` is cleared to `""` to keep behaviour predictable across systems.
 
 **`--no-color` / `NO_COLOR` interaction.** Honoured separately by the rendering frame (§4.2 step 3); the pager cascade itself does not consult these.
 
@@ -283,7 +283,7 @@ All paths follow XDG Base Directory Specification.
 
 ```
 $XDG_DATA_HOME/loran/                      # default: ~/.local/share/loran
-├── pages/                                 # upstream Steelbore pages (sync target)
+├── pages/                                 # upstream Spacecraft Software pages (sync target)
 │   ├── meta.toml                          # tarball version, fetched_at
 │   └── <category>/<tool>.md
 ├── overlays/
@@ -308,7 +308,7 @@ $XDG_CONFIG_HOME/loran/                    # default: ~/.config/loran
 
 Lowest to highest:
 
-1. `pages/` — upstream Steelbore pages (synced via tarball)
+1. `pages/` — upstream Spacecraft Software pages (synced via tarball)
 2. `overlays/<active-distro>/` — distro-specific overrides (Bravais or Ferrite OS)
 3. `overlays/user/` — user customisations
 
@@ -332,7 +332,7 @@ replaces       = ["ls"]
 safe_alias_for = []                  # eza changes ls's default columns and flags;
                                      # `alias ls=eza` is common but breaks some scripts
 pairs_with     = ["bat", "fd"]
-summary        = "Modern ls replacement. Steelbore default for file listing."
+summary        = "Modern ls replacement. Spacecraft Software default for file listing."
 official       = "https://eza.rocks"
 tldr_page      = "eza"
 written_in     = "rust"
@@ -340,11 +340,11 @@ since          = "bravais@0.1"
 tags           = ["filesystem", "tui-friendly"]
 +++
 
-## Steelbore Notes
+## Spacecraft Software Notes
 
-`eza` is the Steelbore-canonical file lister. Aliased to `ls` in the
+`eza` is the Spacecraft Software-canonical file lister. Aliased to `ls` in the
 default Bravais shell profile (Nushell). Honours `LS_COLORS` and the
-Steelbore palette via the `EZA_COLORS` environment variable.
+Spacecraft Software palette via the `EZA_COLORS` environment variable.
 
 ## Recommended Aliases
 
@@ -376,7 +376,7 @@ alias tree = eza --tree
 | `tags`           | array<string>   | no       | Free-form, surfaced in `loran search`.                                                      |
 | `written_in`     | string          | no       | Implementation language. Surfaces a "🦀" badge in TUI for `rust`.                           |
 | `language`       | string          | RESERVED | Reserved for i18n. When activated in v1.x, translated pages live under `pages.<lang>/` per tldr-pages precedent — not inline. |
-| `since`          | string          | no       | First Steelbore release shipping this tool.                                                 |
+| `since`          | string          | no       | First Spacecraft Software release shipping this tool.                                                 |
 | `aliases`        | array<string>   | no       | Alternative spellings (e.g. ripgrep ↔ rg).                                                  |
 
 Validated by `loran-pages` at index build time. Index build fails loud on schema violations — no silent skipping. The `safe_alias_for ⊆ replaces` invariant is enforced; violations emit `PAGE_PARSE_ERROR` with the offending file + line.
@@ -411,8 +411,8 @@ Noun-verb per SFRS §2 Rule 7. Verbs in the canonical set where applicable.
 |------------------------------------|--------------------------------------------------------------------------------------------|
 | `loran`                            | TUI if TTY, else `loran list --json`. Auto-detection per SFRS §5.                          |
 | `loran list`                       | List tools (filterable). Honours `--category`, `--replaces`, `--safe-alias-for`, `--fields`. |
-| `loran show <tool>`                | Show resolved curated page (Steelbore intro + body per §4.1). Curated-or-fail.            |
-| `loran help <tool>`                | Capture and render `<tool> --help` directly (always-live, de-themed). Per §4.2. Sub-command flag: `--pager <cmd>` (overrides the §4.2.1 cascade; `--pager=""` disables pagination; `--pager=loran` forces the Steelbore default chain).            |
+| `loran show <tool>`                | Show resolved curated page (Spacecraft Software intro + body per §4.1). Curated-or-fail.            |
+| `loran help <tool>`                | Capture and render `<tool> --help` directly (always-live, de-themed). Per §4.2. Sub-command flag: `--pager <cmd>` (overrides the §4.2.1 cascade; `--pager=""` disables pagination; `--pager=loran` forces the Spacecraft Software default chain).            |
 | `loran find <legacy>`              | Reverse lookup: which tool replaces `<legacy>`? Use `--safe-alias` to filter to alias-safe matches only. |
 | `loran search <query>`             | Fuzzy search across name, summary, replaces, tags.                                         |
 | `loran categories`                 | List categories with counts. JSON-friendly.                                                |
@@ -423,7 +423,7 @@ Noun-verb per SFRS §2 Rule 7. Verbs in the canonical set where applicable.
 | `loran describe`                   | Self-description manifest for agents. SFRS §4.                                             |
 | `loran mcp`                        | Run as read-only MCP server over stdio. Phase 3.                                           |
 
-### 7.1 Global flags (SFRS §3, identical across all Steelbore CLIs)
+### 7.1 Global flags (SFRS §3, identical across all Spacecraft Software CLIs)
 
 `--json`, `--format`, `--fields`, `--dry-run`, `--verbose`, `--quiet`, `--no-color`, `--color`, `--help`, `--version`, `--absolute-time`, `--print0`, `--yes`. No deviations.
 
@@ -464,8 +464,8 @@ Per SFRS §6. Example for `loran show eza --json`:
     "version": "0.1.0",
     "command": "loran show eza",
     "timestamp": "2026-05-11T08:30:00Z",
-    "maintainer": "Mohamed Hammad <Mohamed.Hammad@Steelbore.com>",
-    "website": "https://Loran.Steelbore.com/"
+    "maintainer": "Mohamed Hammad <Mohamed.Hammad@SpacecraftSoftware.org>",
+    "website": "https://Loran.SpacecraftSoftware.org/"
   },
   "data": {
     "name": "eza",
@@ -473,12 +473,12 @@ Per SFRS §6. Example for `loran show eza --json`:
     "replaces": ["ls"],
     "safe_alias_for": [],
     "pairs_with": ["bat", "fd"],
-    "summary": "Modern ls replacement. Steelbore default for file listing.",
+    "summary": "Modern ls replacement. Spacecraft Software default for file listing.",
     "official": "https://eza.rocks",
     "tags": ["filesystem", "tui-friendly"],
     "written_in": "rust",
     "intro": {
-      "source": "steelbore",
+      "source": "spacecraft software",
       "body_md": "..."
     },
     "body": {
@@ -515,18 +515,18 @@ All documented in `loran schema` output.
 ## 10. TUI Behaviour
 
 - **Default view (no args, TTY):** category list (left pane) + tool list (right pane). Vim `hjkl` navigation; CUA arrow keys. `/` for fuzzy search, `?` for in-app help.
-- **Detail view:** Steelbore intro block, then body. Tab-switchable to raw Markdown and frontmatter views (agent-friendly inspection). `pairs_with` entries render as a sidebar.
-- **`loran help` capture frame:** monochrome / dim chrome only — NOT the Steelbore palette. Visually distinct from curated content. Honours `NO_COLOR`.
-- **Curated content theme:** Steelbore palette only — Void Navy bg, Molten Amber primary text, Steel Blue structural, Radium Green success, Liquid Coolant info, Red Oxide error. Honours `NO_COLOR`.
+- **Detail view:** Spacecraft Software intro block, then body. Tab-switchable to raw Markdown and frontmatter views (agent-friendly inspection). `pairs_with` entries render as a sidebar.
+- **`loran help` capture frame:** monochrome / dim chrome only — NOT the Spacecraft Software palette. Visually distinct from curated content. Honours `NO_COLOR`.
+- **Curated content theme:** Spacecraft Software palette only — Void Navy bg, Molten Amber primary text, Steel Blue structural, Radium Green success, Liquid Coolant info, Red Oxide error. Honours `NO_COLOR`.
 - **Agent guard rail:** If `AI_AGENT=1` or `AGENT=1` is set, TUI never activates — falls back to `--format json` and warns on stderr per SFRS §5.
 
 ---
 
 ## 11. Tarball Update Mechanism
 
-Modelled on tldr-pages, adjusted for Steelbore.
+Modelled on tldr-pages, adjusted for Spacecraft Software.
 
-- **Source (upstream pages):** `https://Loran.Steelbore.com/pages/v1/pages.tar.gz`
+- **Source (upstream pages):** `https://Loran.SpacecraftSoftware.org/pages/v1/pages.tar.gz`
 - **Manifest:** `pages.json` alongside the tarball, contains version + ETag + SHA-256.
 - **Signature:** `pages.tar.gz.minisig` alongside the tarball (ed25519 detached signature).
 - **Trust root:** the publisher's minisign public key is baked into the binary at compile time (`include_bytes!`). Key rotation requires a new Loran release.
@@ -550,21 +550,21 @@ The same flow runs for the tldr tarball (`https://tldr-pages.github.io/assets/tl
 
 ### 12.1 Context files (Day-One artifacts)
 
-Per `steelbore-agentic-cli` §2 and Steelbore Standard v1.1 §5.2:
+Per `spacecraft-agentic-cli` §2 and Spacecraft Software Standard v1.1 §5.2:
 
 - `README.md` — includes Project Posture section linking to NOTICE and CONTRIBUTING.
 - `NOTICE.md` — full no-warranty / no-liability statement; defers to GPL-3.0-or-later for binding terms.
 - `CONTRIBUTING.md` — human onboarding, PR scope, sign-off, security reporting.
 - `LICENSE` — verbatim GPL-3.0-or-later text.
 - `AGENTS.md` — coding conventions, test commands, repo invariants, forbidden patterns. Generic.
-- `CLAUDE.md` — references to skills (`steelbore-standard`, `steelbore-cli-standard`, `steelbore-agentic-cli`, `rust-guidelines`). Claude-specific.
-- `SKILL.md` — Loran's own capability surface for the Steelbore Skills system to consume.
+- `CLAUDE.md` — references to skills (`spacecraft-standard`, `spacecraft-cli-standard`, `spacecraft-agentic-cli`, `rust-guidelines`). Claude-specific.
+- `SKILL.md` — Loran's own capability surface for the Spacecraft Software Skills system to consume.
 
 All present at repo root from the first commit, before `loran-cli` has any sub-commands.
 
 ### 12.2 MCP Surface (Phase 3, Read-Only)
 
-Loran's full sub-command count (≈13) is borderline for SFRS §2 Rule 8's MCP threshold. We ship MCP because the read-only ones (`list`, `show`, `find`, `search`, `categories`) are unusually high-value for agents discovering what tools exist on a Steelbore system.
+Loran's full sub-command count (≈13) is borderline for SFRS §2 Rule 8's MCP threshold. We ship MCP because the read-only ones (`list`, `show`, `find`, `search`, `categories`) are unusually high-value for agents discovering what tools exist on a Spacecraft Software system.
 
 **The MCP surface is strictly read-only.** Agents cannot invoke `update`, `new`, `validate`, or `help` (the live capture). This is a deliberate security and predictability decision:
 
@@ -573,7 +573,7 @@ Loran's full sub-command count (≈13) is borderline for SFRS §2 Rule 8's MCP t
 - `validate` is too verbose for agent token budgets and serves no read-time purpose.
 - `help` invokes arbitrary subprocesses; an agent that can choose which `<tool>` to spawn is an attack surface.
 
-The MCP `tools/list` response advertises only the read-only verbs, with names + capability tags. Full schemas come from `tools/get` per `steelbore-agentic-cli` §6 lazy-loading discipline.
+The MCP `tools/list` response advertises only the read-only verbs, with names + capability tags. Full schemas come from `tools/get` per `spacecraft-agentic-cli` §6 lazy-loading discipline.
 
 ### 12.3 Tips-thinking error catalog
 
@@ -590,9 +590,9 @@ Every error code from §9 has a runnable `hint`. Examples:
 
 ### 12.4 Attribution surfacing
 
-Per Steelbore Standard §13.2:
+Per Spacecraft Software Standard §13.2:
 
-- `--version` (human): footer line `Maintained by Mohamed Hammad <Mohamed.Hammad@Steelbore.com>` and `https://Loran.Steelbore.com/`.
+- `--version` (human): footer line `Maintained by Mohamed Hammad <Mohamed.Hammad@SpacecraftSoftware.org>` and `https://Loran.SpacecraftSoftware.org/`.
 - `--version --json`: `metadata.maintainer` and `metadata.website` fields (see §8).
 - `--help`: project URL and maintainer name at footer.
 - `README.md`: "Maintainer" section with name, email, project URL.
@@ -600,7 +600,7 @@ Per Steelbore Standard §13.2:
 
 ---
 
-## 13. Steelbore Standard v1.1 Compliance Checklist
+## 13. Spacecraft Software Standard v1.1 Compliance Checklist
 
 | §  | Requirement                            | Status / Note                                                                                                                |
 |----|----------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
@@ -614,7 +614,7 @@ Per Steelbore Standard §13.2:
 | 6.1| POSIX-compliant CLI                    | ✓ SFRS-compliant; default output is POSIX-safe.                                                                              |
 | 7  | PFA: no tracking, minimal perms, local | ✓ No telemetry. Filesystem + outbound HTTPS to upstream + tldr CDNs only. All data local.                                    |
 | 8  | CUA + Vim bindings                     | ✓ Both schemes in TUI.                                                                                                       |
-| 9  | Steelbore palette; Void Navy bg        | ✓ TUI uses palette tokens only for curated content. `loran help` capture frame uses monochrome (intentional brand boundary). |
+| 9  | Spacecraft Software palette; Void Navy bg        | ✓ TUI uses palette tokens only for curated content. `loran help` capture frame uses monochrome (intentional brand boundary). |
 | 10 | FOSS fonts                             | N/A — terminal app, uses user's terminal font. Docs use Share Tech Mono / Inconsolata per Standard.                          |
 | 11 | Material Design / WCAG 2.1 AA          | N/A for v1 (no GUI). WCAG-AA contrast already satisfied by palette per §9.                                                   |
 | 12 | ISO 8601 / UTC / Z-suffix / 24h / metric | ✓ All timestamps in JSON envelope and `live_help` captures carry `Z` suffix; no offsets, no local-time in stored or transmitted data. |
@@ -628,7 +628,7 @@ Per Steelbore Standard §13.2:
 |---------|----------|------------------------------------------------------------------------------------------------------------------------------------|
 | Phase 1 | Ingot    | Workspace + posture files + global flags + JSON envelope + `list` / `show` / `help` / `find` / `search` / `categories` + index from bundled `pages/`. `Ingestor` trait abstraction. Text-mode only. |
 | Phase 2 | Billet   | Tarball update + minisign signature verification + overlays + TUI + `loran new` + `validate`. The user-visible 1.0 milestone.       |
-| Phase 3 | Bloom    | Read-only MCP surface + `loran schema` JSON-Schema-ified for Anthropic/OpenAI/Gemini/MCP function-calling + `DescribeIngestor` for SFRS describe-compatible Steelbore CLIs + Bravais/Ferrite OS overlay catalogs in tree. |
+| Phase 3 | Bloom    | Read-only MCP surface + `loran schema` JSON-Schema-ified for Anthropic/OpenAI/Gemini/MCP function-calling + `DescribeIngestor` for SFRS describe-compatible Spacecraft Software CLIs + Bravais/Ferrite OS overlay catalogs in tree. |
 
 Ingot is shippable on its own as a useful binary, even before tarball/overlay machinery exists. Billet is the user-visible 1.0 milestone. Bloom is the agentic completion.
 
@@ -646,8 +646,8 @@ The following questions from earlier drafts have been resolved and integrated in
 Remaining open questions:
 
 1. **`pairs_with` reciprocity** — current spec treats it as non-reciprocal. Should `loran validate` warn when A claims `pairs_with = ["B"]` but B does not reciprocate? Or accept asymmetry as intentional?
-2. **`DescribeIngestor` security model** — Phase 3 wants to spawn `<tool> describe --json` against Steelbore-native binaries. How does Loran decide which binaries are trusted to spawn? Allowlist baked into upstream pages tarball? Self-declaration via SFRS `describe`?
+2. **`DescribeIngestor` security model** — Phase 3 wants to spawn `<tool> describe --json` against Spacecraft Software-native binaries. How does Loran decide which binaries are trusted to spawn? Allowlist baked into upstream pages tarball? Self-declaration via SFRS `describe`?
 
 ---
 
-*Forged in Steelbore.*
+*Forged in Spacecraft Software.*

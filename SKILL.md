@@ -5,9 +5,9 @@ SPDX-FileCopyrightText: 2026 Mohamed Hammad
 
 ---
 name: loran
-description: Loran — the Steelbore reference manual. Catalog-browse, curated tool pages, reverse legacy lookup, fuzzy search, and a deliberately-de-themed live `--help` capture. Agent-native (`--json`, `schema`, `describe`, read-only MCP) per Steelbore SFRS v1.0.0.
+description: Loran — the Spacecraft Software reference manual. Catalog-browse, curated tool pages, reverse legacy lookup, fuzzy search, and a deliberately-de-themed live `--help` capture. Agent-native (`--json`, `schema`, `describe`, read-only MCP) per Spacecraft Software SFRS v1.0.0.
 license: GPL-3.0-or-later
-project: Steelbore
+project: Spacecraft Software
 component: Loran
 version: 0.0.0
 status: pre-implementation (Phase 0 — workspace bootstrap)
@@ -17,8 +17,8 @@ governing_docs:
   - loran-plan-v0_1.md
   - loran-todo-v0_1.md
 governing_standards:
-  - Steelbore Standard v1.1
-  - Steelbore SFRS v1.0.0
+  - Spacecraft Software Standard v1.1
+  - Spacecraft Software SFRS v1.0.0
 entry_points:
   - command: loran list
     description: List tools in the catalog (filterable by --category, --replaces, --safe-alias-for).
@@ -36,7 +36,7 @@ entry_points:
     idempotent: true
     phase: 1
   - command: loran find <legacy>
-    description: Reverse lookup — which Steelbore tool replaces a legacy name? --safe-alias filters to alias-safe matches.
+    description: Reverse lookup — which Spacecraft Software tool replaces a legacy name? --safe-alias filters to alias-safe matches.
     destructive: false
     idempotent: true
     phase: 1
@@ -123,27 +123,27 @@ mcp_surface:
   read_only: true
   tools: [list, show, find, search, categories]
   excluded: [update, new, validate, help, schema, describe, mcp]
-  rationale: Write verbs would let an agent silently mutate state or trigger subprocesses. `help` invokes arbitrary binaries — an MCP-controllable attack surface. Lazy schema loading per steelbore-agentic-cli §6.
+  rationale: Write verbs would let an agent silently mutate state or trigger subprocesses. `help` invokes arbitrary binaries — an MCP-controllable attack surface. Lazy schema loading per spacecraft-agentic-cli §6.
 ---
 
 # Loran — agent skill
 
 ## Overview
 
-`loran` is the canonical reference tool for Steelbore-based systems. It answers three questions about a system's tool catalog:
+`loran` is the canonical reference tool for Spacecraft Software-based systems. It answers three questions about a system's tool catalog:
 
 1. **What tools are available here?** — `loran list`, `loran categories`, TUI browse.
-2. **What does this tool do, and what does it replace?** — `loran show <tool>` for the curated Steelbore page; `loran help <tool>` for an honest passthrough of upstream `--help`.
+2. **What does this tool do, and what does it replace?** — `loran show <tool>` for the curated Spacecraft Software page; `loran help <tool>` for an honest passthrough of upstream `--help`.
 3. **What replaces the legacy tool I know?** — `loran find ls` → `eza`.
 
-The MCP surface (Phase 3) exposes the five read-only verbs so an AI agent operating on a Steelbore system can discover what's installed without TUI activation.
+The MCP surface (Phase 3) exposes the five read-only verbs so an AI agent operating on a Spacecraft Software system can discover what's installed without TUI activation.
 
 ## When to use this skill
 
 - You are an agent operating on a Bravais or Ferrite OS system and need to discover the local tool catalog.
-- You are writing automation that should prefer Steelbore-canonical tools (`eza` over `ls`, `bat` over `cat`, `rg` over `grep`).
-- You are reverse-looking-up a legacy Unix tool to find the Steelbore replacement.
-- You are bringing up a new Steelbore CLI and need to author a Loran page describing it.
+- You are writing automation that should prefer Spacecraft Software-canonical tools (`eza` over `ls`, `bat` over `cat`, `rg` over `grep`).
+- You are reverse-looking-up a legacy Unix tool to find the Spacecraft Software replacement.
+- You are bringing up a new Spacecraft Software CLI and need to author a Loran page describing it.
 
 ## Key patterns
 

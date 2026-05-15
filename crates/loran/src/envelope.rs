@@ -22,7 +22,7 @@
 //! data only, never diagnostics).
 //!
 //! Timestamps everywhere are `jiff::Timestamp` values serialised to
-//! ISO 8601 UTC with the `Z` suffix (Steelbore Standard §12.5 — no
+//! ISO 8601 UTC with the `Z` suffix (Spacecraft Software Standard §12.5 — no
 //! offsets, no local time, no exceptions). The custom serialiser is
 //! the single authoritative point for that invariant.
 
@@ -33,8 +33,8 @@ use serde::{Serialize, Serializer};
 
 const TOOL_NAME: &str = "loran";
 const TOOL_VERSION: &str = env!("CARGO_PKG_VERSION");
-const MAINTAINER: &str = "Mohamed Hammad <Mohamed.Hammad@Steelbore.com>";
-const WEBSITE: &str = "https://Loran.Steelbore.com/";
+const MAINTAINER: &str = "Mohamed Hammad <Mohamed.Hammad@SpacecraftSoftware.org>";
+const WEBSITE: &str = "https://Loran.SpacecraftSoftware.org/";
 
 /// Successful-output envelope.
 ///
@@ -260,7 +260,7 @@ mod tests {
             "page `nope` is not in the catalog",
             "loran search nope --json",
             "loran show nope",
-            Some("https://Loran.Steelbore.com/spec/#9".to_owned()),
+            Some("https://Loran.SpacecraftSoftware.org/spec/#9".to_owned()),
         );
         let json = serde_json::to_string(&env).expect("error envelope serialises");
         let parsed: Value = serde_json::from_str(&json).expect("valid JSON");

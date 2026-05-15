@@ -20,7 +20,7 @@
 //! installed catalog untouched. There is **no** "extract anyway" path
 //! — `--require-signatures` is the only flag that opts out of
 //! signature checking, and it only applies to sources known not to
-//! sign (tldr-pages; not the Steelbore upstream).
+//! sign (tldr-pages; not the Spacecraft Software upstream).
 //!
 //! ## Publisher trust root
 //!
@@ -38,7 +38,7 @@ use crate::fetch::{FetchClient, FetchError, FetchOutcome};
 use crate::meta::{MetaError, SourceMetaStore};
 use crate::signing::{SignError, verify_any};
 
-/// Canonical name for the upstream Steelbore pages source. Used as the
+/// Canonical name for the upstream Spacecraft Software pages source. Used as the
 /// key in `sources.toml` and the JSON `data.source` field.
 pub const SOURCE_UPSTREAM_PAGES: &str = "upstream-pages";
 
@@ -55,15 +55,17 @@ pub const TLDR_PAGES_URL: &str = "https://tldr-pages.github.io/assets/tldr.zip";
 /// the publisher pipeline (Sub-phase 2D) launches. Until then this URL
 /// will fail a manifest fetch — that's by design, so a `loran update`
 /// against an un-launched publisher fails loud rather than silently.
-pub const PUBLISHER_PAGES_MANIFEST_URL: &str = "https://Loran.Steelbore.com/pages/v1/pages.json";
+pub const PUBLISHER_PAGES_MANIFEST_URL: &str =
+    "https://Loran.SpacecraftSoftware.org/pages/v1/pages.json";
 
 /// Publisher tarball URL. Placeholder; see [`PUBLISHER_PAGES_MANIFEST_URL`].
-pub const PUBLISHER_PAGES_TARBALL_URL: &str = "https://Loran.Steelbore.com/pages/v1/pages.tar.gz";
+pub const PUBLISHER_PAGES_TARBALL_URL: &str =
+    "https://Loran.SpacecraftSoftware.org/pages/v1/pages.tar.gz";
 
 /// Publisher detached signature URL (minisign `.minisig`).
 /// Placeholder; see [`PUBLISHER_PAGES_MANIFEST_URL`].
 pub const PUBLISHER_PAGES_SIG_URL: &str =
-    "https://Loran.Steelbore.com/pages/v1/pages.tar.gz.minisig";
+    "https://Loran.SpacecraftSoftware.org/pages/v1/pages.tar.gz.minisig";
 
 /// Publisher's minisign public key.
 ///
@@ -137,7 +139,7 @@ pub struct UpdateOpts {
 }
 
 impl UpdateOpts {
-    /// Default `UpdateOpts` targeting the placeholder Steelbore
+    /// Default `UpdateOpts` targeting the placeholder Spacecraft Software
     /// publisher. Caller must override `target_dir`.
     ///
     /// Each URL and the public key honour an environment override so
@@ -182,7 +184,7 @@ fn env_or_keys(key: &str, default: &str) -> Vec<String> {
         .collect()
 }
 
-/// Refresh the upstream Steelbore pages catalog.
+/// Refresh the upstream Spacecraft Software pages catalog.
 ///
 /// Pipeline (all-or-nothing):
 ///

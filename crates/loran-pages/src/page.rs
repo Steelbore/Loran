@@ -81,7 +81,7 @@ pub struct Page {
     /// interpreted by v1 consumers (Spec §2 decision #15).
     pub language: Option<String>,
 
-    /// First Steelbore release shipping this tool (e.g. `bravais@0.1`).
+    /// First Spacecraft Software release shipping this tool (e.g. `bravais@0.1`).
     pub since: Option<String>,
 
     /// Alternative spellings (e.g. `ripgrep` ↔ `rg`).

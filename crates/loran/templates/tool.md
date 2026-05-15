@@ -14,7 +14,7 @@ tags           = []
 
 # {{name}}
 
-Steelbore notes:
+Spacecraft Software notes:
 
 - Why we ship {{name}} as the canonical option for this category.
 - The legacy tool(s) it replaces and what's lost by aliasing.

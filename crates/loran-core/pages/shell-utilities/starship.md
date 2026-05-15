@@ -13,9 +13,9 @@ tags = ["prompt", "shell"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`starship` is the Steelbore-canonical shell prompt. One `~/.config/starship.toml` works across every shell the team uses (Nushell, Ion, PowerShell, Bash, Zsh, Fish), so the prompt stays consistent when you switch shells or pair-program.
+`starship` is the Spacecraft Software-canonical shell prompt. One `~/.config/starship.toml` works across every shell the team uses (Nushell, Ion, PowerShell, Bash, Zsh, Fish), so the prompt stays consistent when you switch shells or pair-program.
 
 ## Recommended setup
 
@@ -37,7 +37,7 @@ eval "$(starship init bash)"   # or zsh / fish / pwsh
 ## Configuration highlights
 
 - Detects 30+ tool versions (Rust, Go, Node, Python, …) and surfaces the active one.
-- Optional `[character] success_symbol` swap for the Steelbore Molten Amber prompt arrow.
+- Optional `[character] success_symbol` swap for the Spacecraft Software Molten Amber prompt arrow.
 - `cmd_duration` annotates long-running commands so you notice when something stalled.
 
 ## Pairs with

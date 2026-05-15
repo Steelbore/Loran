@@ -13,9 +13,9 @@ tags = ["file-viewing", "syntax-highlighting"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`bat` is the Steelbore-canonical file viewer. Unlike `eza` vs `ls`, `bat` is alias-safe for `cat` — `bat`'s default detects piped output and gracefully falls back to plain text behaviour, so `alias cat=bat` does not break scripts.
+`bat` is the Spacecraft Software-canonical file viewer. Unlike `eza` vs `ls`, `bat` is alias-safe for `cat` — `bat`'s default detects piped output and gracefully falls back to plain text behaviour, so `alias cat=bat` does not break scripts.
 
 ## Recommended aliases
 
@@ -23,7 +23,7 @@ aliases = []
 alias cat = bat --paging=never
 ```
 
-`--paging=never` is the Steelbore default for the `cat`-alias surface: keep `bat` for interactive viewing (`bat file.rs` paginates) but never paginate inside a pipeline.
+`--paging=never` is the Spacecraft Software default for the `cat`-alias surface: keep `bat` for interactive viewing (`bat file.rs` paginates) but never paginate inside a pipeline.
 
 ## Pager use
 

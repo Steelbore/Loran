@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2026 Mohamed Hammad
 
-//! Color-mode resolution per Steelbore SFRS / [NO_COLOR](https://no-color.org).
+//! Color-mode resolution per Spacecraft Software SFRS / [NO_COLOR](https://no-color.org).
 //!
 //! Resolution order (highest priority first):
 //!

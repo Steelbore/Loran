@@ -13,9 +13,9 @@ tags = ["filesystem", "search"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`fd` is the Steelbore-canonical filesystem search tool. It is dramatically faster than `find` on real trees, honours `.gitignore` by default, and uses sensible regex-by-default matching instead of `find`'s glob-by-default behaviour.
+`fd` is the Spacecraft Software-canonical filesystem search tool. It is dramatically faster than `find` on real trees, honours `.gitignore` by default, and uses sensible regex-by-default matching instead of `find`'s glob-by-default behaviour.
 
 `safe_alias_for` is empty: `fd`'s defaults (`.gitignore`-aware, no implicit type, regex-by-default) differ from `find` enough that `alias find=fd` will break common shell idioms. Use `fd` explicitly; reach for `find` when you need POSIX semantics.
 

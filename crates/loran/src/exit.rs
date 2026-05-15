@@ -18,7 +18,7 @@
 //! - a `numeric` exit code, returned to the OS;
 //! - a runnable `hint`, produced via [`ExitCode::hint`] over an
 //!   [`ErrorContext`], following the "tips-thinking" discipline from
-//!   `steelbore-agentic-cli` §5 — every error response must show the
+//!   `spacecraft-agentic-cli` §5 — every error response must show the
 //!   user a command they can paste to recover.
 
 use std::fmt;

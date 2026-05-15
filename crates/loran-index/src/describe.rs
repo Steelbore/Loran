@@ -4,14 +4,14 @@
 //! `DescribeIngestor` — synthesize Loran pages from SFRS-compliant
 //! `<tool> describe --json` output (WP-P3.04).
 //!
-//! Steelbore CLIs are required to implement a `describe` sub-command
+//! Spacecraft Software CLIs are required to implement a `describe` sub-command
 //! that emits an SFRS envelope describing every verb, global flag,
-//! and exit code (`steelbore-cli-standard` §7). This ingester walks a
+//! and exit code (`spacecraft-cli-standard` §7). This ingester walks a
 //! caller-supplied list of binaries, runs `describe --json` against
 //! each with a 5-second timeout, parses the envelope, and synthesises
 //! a baseline [`Page`] per tool. Curated pages overlay on top via the
 //! [`LayeredIngestor`](crate::LayeredIngestor) so hand-written
-//! Steelbore notes always win.
+//! Spacecraft Software notes always win.
 //!
 //! The [`Runner`] trait abstracts subprocess execution so unit tests
 //! can drive the parser and synthesiser without spawning real
@@ -39,9 +39,9 @@ pub const DEFAULT_TIMEOUT: Duration = Duration::from_secs(5);
 /// Canonical category slug for auto-synthesised pages. The bundled
 /// `categories.toml` may not declare it — that's fine: `loran
 /// categories` only enumerates entries it knows about and gracefully
-/// reports `0` counts for any unknown slug. A future Steelbore release
+/// reports `0` counts for any unknown slug. A future Spacecraft Software release
 /// can promote this to a registry entry once the convention settles.
-pub const SYNTH_CATEGORY: &str = "steelbore-cli";
+pub const SYNTH_CATEGORY: &str = "spacecraft-cli";
 
 /// Errors specific to the describe pipeline. They flow up as
 /// [`IngestError::BadSource`] so the surrounding pipeline doesn't
@@ -225,7 +225,7 @@ fn synthesise_page(envelope: DescribeEnvelope) -> Result<Page, DescribeError> {
         .summary
         .clone()
         .filter(|s| !s.trim().is_empty())
-        .unwrap_or_else(|| format!("Steelbore CLI: {tool_name}."));
+        .unwrap_or_else(|| format!("Spacecraft Software CLI: {tool_name}."));
 
     let mut body = String::new();
     body.push_str("## Auto-synthesised from `describe --json`\n\n");
@@ -233,7 +233,7 @@ fn synthesise_page(envelope: DescribeEnvelope) -> Result<Page, DescribeError> {
         "This page is the default fallback Loran generates by invoking the \
          binary's own `describe` sub-command. Override it with a curated \
          entry under `overlays/user/` to replace this with hand-written \
-         Steelbore notes.\n\n",
+         Spacecraft Software notes.\n\n",
     );
     if let Some(version) = envelope.metadata.version.as_deref() {
         let _ = writeln!(body, "**Version:** `{version}`\n");
@@ -431,10 +431,10 @@ mod tests {
         "metadata": {
             "tool": "ferrocast",
             "version": "0.1.0",
-            "website": "https://Ferrocast.Steelbore.com"
+            "website": "https://Ferrocast.SpacecraftSoftware.org"
         },
         "data": {
-            "summary": "Steelbore broadcast packaging tool.",
+            "summary": "Spacecraft Software broadcast packaging tool.",
             "commands": [
                 { "name": "pack", "summary": "Pack a broadcast." },
                 { "name": "verify", "summary": "Verify a broadcast." }
@@ -468,13 +468,13 @@ mod tests {
         let page = synthesise_page(env).expect("page synth ok");
         assert_eq!(page.name, "ferrocast");
         assert_eq!(page.category, SYNTH_CATEGORY);
-        assert!(page.summary.starts_with("Steelbore broadcast"));
+        assert!(page.summary.starts_with("Spacecraft Software broadcast"));
         assert!(page.body.contains("Auto-synthesised"));
         assert!(page.body.contains("pack"));
         assert!(page.body.contains("verify"));
         assert_eq!(
             page.official.as_deref(),
-            Some("https://Ferrocast.Steelbore.com")
+            Some("https://Ferrocast.SpacecraftSoftware.org")
         );
     }
 

@@ -11,7 +11,7 @@ delta	file-viewing	Syntax-highlighting pager for git, diff, and grep output. Sid
 direnv	shell-utilities	Per-directory environment variables. `.envrc` activates on cd, deactivates on leave.
 dog	networking	Modern DNS lookup tool â dig with sane defaults and JSON output.
 dust	file-search	Disk-usage analyser. Shows where space is going in a colour bar-chart, sorted by size.
-eza	file-listing	Modern ls replacement. Steelbore default for file listing.
+eza	file-listing	Modern ls replacement. Spacecraft Software default for file listing.
 fd	file-search	Simple, fast user-friendly alternative to find.
 git-cliff	version-control	Conventional-commit changelog generator. Configurable templates, no JS runtime.
 gron	data-processing	Make JSON greppable. Flattens nested structures into discoverable assignment lines.
@@ -23,7 +23,7 @@ lazygit	version-control	Git TUI with stage-hunk-by-hunk, interactive rebase, and
 lsd	file-listing	Drop-in `ls` replacement with colours and icons. Conservative alternative to eza.
 miller	data-processing	awk for CSV / TSV / JSON / Parquet â name-keyed, schema-aware, streaming.
 procs	process-management	Modern ps replacement with colour, search, and tree view.
-rg	text-search	ripgrep â recursively search files for a regex pattern. The Steelbore default.
+rg	text-search	ripgrep â recursively search files for a regex pattern. The Spacecraft Software default.
 sd	text-search	Intuitive find-and-replace CLI. Literal patterns by default, regex with -r.
 starship	shell-utilities	Cross-shell prompt. One TOML config drives Bash, Zsh, Fish, Nushell, PowerShell, Ion.
 xh	networking	Friendly HTTP client. Re-implementation of HTTPie's UX in Rust with extra polish.

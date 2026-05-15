@@ -4,7 +4,7 @@
 //! Active-distro detection for the overlay engine.
 //!
 //! Spec §5.1 picks the active overlay from `/etc/os-release`. `ID=bravais`
-//! and `ID=ferrite` are the supported Steelbore distro identifiers; any
+//! and `ID=ferrite` are the supported Spacecraft Software distro identifiers; any
 //! other (or no) file falls back to `"generic"`.
 //!
 //! Parsing is forgiving: we only look at the `ID=` line, ignore
@@ -23,7 +23,7 @@ pub const DISTRO_GENERIC: &str = "generic";
 /// elsewhere can use [`detect_distro_id_from`] against fixtures.
 pub const DEFAULT_OS_RELEASE_PATH: &str = "/etc/os-release";
 
-/// Detect the active Steelbore-distro identifier from the host
+/// Detect the active Spacecraft Software-distro identifier from the host
 /// `/etc/os-release`, returning `"generic"` on any failure.
 #[must_use]
 pub fn detect_distro_id() -> String {

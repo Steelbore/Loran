@@ -7,7 +7,7 @@
 //! exercises end-to-end:
 //!
 //! - `DescribeIngestor` against a real subprocess on `$PATH` (a
-//!   tempdir-resident shell script masquerading as a Steelbore CLI).
+//!   tempdir-resident shell script masquerading as a Spacecraft Software CLI).
 //! - The full layered-index precedence chain — synthesised pages sit
 //!   under the bundled catalog, which sits under distro / user
 //!   overlays, all the way through `loran show --json`.
@@ -80,10 +80,10 @@ const FAKE_ENVELOPE: &str = r#"{
     "metadata": {
         "tool": "ferrocast",
         "version": "0.1.0",
-        "website": "https://Ferrocast.Steelbore.com"
+        "website": "https://Ferrocast.SpacecraftSoftware.org"
     },
     "data": {
-        "summary": "Steelbore broadcast packaging tool.",
+        "summary": "Spacecraft Software broadcast packaging tool.",
         "commands": [
             { "name": "pack", "summary": "Pack a broadcast." },
             { "name": "verify", "summary": "Verify a broadcast." }
@@ -116,7 +116,7 @@ fn describe_ingestor_synthesises_page_from_real_subprocess() {
     );
     assert_eq!(
         envelope.pointer("/data/category").and_then(|v| v.as_str()),
-        Some("steelbore-cli")
+        Some("spacecraft-cli")
     );
     assert!(
         envelope
@@ -127,7 +127,7 @@ fn describe_ingestor_synthesises_page_from_real_subprocess() {
     );
     assert_eq!(
         envelope.pointer("/data/official").and_then(|v| v.as_str()),
-        Some("https://Ferrocast.Steelbore.com")
+        Some("https://Ferrocast.SpacecraftSoftware.org")
     );
 }
 
@@ -147,7 +147,7 @@ fn user_overlay_overrides_describe_synthesised_page() {
         .join("loran")
         .join("overlays")
         .join("user")
-        .join("steelbore-cli");
+        .join("spacecraft-cli");
     write(
         &overlay,
         "ferrocast.md",

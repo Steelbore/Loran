@@ -7,7 +7,7 @@
 //!
 //! Phase 1B scaffolding: parses every SFRS global flag, dispatches to
 //! one of twelve sub-commands, and surfaces a custom `--version` /
-//! `--help` footer per Steelbore Standard v1.1 §13.2. Sub-command
+//! `--help` footer per Spacecraft Software Standard v1.1 §13.2. Sub-command
 //! handlers are stubs that emit a "not yet implemented" notice and
 //! exit with [`ExitCode::NotYetImplemented`]; real implementations land
 //! in Sub-phases 1C–1D per `loran-plan-v0_1.md`.

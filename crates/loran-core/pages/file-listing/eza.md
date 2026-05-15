@@ -1,7 +1,7 @@
 +++
 name = "eza"
 category = "file-listing"
-summary = "Modern ls replacement. Steelbore default for file listing."
+summary = "Modern ls replacement. Spacecraft Software default for file listing."
 replaces = ["ls"]
 safe_alias_for = []
 pairs_with = ["bat", "fd"]
@@ -13,9 +13,9 @@ tags = ["filesystem", "tui-friendly"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`eza` is the Steelbore-canonical file lister and is the modern successor to the unmaintained `exa`. It is the default surface every other Steelbore tool assumes when it documents "your file listing".
+`eza` is the Spacecraft Software-canonical file lister and is the modern successor to the unmaintained `exa`. It is the default surface every other Spacecraft Software tool assumes when it documents "your file listing".
 
 ## Recommended aliases
 

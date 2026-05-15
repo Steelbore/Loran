@@ -24,8 +24,8 @@ include = [
 ]
 
 [dependencies]
-loran-pages = { path = "../loran-pages", version = "0.3.0" }
-loran-index = { path = "../loran-index", version = "0.3.0" }
+loran-pages = { path = "../loran-pages", version = "0.4.0" }
+loran-index = { path = "../loran-index", version = "0.4.0" }
 dirs = { workspace = true }
 flate2 = { workspace = true }
 jiff = { workspace = true }
@@ -45,7 +45,7 @@ which = { workspace = true }
 zip = { workspace = true }
 
 [build-dependencies]
-loran-pages = { path = "../loran-pages", version = "0.3.0" }
+loran-pages = { path = "../loran-pages", version = "0.4.0" }
 
 [dev-dependencies]
 criterion = { workspace = true }

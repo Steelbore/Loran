@@ -13,9 +13,9 @@ tags = ["git", "tui-friendly"]
 aliases = ["lg"]
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`lazygit` is the Steelbore TUI of record for git. It does not replace the `git` binary — every action shells out to real `git` — but it eliminates the muscle-memory tax of remembering plumbing flags for staging hunks, reordering commits during a rebase, and resolving merge conflicts.
+`lazygit` is the Spacecraft Software TUI of record for git. It does not replace the `git` binary — every action shells out to real `git` — but it eliminates the muscle-memory tax of remembering plumbing flags for staging hunks, reordering commits during a rebase, and resolving merge conflicts.
 
 The keymap is discoverable: `?` opens context-sensitive help in every panel.
 

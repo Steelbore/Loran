@@ -6,11 +6,11 @@
 //! Loran TUI — `ratatui` application.
 //!
 //! WP-P2.02 ships the shell: panic-safe terminal initialisation,
-//! Steelbore palette, an event loop, a placeholder pane, and the
+//! Spacecraft Software palette, an event loop, a placeholder pane, and the
 //! `q` / `Ctrl-C` quit binding. Subsequent WPs layer the browse,
 //! detail, and fuzzy-search views on top.
 //!
-//! Brand boundary: only curated content uses the Steelbore palette;
+//! Brand boundary: only curated content uses the Spacecraft Software palette;
 //! live `--help` capture frames remain monochrome (Spec §2 decision
 //! #11). The palette set lives in [`theme`] and never bleeds into
 //! the `loran help` rendering path.

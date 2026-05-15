@@ -13,9 +13,9 @@ tags = ["json", "filter"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`jaq` is the Steelbore-canonical JSON filter. It is alias-safe for `jq`: a clean superset of the jq language in the cases that matter, with strict-numeric and arithmetic semantics that are saner than jq's. Performance is consistently 2–10× faster on real workloads.
+`jaq` is the Spacecraft Software-canonical JSON filter. It is alias-safe for `jq`: a clean superset of the jq language in the cases that matter, with strict-numeric and arithmetic semantics that are saner than jq's. Performance is consistently 2–10× faster on real workloads.
 
 ## Recommended aliases
 
@@ -41,5 +41,5 @@ jaq -n '{"now": now}'             # constant input
 
 ## Pairs with
 
-- **xh** — the canonical Steelbore HTTP→JSON pipeline (`xh url | jaq …`).
+- **xh** — the canonical Spacecraft Software HTTP→JSON pipeline (`xh url | jaq …`).
 - **rg** — pre-filter logs with `rg` before piping JSON lines into `jaq`.

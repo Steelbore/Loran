@@ -12,9 +12,9 @@ use crate::envelope::{Envelope, JsonEmitter};
 
 const TOOL_NAME: &str = "loran";
 const TOOL_VERSION: &str = env!("CARGO_PKG_VERSION");
-const MAINTAINER: &str = "Mohamed Hammad <Mohamed.Hammad@Steelbore.com>";
-const WEBSITE: &str = "https://Loran.Steelbore.com/";
-const SOURCE: &str = "https://github.com/Steelbore/Loran";
+const MAINTAINER: &str = "Mohamed Hammad <Mohamed.Hammad@SpacecraftSoftware.org>";
+const WEBSITE: &str = "https://Loran.SpacecraftSoftware.org/";
+const SOURCE: &str = "https://github.com/Spacecraft-Software/Loran";
 
 /// Body payload for `--version --json`.
 #[derive(Serialize)]

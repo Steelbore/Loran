@@ -8,27 +8,27 @@ Copyright (c) 2026 Mohamed Hammad
 | Field          | Value                                                       |
 |----------------|-------------------------------------------------------------|
 | **Project**    | Lodestone                                                   |
-| **Tagline**    | The Steelbore reference manual.                             |
+| **Tagline**    | The Spacecraft Software reference manual.                             |
 | **Version**    | 0.1.0 (specification draft)                                 |
 | **Date**       | 2026-04-29                                                  |
 | **Author**     | Mohamed Hammad                                              |
 | **Copyright**  | (c) 2026 Mohamed Hammad                                     |
 | **License**    | GPL-3.0-or-later                                            |
-| **Governed by**| Steelbore Standard v1.0, Steelbore SFRS v1.0.0              |
+| **Governed by**| Spacecraft Software Standard v1.0, Spacecraft Software SFRS v1.0.0              |
 
 ---
 
 ## 1. Purpose
 
-Lodestone is the canonical, agent-friendly reference tool for Steelbore-based systems (Lattice, Ferrite OS, future distros). It answers three questions in one binary:
+Lodestone is the canonical, agent-friendly reference tool for Spacecraft Software-based systems (Lattice, Ferrite OS, future distros). It answers three questions in one binary:
 
-1. **What tools are available on this system?** — categorised browse of the Steelbore tool catalog.
-2. **What does this tool do, and what does it replace?** — Steelbore-curated intro, then tldr page, then live `--help` as fallback.
+1. **What tools are available on this system?** — categorised browse of the Spacecraft Software tool catalog.
+2. **What does this tool do, and what does it replace?** — Spacecraft Software-curated intro, then tldr page, then live `--help` as fallback.
 3. **What replaces the legacy tool I know?** — `lodestone find ls` → `eza`.
 
-Lodestone is to Steelbore what `man` is to Unix and `info` is to GNU: a system-level reference. Unlike either, it ships agent-native (`--json`, `schema`, MCP) from day one.
+Lodestone is to Spacecraft Software what `man` is to Unix and `info` is to GNU: a system-level reference. Unlike either, it ships agent-native (`--json`, `schema`, MCP) from day one.
 
-The metaphor: a lodestone is a naturally magnetised piece of magnetite that early sailors used as a primitive compass. Lodestone the tool is the user's compass through a Steelbore system.
+The metaphor: a lodestone is a naturally magnetised piece of magnetite that early sailors used as a primitive compass. Lodestone the tool is the user's compass through a Spacecraft Software system.
 
 ---
 
@@ -44,12 +44,12 @@ These are settled and inform the rest of this spec. Listed up front so reviewers
 | 4 | **Category-first browsing** (mirrors the GRUB/parted help affordance the user described).              |
 | 5 | **TUI default with TTY auto-detection** per SFRS §5 cascade. Pipe = `--format json`.                    |
 | 6 | **Tarball update model**, mirroring tldr-pages. No git client dependency at runtime.                    |
-| 7 | **Resolution order:** Steelbore intro (always) → custom page → tldr page → live `--help` → no-entry prompt. |
+| 7 | **Resolution order:** Spacecraft Software intro (always) → custom page → tldr page → live `--help` → no-entry prompt. |
 | 8 | **Page format:** single Markdown file with TOML frontmatter (Hugo/Zola style).                          |
 | 9 | **In-process rendering** of Lodestone pages via `pulldown-cmark` + `ratatui` + `crossterm`. No `bat` for own pages. |
 | 10| **`bat -pp`** as PAGER/MANPAGER for the captured `<tool> --help` subprocess only. Falls back to `cat` if `bat` absent. |
 | 11| **`lodestone new <tool>`** scaffolds pages from a user-editable template, writing to the user overlay by default. |
-| 12| **GPL-3.0-or-later**, SPDX headers on all source files (Steelbore Standard §4).                         |
+| 12| **GPL-3.0-or-later**, SPDX headers on all source files (Spacecraft Software Standard §4).                         |
 
 ---
 
@@ -64,7 +64,7 @@ lodestone/
 ├── LICENSE                          # GPL-3.0-or-later
 ├── AGENTS.md                        # generic agent context
 ├── CLAUDE.md                        # Claude Code-specific context
-├── SKILL.md                         # capability surface for Steelbore Skills
+├── SKILL.md                         # capability surface for Spacecraft Software Skills
 ├── CONTRIBUTING.md
 ├── crates/
 │   ├── lodestone-cli/               # clap binary, dispatcher, exit codes
@@ -121,7 +121,7 @@ No `tokio` in the v1 fast path. Tarball fetch is one synchronous request; everyt
                    │ yes                         │ no
                    ▼                             ▼
         ┌──────────────────────┐   ┌──────────────────────┐
-        │ Render Steelbore     │   │ Skip Steelbore intro │
+        │ Render Spacecraft Software     │   │ Skip Spacecraft Software intro │
         │ intro block (always) │   │                      │
         └──────────┬───────────┘   └──────────┬───────────┘
                    │                          │
@@ -175,7 +175,7 @@ All paths follow XDG Base Directory Specification.
 
 ```
 $XDG_DATA_HOME/lodestone/                  # default: ~/.local/share/lodestone
-├── pages/                                 # upstream Steelbore pages (sync target)
+├── pages/                                 # upstream Spacecraft Software pages (sync target)
 │   ├── meta.toml                          # tarball version, fetched_at
 │   └── <category>/<tool>.md
 ├── overlays/
@@ -200,7 +200,7 @@ $XDG_CONFIG_HOME/lodestone/                # default: ~/.config/lodestone
 
 Lowest to highest:
 
-1. `pages/` — upstream Steelbore pages (synced via tarball)
+1. `pages/` — upstream Spacecraft Software pages (synced via tarball)
 2. `overlays/<active-distro>/` — distro-specific overrides (Lattice or Ferrite OS)
 3. `overlays/user/` — user customisations
 
@@ -219,19 +219,19 @@ Single Markdown file with TOML frontmatter, fenced by `+++`.
 name      = "eza"
 category  = "file-listing"
 replaces  = ["ls"]
-summary   = "Modern ls replacement. Steelbore default for file listing."
+summary   = "Modern ls replacement. Spacecraft Software default for file listing."
 official  = "https://eza.rocks"
 tldr_page = "eza"                  # key into tldr cache; omit to disable tldr lookup
 language  = "rust"                 # optional metadata
-since     = "lattice@0.1"          # optional: first Steelbore release shipping it
+since     = "lattice@0.1"          # optional: first Spacecraft Software release shipping it
 tags      = ["filesystem", "tui-friendly"]
 +++
 
-## Steelbore Notes
+## Spacecraft Software Notes
 
-`eza` is the Steelbore-canonical file lister. Aliased to `ls` in the
+`eza` is the Spacecraft Software-canonical file lister. Aliased to `ls` in the
 default Lattice shell profile (Nushell). Honours `LS_COLORS` and the
-Steelbore palette via the `EZA_COLORS` environment variable.
+Spacecraft Software palette via the `EZA_COLORS` environment variable.
 
 ## Recommended Aliases
 
@@ -260,7 +260,7 @@ alias tree = eza --tree
 | `tldr_page`| string          | no       | tldr key. Defaults to `name` if omitted; set to "" to disable. |
 | `tags`     | array<string>   | no       | Free-form, surfaced in `lodestone search`.         |
 | `language` | string          | no       | Implementation language. Surfaces a "🦀" badge in TUI for `rust`. |
-| `since`    | string          | no       | First Steelbore release shipping this tool.        |
+| `since`    | string          | no       | First Spacecraft Software release shipping this tool.        |
 | `aliases`  | array<string>   | no       | Alternative spellings (e.g. ripgrep ↔ rg).         |
 
 Validated by `lodestone-pages` at index build time. Index build fails loud on schema violations — no silent skipping.
@@ -293,7 +293,7 @@ Noun-verb per SFRS §2 Rule 7. Verbs in the canonical set where applicable.
 |------------------------------------|-----------------------------------------------------------------------|
 | `lodestone`                        | TUI if TTY, else `lodestone list --json`. Auto-detection per SFRS §5. |
 | `lodestone list`                   | List tools (filterable). Honours `--category`, `--replaces`, `--fields`. |
-| `lodestone show <tool>`            | Show resolved page (Steelbore intro + body per §4 chain).             |
+| `lodestone show <tool>`            | Show resolved page (Spacecraft Software intro + body per §4 chain).             |
 | `lodestone find <legacy>`          | Reverse lookup: which tool replaces `<legacy>`?                       |
 | `lodestone search <query>`         | Fuzzy search across name, summary, replaces, tags.                    |
 | `lodestone categories`             | List categories with counts. JSON-friendly.                           |
@@ -304,7 +304,7 @@ Noun-verb per SFRS §2 Rule 7. Verbs in the canonical set where applicable.
 | `lodestone describe`               | Self-description manifest for agents. SFRS §4.                        |
 | `lodestone mcp`                    | Run as MCP server over stdio. Phase 3.                                |
 
-### 7.1 Global flags (SFRS §3, identical across all Steelbore CLIs)
+### 7.1 Global flags (SFRS §3, identical across all Spacecraft Software CLIs)
 
 `--json`, `--format`, `--fields`, `--dry-run`, `--verbose`, `--quiet`, `--no-color`, `--color`, `--help`, `--version`, `--absolute-time`, `--print0`, `--yes`. No deviations.
 
@@ -349,12 +349,12 @@ Per SFRS §6. Example for `lodestone show eza --json`:
     "name": "eza",
     "category": "file-listing",
     "replaces": ["ls"],
-    "summary": "Modern ls replacement. Steelbore default for file listing.",
+    "summary": "Modern ls replacement. Spacecraft Software default for file listing.",
     "official": "https://eza.rocks",
     "tags": ["filesystem", "tui-friendly"],
     "language": "rust",
     "intro": {
-      "source": "steelbore",
+      "source": "spacecraft software",
       "body_md": "..."
     },
     "body": {
@@ -390,17 +390,17 @@ All documented in `lodestone schema` output.
 ## 10. TUI Behaviour
 
 - **Default view (no args, TTY):** category list (left pane) + tool list (right pane). Vim `hjkl` navigation; CUA arrow keys. `/` for fuzzy search, `?` for in-app help.
-- **Detail view:** Steelbore intro block, then body, with a live indicator if `body.kind = "live_help"`. Tab-switchable to raw Markdown and frontmatter views (agent-friendly inspection).
-- **Theme:** Steelbore palette only (Void Navy bg, Molten Amber primary text, Steel Blue structural, Radium Green success, Liquid Coolant info, Red Oxide error). Honours `NO_COLOR`.
+- **Detail view:** Spacecraft Software intro block, then body, with a live indicator if `body.kind = "live_help"`. Tab-switchable to raw Markdown and frontmatter views (agent-friendly inspection).
+- **Theme:** Spacecraft Software palette only (Void Navy bg, Molten Amber primary text, Steel Blue structural, Radium Green success, Liquid Coolant info, Red Oxide error). Honours `NO_COLOR`.
 - **Agent guard rail:** If `AI_AGENT=1` or `AGENT=1` is set, TUI never activates — falls back to `--format json` and warns on stderr per SFRS §5.
 
 ---
 
 ## 11. Tarball Update Mechanism
 
-Modelled on tldr-pages, adjusted for Steelbore.
+Modelled on tldr-pages, adjusted for Spacecraft Software.
 
-- Source: `https://pages.steelbore.org/lodestone/v1/pages.tar.gz` (CDN endpoint TBD; placeholder URL).
+- Source: `https://pages.SpacecraftSoftware.org/lodestone/v1/pages.tar.gz` (CDN endpoint TBD; placeholder URL).
 - Manifest: `pages.json` alongside the tarball, contains version + ETag + SHA-256.
 - Fetch: `ureq` + `rustls`, `If-None-Match` against cached ETag. 304 = no work needed.
 - Verify: SHA-256 against manifest before extraction.
@@ -415,18 +415,18 @@ Modelled on tldr-pages, adjusted for Steelbore.
 
 ### 12.1 Context files (Day-One artifacts)
 
-Per `steelbore-agentic-cli` §2:
+Per `spacecraft-agentic-cli` §2:
 
 - `AGENTS.md` — coding conventions, test commands, repo invariants, forbidden patterns. Generic.
-- `CLAUDE.md` — references to skills (`steelbore-standard`, `steelbore-cli-standard`, `steelbore-agentic-cli`, `rust-guidelines`). Claude-specific.
-- `SKILL.md` — Lodestone's own capability surface for the Steelbore Skills system to consume.
+- `CLAUDE.md` — references to skills (`spacecraft-standard`, `spacecraft-cli-standard`, `spacecraft-agentic-cli`, `rust-guidelines`). Claude-specific.
+- `SKILL.md` — Lodestone's own capability surface for the Spacecraft Software Skills system to consume.
 - `CONTRIBUTING.md` — human onboarding.
 
 All present at repo root from the first commit, before `lodestone-cli` has any sub-commands.
 
 ### 12.2 MCP Surface (Phase 3)
 
-Lodestone's full sub-command count (≈12) is borderline for SFRS §2 Rule 8's MCP threshold. We ship MCP because the read-only ones (`list`, `show`, `find`, `search`, `categories`) are unusually high-value for agents discovering what tools exist on a Steelbore system. Lazy-loading discipline per `steelbore-agentic-cli` §6: `tools/list` advertises names + capability tags only; full schemas come from `tools/get`.
+Lodestone's full sub-command count (≈12) is borderline for SFRS §2 Rule 8's MCP threshold. We ship MCP because the read-only ones (`list`, `show`, `find`, `search`, `categories`) are unusually high-value for agents discovering what tools exist on a Spacecraft Software system. Lazy-loading discipline per `spacecraft-agentic-cli` §6: `tools/list` advertises names + capability tags only; full schemas come from `tools/get`.
 
 ### 12.3 Tips-thinking error catalog
 
@@ -442,7 +442,7 @@ Every error code from §9 has a runnable `hint`. Examples:
 
 ---
 
-## 13. Steelbore Standard §13 Compliance Checklist
+## 13. Spacecraft Software Standard §13 Compliance Checklist
 
 | § | Requirement                            | Status / Note                                                                       |
 |---|----------------------------------------|-------------------------------------------------------------------------------------|
@@ -454,7 +454,7 @@ Every error code from §9 has a runnable `hint`. Examples:
 | 5.1 | POSIX-compliant CLI                  | ✓ SFRS-compliant; default output is POSIX-safe.                                     |
 | 6 | PFA: no tracking, minimal perms, local | ✓ No telemetry. Filesystem + outbound HTTPS to tarball CDN only. All data local.   |
 | 7 | CUA + Vim bindings                     | ✓ Both schemes in TUI.                                                              |
-| 8 | Steelbore palette; Void Navy bg        | ✓ TUI uses palette tokens only.                                                     |
+| 8 | Spacecraft Software palette; Void Navy bg        | ✓ TUI uses palette tokens only.                                                     |
 | 9 | FOSS fonts                             | N/A — terminal app, uses user's terminal font. Docs use Share Tech Mono / Inconsolata. |
 | 10| Material Design / WCAG 2.1 AA          | N/A for v1 (no GUI). WCAG-AA contrast already satisfied by palette per §8.          |
 | 11| ISO 8601 / UTC / 24h / metric          | ✓ All timestamps in JSON envelope and `live_help` captures.                         |
@@ -475,7 +475,7 @@ Ingot is shippable on its own as a useful binary, even before tarball/overlay ma
 
 ## 15. Open Questions for v0.2
 
-1. **Tarball CDN host** — `pages.steelbore.org` is a placeholder. Where does the upstream pages tree actually live, and who runs the publisher pipeline?
+1. **Tarball CDN host** — `pages.SpacecraftSoftware.org` is a placeholder. Where does the upstream pages tree actually live, and who runs the publisher pipeline?
 2. **Overlay distribution** — does the Lattice overlay live in the Lodestone repo or in the Lattice repo? (Coupling vs. cohesion trade-off; I lean toward Lattice repo, surfaced into Lodestone via the tarball pipeline.)
 3. **i18n** — frontmatter has no `language` field for translations. tldr-pages handles this with `pages.<lang>/`. Defer to v1.x or design in now?
 4. **Categories: flat or nested?** — current spec is flat. Nested (`system/file-listing`, `system/text-search`) might scale better as the catalog grows, but complicates the UX. Defer until the catalog hits ~50 entries.
@@ -483,4 +483,4 @@ Ingot is shippable on its own as a useful binary, even before tarball/overlay ma
 
 ---
 
-*Forged in Steelbore.*
+*Forged in Spacecraft Software.*

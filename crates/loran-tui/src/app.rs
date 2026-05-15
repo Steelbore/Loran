@@ -582,7 +582,7 @@ impl App {
                     .add_modifier(Modifier::BOLD),
             ),
             Span::raw("  "),
-            Span::styled("reference manual for Steelbore tools", muted),
+            Span::styled("reference manual for Spacecraft Software tools", muted),
         ]))
         .alignment(Alignment::Left)
         .block(Block::default().borders(Borders::BOTTOM).style(chrome));
@@ -811,7 +811,7 @@ impl App {
         let mut lines: Vec<Line<'static>> = vec![
             Line::from(Span::styled(page.summary.clone(), chrome)),
             Line::from(Span::styled(
-                "Steelbore curated entry · Tab to cycle views".to_owned(),
+                "Spacecraft Software curated entry · Tab to cycle views".to_owned(),
                 muted,
             )),
             Line::raw(""),
@@ -1113,7 +1113,7 @@ mod tests {
              +++\n\
              \n\
              ## {name}\n\n\
-             Steelbore notes for {name}.\n"
+             Spacecraft Software notes for {name}.\n"
         )
     }
 

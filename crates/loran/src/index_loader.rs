@@ -17,7 +17,7 @@
 //! exist (fresh install, no user overlay yet, …).
 //!
 //! Optionally augmented at the lowest precedence by auto-synthesised
-//! Steelbore-CLI pages from [`DescribeIngestor`] when the
+//! Spacecraft Software-CLI pages from [`DescribeIngestor`] when the
 //! `LORAN_DESCRIBE_BINARIES` env var is set (WP-P3.04). Curated
 //! pages always overlay on top.
 

@@ -63,7 +63,7 @@ fn emit_text(result: &FindResult) {
         };
         let _ = writeln!(
             stdout,
-            "no Steelbore tool{} supersedes `{}`",
+            "no Spacecraft Software tool{} supersedes `{}`",
             qualifier, result.query
         );
         let _ = writeln!(stdout, "  hint: loran search {} --json", result.query);

@@ -47,10 +47,10 @@ pub enum ShowResult {
     },
 }
 
-/// "Steelbore intro" block surfaced as `data.intro` in the JSON envelope.
+/// "Spacecraft Software intro" block surfaced as `data.intro` in the JSON envelope.
 #[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct IntroBlock {
-    /// Always `"steelbore"` in v1.
+    /// Always `"spacecraft software"` in v1.
     pub source: &'static str,
     /// Intro markdown — a paragraph derived from the page's `summary`.
     pub body_md: String,
@@ -112,8 +112,8 @@ pub fn resolve_show_with_tldr(index: &Index, tool: &str, tldr: &dyn TldrLookup) 
     };
 
     let intro = IntroBlock {
-        source: "steelbore",
-        body_md: format!("{}\n\nFrom Steelbore curation.", page.summary),
+        source: "spacecraft software",
+        body_md: format!("{}\n\nFrom Spacecraft Software curation.", page.summary),
     };
 
     let tldr_enabled = tldr_plausibly_available(page);
@@ -196,9 +196,9 @@ mod tests {
         match result {
             ShowResult::IndexHit { page, intro, body } => {
                 assert_eq!(page.name, "eza");
-                assert_eq!(intro.source, "steelbore");
+                assert_eq!(intro.source, "spacecraft software");
                 assert!(intro.body_md.starts_with("the summary"));
-                assert!(intro.body_md.contains("From Steelbore curation"));
+                assert!(intro.body_md.contains("From Spacecraft Software curation"));
                 assert_eq!(body.kind, "custom");
                 assert!(body.body_md.contains("body"));
             }

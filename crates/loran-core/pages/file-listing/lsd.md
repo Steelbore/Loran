@@ -13,9 +13,9 @@ tags = ["filesystem", "tui-friendly"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`lsd` (LSDeluxe) is Steelbore's recommended alternative when a user wants something closer to GNU `ls` than `eza`. Argument grammar is `ls`-compatible enough that `alias ls=lsd` rarely breaks scripts that inspect filenames or sizes; that is why `safe_alias_for` includes `ls`.
+`lsd` (LSDeluxe) is Spacecraft Software's recommended alternative when a user wants something closer to GNU `ls` than `eza`. Argument grammar is `ls`-compatible enough that `alias ls=lsd` rarely breaks scripts that inspect filenames or sizes; that is why `safe_alias_for` includes `ls`.
 
 Pick `eza` when you want git integration and tree mode out of the box. Pick `lsd` when you want `ls`-compatible flags with colour + icons and nothing else.
 

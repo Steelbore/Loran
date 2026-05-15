@@ -13,11 +13,11 @@ tags = ["shell", "navigation"]
 aliases = ["z", "zi"]
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
 `zoxide` tracks every directory you `cd` into and ranks them by frecency (frequency × recency). Type `z lor` and it `cd`s into the most-used path matching `lor`; `zi` opens an interactive picker via `fzf`-style filtering.
 
-`safe_alias_for` is empty because `cd` is a shell builtin and the substitution requires the user to alias `cd=z` (or use a separate `z` command). Steelbore recommends installing `zoxide` as `z` and leaving `cd` alone for muscle-memory parity with plain shells.
+`safe_alias_for` is empty because `cd` is a shell builtin and the substitution requires the user to alias `cd=z` (or use a separate `z` command). Spacecraft Software recommends installing `zoxide` as `z` and leaving `cd` alone for muscle-memory parity with plain shells.
 
 ## Recommended setup
 

@@ -13,7 +13,7 @@ tags = ["tabular", "json", "csv"]
 aliases = ["mlr"]
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
 Where `jaq` owns JSON, `miller` (`mlr`) owns tabular data. It speaks CSV, TSV, JSONL, and Parquet natively and lets you reference fields by name rather than positional index — no more `awk -F, '{print $7}'` fragility when columns reorder.
 

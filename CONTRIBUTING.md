@@ -5,7 +5,7 @@ SPDX-FileCopyrightText: 2026 Mohamed Hammad
 
 # Contributing to Loran
 
-Thanks for your interest in **Loran** — the Steelbore reference manual. This document is the human contributor on-ramp; `AGENTS.md`, `CLAUDE.md`, and `SKILL.md` cover the machine / agent side.
+Thanks for your interest in **Loran** — the Spacecraft Software reference manual. This document is the human contributor on-ramp; `AGENTS.md`, `CLAUDE.md`, and `SKILL.md` cover the machine / agent side.
 
 ## Ground rules
 
@@ -55,20 +55,20 @@ Before opening a PR:
 - [ ] `cargo audit` reports no advisories (or new advisories are documented).
 - [ ] If a TODO task is cleared, `loran-todo-v0_1.md` is updated in the same PR.
 - [ ] If spec or PRD behaviour changed, the affected document is updated in the same PR.
-- [ ] New CLI features honour Steelbore SFRS v1.0.0 §3–§11 (global flags, JSON envelope, exit-code map, structured errors to stderr).
+- [ ] New CLI features honour Spacecraft Software SFRS v1.0.0 §3–§11 (global flags, JSON envelope, exit-code map, structured errors to stderr).
 
 ## Maintainer discretion
 
-Per Steelbore Standard v1.1 §5.4: PR acceptance, feature scope, naming, architecture, and roadmap decisions are at the maintainer's sole discretion. Rejection reflects fit, not quality. The maintainer commits to giving honest, specific feedback on rejected PRs so contributors can recalibrate.
+Per Spacecraft Software Standard v1.1 §5.4: PR acceptance, feature scope, naming, architecture, and roadmap decisions are at the maintainer's sole discretion. Rejection reflects fit, not quality. The maintainer commits to giving honest, specific feedback on rejected PRs so contributors can recalibrate.
 
 ## Security reporting
 
-Found a security issue? **Do not file a public issue.** Email the maintainer directly at <Mohamed.Hammad@Steelbore.com> with details and a reproduction. You will receive an acknowledgement within reasonable best-effort time. Coordinated disclosure timelines will be agreed case-by-case; there is no published embargo policy at this stage of the project.
+Found a security issue? **Do not file a public issue.** Email the maintainer directly at <Mohamed.Hammad@SpacecraftSoftware.org> with details and a reproduction. You will receive an acknowledgement within reasonable best-effort time. Coordinated disclosure timelines will be agreed case-by-case; there is no published embargo policy at this stage of the project.
 
 ## Code of conduct
 
-Be kind. Assume good faith. The Steelbore project values rigour over speed and correctness over cleverness; feedback in that spirit is always welcome.
+Be kind. Assume good faith. Spacecraft Software values rigour over speed and correctness over cleverness; feedback in that spirit is always welcome.
 
 ---
 
-*Forged in Steelbore.*
+*Forged in Spacecraft Software.*

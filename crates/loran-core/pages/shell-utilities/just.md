@@ -13,9 +13,9 @@ tags = ["build", "shell"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`just` is the Steelbore replacement for `make` when the goal is a project-local task runner rather than a build system. Recipes are scripts, not declarative dependency graphs; arguments are first-class; tab-indentation rules don't bite.
+`just` is the Spacecraft Software replacement for `make` when the goal is a project-local task runner rather than a build system. Recipes are scripts, not declarative dependency graphs; arguments are first-class; tab-indentation rules don't bite.
 
 `safe_alias_for` is empty because `make`'s rule semantics (file timestamps, implicit rules) are not what `just` offers; aliasing would mislead.
 

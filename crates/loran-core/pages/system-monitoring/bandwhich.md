@@ -13,9 +13,9 @@ tags = ["network", "tui-friendly"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`bandwhich` shows network usage broken down by process, by remote address, and by connection in a single TUI. Steelbore favours it over `iftop` (per-interface) and `nethogs` (per-process but interface-bound) because it correlates all three views simultaneously.
+`bandwhich` shows network usage broken down by process, by remote address, and by connection in a single TUI. Spacecraft Software favours it over `iftop` (per-interface) and `nethogs` (per-process but interface-bound) because it correlates all three views simultaneously.
 
 Requires `CAP_NET_RAW` to inspect packets; install with capabilities or run via `sudo`.
 

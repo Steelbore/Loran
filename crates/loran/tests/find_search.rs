@@ -36,7 +36,7 @@ fn find_strict_mode_only_returns_alias_safe_replacers() {
         .success();
     let stdout = String::from_utf8(strict.get_output().stdout.clone()).unwrap();
     assert!(
-        stdout.contains("no Steelbore tool"),
+        stdout.contains("no Spacecraft Software tool"),
         "expected no-match diagnostic for grep --safe-alias; got {stdout}"
     );
     assert!(stdout.contains("hint: loran search grep"));
@@ -46,7 +46,7 @@ fn find_strict_mode_only_returns_alias_safe_replacers() {
 fn find_empty_result_emits_hint() {
     let assert = loran().args(["find", "no-such-tool"]).assert().success();
     let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
-    assert!(stdout.contains("no Steelbore tool"));
+    assert!(stdout.contains("no Spacecraft Software tool"));
     assert!(stdout.contains("hint: loran search no-such-tool"));
 }
 

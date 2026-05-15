@@ -78,7 +78,7 @@ fn emit_success(cli: &Cli, tool: &str, result: &HelpResult) -> ExitCode {
 
 fn emit_text(tool: &str, result: &HelpResult) {
     let mut stdout = std::io::stdout().lock();
-    // Monochrome ASCII frame — deliberately NOT the Steelbore palette
+    // Monochrome ASCII frame — deliberately NOT the Spacecraft Software palette
     // (Spec §2 decision #11; §4.2 step 3). The brand boundary lives
     // here.
     let header = format!(

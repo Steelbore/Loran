@@ -13,9 +13,9 @@ tags = ["filesystem", "tui-friendly"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`dust` answers "where did my disk go?" in a single screen: a tree of the largest directories sorted by size, with a relative bar chart to the right. It is the Steelbore replacement for the classic `du | sort -h | tail` pipeline.
+`dust` answers "where did my disk go?" in a single screen: a tree of the largest directories sorted by size, with a relative bar chart to the right. It is the Spacecraft Software replacement for the classic `du | sort -h | tail` pipeline.
 
 `safe_alias_for` is empty because `du`'s flag grammar and output format are different; scripts that parse `du -sh` would break with `dust`.
 

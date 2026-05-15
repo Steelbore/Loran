@@ -9,7 +9,7 @@
 
 [file-listing]
 title = "File listing"
-description = "Tools that enumerate filesystem entries — Steelbore's modern ls replacements."
+description = "Tools that enumerate filesystem entries — Spacecraft Software's modern ls replacements."
 
 [file-viewing]
 title = "File viewing"
@@ -17,7 +17,7 @@ description = "Tools that display file contents with syntax highlighting and str
 
 [text-search]
 title = "Text search"
-description = "Tools that search file contents — Steelbore's grep family."
+description = "Tools that search file contents — Spacecraft Software's grep family."
 
 [file-search]
 title = "File search"

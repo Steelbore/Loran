@@ -13,9 +13,9 @@ tags = ["binary", "tui-friendly"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`hexyl` is Steelbore's preferred hex viewer. Output is colour-coded — null bytes, ASCII printable, ASCII whitespace, and high bytes each get their own hue — which makes scanning binary data far faster than monochrome `xxd`.
+`hexyl` is Spacecraft Software's preferred hex viewer. Output is colour-coded — null bytes, ASCII printable, ASCII whitespace, and high bytes each get their own hue — which makes scanning binary data far faster than monochrome `xxd`.
 
 `safe_alias_for` is empty because the output format is not byte-compatible with `xxd` / `hexdump`; tools that parse that output (rare) would break.
 

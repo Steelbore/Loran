@@ -13,9 +13,9 @@ tags = ["git", "release"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`git-cliff` is Steelbore's preferred changelog generator. It reads conventional-commit messages from the git log, applies a template you control, and emits a Markdown changelog ready for release notes. Unlike the Node.js ecosystem alternatives it replaces, it is a single static binary with no runtime dependency.
+`git-cliff` is Spacecraft Software's preferred changelog generator. It reads conventional-commit messages from the git log, applies a template you control, and emits a Markdown changelog ready for release notes. Unlike the Node.js ecosystem alternatives it replaces, it is a single static binary with no runtime dependency.
 
 Drop a `cliff.toml` in the repo root, then:
 

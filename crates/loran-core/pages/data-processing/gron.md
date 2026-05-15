@@ -13,9 +13,9 @@ tags = ["json", "text"]
 aliases = []
 +++
 
-## Steelbore notes
+## Spacecraft Software notes
 
-`gron` flattens JSON into one-line-per-key assignments so you can pipe it to `rg` and discover the exact path you need without learning a query language. Once you know the path, switch to `jaq` for the real extraction. Steelbore recommends `gron` for the discovery phase, `jaq` for the execution phase.
+`gron` flattens JSON into one-line-per-key assignments so you can pipe it to `rg` and discover the exact path you need without learning a query language. Once you know the path, switch to `jaq` for the real extraction. Spacecraft Software recommends `gron` for the discovery phase, `jaq` for the execution phase.
 
 ```sh
 xh api.example.com/users | gron | rg 'email'

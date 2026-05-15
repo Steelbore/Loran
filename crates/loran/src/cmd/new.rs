@@ -152,7 +152,7 @@ pub(crate) fn run(cli: &Cli, args: &NewArgs) -> ExitCode {
 
 /// Resolve the overlay root for `scope`. The `User` scope returns
 /// `$XDG_DATA_HOME/loran/overlays/user/`. The `Upstream` scope honours
-/// `LORAN_UPSTREAM_PATH` (the configured Steelbore-publisher checkout)
+/// `LORAN_UPSTREAM_PATH` (the configured Spacecraft Software-publisher checkout)
 /// until the proper config-file plumbing lands.
 fn overlay_root_for(scope: NewScope) -> Result<PathBuf, String> {
     match scope {
@@ -163,7 +163,7 @@ fn overlay_root_for(scope: NewScope) -> Result<PathBuf, String> {
             Ok(path) if !path.is_empty() => Ok(PathBuf::from(path).join("pages")),
             _ => Err(
                 "`--scope=upstream` requires LORAN_UPSTREAM_PATH set to your \
-                 Steelbore-publisher checkout (config-file support arrives in a \
+                 Spacecraft Software-publisher checkout (config-file support arrives in a \
                  later sub-phase)"
                     .to_owned(),
             ),

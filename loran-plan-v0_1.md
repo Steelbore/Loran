@@ -8,16 +8,16 @@ Copyright (c) 2026 Mohamed Hammad
 | Field           | Value                                                       |
 |-----------------|-------------------------------------------------------------|
 | **Project**     | Loran                                                       |
-| **Tagline**     | The Steelbore reference manual.                             |
+| **Tagline**     | The Spacecraft Software reference manual.                             |
 | **Document**    | Implementation Plan                                         |
 | **Version**     | 0.1.0 (initial draft)                                       |
 | **Date**        | 2026-05-11                                                  |
 | **Author**      | Mohamed Hammad                                              |
-| **Maintainer**  | Mohamed Hammad <Mohamed.Hammad@Steelbore.com>               |
+| **Maintainer**  | Mohamed Hammad <Mohamed.Hammad@SpacecraftSoftware.org>               |
 | **Copyright**   | (c) 2026 Mohamed Hammad                                     |
 | **License**     | GPL-3.0-or-later                                            |
-| **Website**     | https://Loran.Steelbore.com/                                |
-| **Governed by** | Steelbore Standard v1.1, Steelbore SFRS v1.0.0              |
+| **Website**     | https://Loran.SpacecraftSoftware.org/                                |
+| **Governed by** | Spacecraft Software Standard v1.1, Spacecraft Software SFRS v1.0.0              |
 | **PRD**         | `loran-prd-v0_1.md`                                         |
 | **Spec**        | `loran-spec-v0_2.md`                                        |
 
@@ -165,12 +165,12 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 | **Outputs** | `AGENTS.md`, `CLAUDE.md`, `SKILL.md` |
 | **PRD links** | FR-067 (agent context surface) |
 
-**Approach.** AGENTS.md captures repo invariants: Rust-only, GPL-3.0-or-later, SPDX headers required, run `cargo fmt && cargo clippy -- -D warnings && cargo test` before committing, no `unsafe` outside reviewed exceptions, target shells are Nushell and Ion (POSIX sh in scripts). CLAUDE.md adds Claude-Code specific instructions: skills to load (`steelbore-standard`, `steelbore-cli-standard`, `steelbore-agentic-cli`, `rust-guidelines`), reference paths to the spec/PRD/plan. SKILL.md is Loran's own capability surface for the Steelbore Skills system.
+**Approach.** AGENTS.md captures repo invariants: Rust-only, GPL-3.0-or-later, SPDX headers required, run `cargo fmt && cargo clippy -- -D warnings && cargo test` before committing, no `unsafe` outside reviewed exceptions, target shells are Nushell and Ion (POSIX sh in scripts). CLAUDE.md adds Claude-Code specific instructions: skills to load (`spacecraft-standard`, `spacecraft-cli-standard`, `spacecraft-agentic-cli`, `rust-guidelines`), reference paths to the spec/PRD/plan. SKILL.md is Loran's own capability surface for the Spacecraft Software Skills system.
 
 **Acceptance criteria:**
 - [ ] AGENTS.md lists every coding-convention invariant
 - [ ] CLAUDE.md references the four governing skills and the three governing documents
-- [ ] SKILL.md follows Steelbore SKILL format with description and metadata
+- [ ] SKILL.md follows Spacecraft Software SKILL format with description and metadata
 
 ### WP-P0.04 — Cargo workspace skeleton
 
@@ -270,7 +270,7 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 | **Outputs** | A seed catalog of ~25–40 curated pages embedded into the binary via `build.rs` |
 | **PRD links** | M-01, M-02 |
 
-**Approach.** Author curated pages for the Steelbore-canonical tools (eza, bat, rg, fd, procs, bottom, dog, xh, jaq, sd, hyperfine, dust, gitui, helix, nushell, …). Use a `build.rs` script that reads `pages/` at compile time, validates each page via `loran-pages`, and emits a generated `const BUNDLED_PAGES: &[(&str, &str)]` array with relative paths and file contents. The `loran-core` crate exposes a function to construct a `BundledPagesIngestor` from this constant. Validation in `build.rs` means malformed bundled pages break the build, not the binary at runtime.
+**Approach.** Author curated pages for the Spacecraft Software-canonical tools (eza, bat, rg, fd, procs, bottom, dog, xh, jaq, sd, hyperfine, dust, gitui, helix, nushell, …). Use a `build.rs` script that reads `pages/` at compile time, validates each page via `loran-pages`, and emits a generated `const BUNDLED_PAGES: &[(&str, &str)]` array with relative paths and file contents. The `loran-core` crate exposes a function to construct a `BundledPagesIngestor` from this constant. Validation in `build.rs` means malformed bundled pages break the build, not the binary at runtime.
 
 **Acceptance criteria:**
 - [ ] `pages/` tree contains 25+ curated pages
@@ -310,7 +310,7 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 | **Outputs** | The `help` capture engine per spec §4.2 |
 | **PRD links** | FR-020 to FR-025, FR-024a, NFR-034 |
 
-**Approach.** `capture_help(tool_name, opts: HelpOpts) -> HelpResult`. Steps: resolve binary via PATH (using `which` crate or hand-rolled), spawn `Command::new(path).arg("--help")` with no shell, resolve the pager via the §4.2.1 cascade (`opts.pager` override → `$MANPAGER` → `$PAGER` → `bat -pp` if `bat` on PATH → `moor` if `moor` on PATH → `cat`), set `PAGER` and `MANPAGER` to the resolved command in the subprocess env, clear `LESS` only when a step in the Steelbore default chain fired (steps 4–6), enforce 5s timeout via async-or-thread + `kill_on_drop`, capture stdout+stderr, prefer non-empty. On non-zero exit, retry `-h` then `help` subcommand. Returns a typed `HelpResult` with captured text + ISO 8601 UTC capture timestamp + which flag variant succeeded + the resolved pager command + a `PagerSource` enum recording which cascade step won. The `--pager=loran` sentinel is intercepted by the CLI (`loran-cli`) before `HelpOpts` is built — `opts.pager` arrives as `None` from the cascade's perspective but a separate `opts.skip_user_env_pager: bool` is set so steps 2–3 are bypassed. Implementation uses synchronous threads with a wall-clock timer — keeps the v1 fast path async-free per spec §3.3.
+**Approach.** `capture_help(tool_name, opts: HelpOpts) -> HelpResult`. Steps: resolve binary via PATH (using `which` crate or hand-rolled), spawn `Command::new(path).arg("--help")` with no shell, resolve the pager via the §4.2.1 cascade (`opts.pager` override → `$MANPAGER` → `$PAGER` → `bat -pp` if `bat` on PATH → `moor` if `moor` on PATH → `cat`), set `PAGER` and `MANPAGER` to the resolved command in the subprocess env, clear `LESS` only when a step in the Spacecraft Software default chain fired (steps 4–6), enforce 5s timeout via async-or-thread + `kill_on_drop`, capture stdout+stderr, prefer non-empty. On non-zero exit, retry `-h` then `help` subcommand. Returns a typed `HelpResult` with captured text + ISO 8601 UTC capture timestamp + which flag variant succeeded + the resolved pager command + a `PagerSource` enum recording which cascade step won. The `--pager=loran` sentinel is intercepted by the CLI (`loran-cli`) before `HelpOpts` is built — `opts.pager` arrives as `None` from the cascade's perspective but a separate `opts.skip_user_env_pager: bool` is set so steps 2–3 are bypassed. Implementation uses synchronous threads with a wall-clock timer — keeps the v1 fast path async-free per spec §3.3.
 
 **Acceptance criteria:**
 - [ ] Binary resolution via PATH only; argv never trusted as path
@@ -334,7 +334,7 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 | **Outputs** | Markdown body → plain-text rendering for non-TTY output |
 | **PRD links** | NFR-050, NFR-051 |
 
-**Approach.** A single function `render_text(body_md, writer) -> Result<()>` using `pulldown-cmark` events. Headings rendered as plain text with capitalisation; code blocks indented 4 spaces; lists bulleted with `-`; links rendered as `[text](url)`. Output is POSIX-parseable. No ANSI escapes. This is the renderer used when stdout is not a TTY and `--format text` is in effect (or auto-detected). The Steelbore-themed renderer comes in WP-P2.02 alongside the TUI.
+**Approach.** A single function `render_text(body_md, writer) -> Result<()>` using `pulldown-cmark` events. Headings rendered as plain text with capitalisation; code blocks indented 4 spaces; lists bulleted with `-`; links rendered as `[text](url)`. Output is POSIX-parseable. No ANSI escapes. This is the renderer used when stdout is not a TTY and `--format text` is in effect (or auto-detected). The Spacecraft Software-themed renderer comes in WP-P2.02 alongside the TUI.
 
 **Acceptance criteria:**
 - [ ] Output passes through `grep` / `awk` / `cut` cleanly
@@ -471,11 +471,11 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 | **Outputs** | Working `loran help <tool>` per spec §4.2 |
 | **PRD links** | FR-020 to FR-025 |
 
-**Approach.** Dispatches to `loran-core::capture_help`. Text mode wraps the captured output in a monochrome ASCII frame with the `LIVE OUTPUT —` header; never uses the Steelbore palette. JSON mode emits envelope with `body.kind = "live_help"` and `body.captured_at` per spec §8. On `LIVE_HELP_TIMEOUT`, emits the structured error with hint `loran new <tool> --edit`.
+**Approach.** Dispatches to `loran-core::capture_help`. Text mode wraps the captured output in a monochrome ASCII frame with the `LIVE OUTPUT —` header; never uses the Spacecraft Software palette. JSON mode emits envelope with `body.kind = "live_help"` and `body.captured_at` per spec §8. On `LIVE_HELP_TIMEOUT`, emits the structured error with hint `loran new <tool> --edit`.
 
 **Acceptance criteria:**
 - [ ] Working capture for a sample binary on PATH
-- [ ] Frame is monochrome ASCII — NOT Steelbore palette
+- [ ] Frame is monochrome ASCII — NOT Spacecraft Software palette
 - [ ] Header includes ISO 8601 UTC capture timestamp
 - [ ] Timeout error envelopes correctly
 - [ ] JSON `body.kind = "live_help"` confirmed
@@ -625,7 +625,7 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 | **Outputs** | A ratatui app shell that launches, displays a placeholder pane, and exits cleanly |
 | **PRD links** | FR-006 |
 
-**Approach.** `ratatui` + `crossterm`. Event loop, terminal initialisation, panic-safe restoration (terminal restored on Ctrl-C, panic, drop). Theme set up using Steelbore palette tokens from a `loran-render::theme` module. Empty initial app with a placeholder pane and `q` to quit.
+**Approach.** `ratatui` + `crossterm`. Event loop, terminal initialisation, panic-safe restoration (terminal restored on Ctrl-C, panic, drop). Theme set up using Spacecraft Software palette tokens from a `loran-render::theme` module. Empty initial app with a placeholder pane and `q` to quit.
 
 **Acceptance criteria:**
 - [ ] Launches on TTY; exits cleanly on `q`, Ctrl-C, panic, signal
@@ -660,14 +660,14 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 | **Sizing** | M |
 | **Owner crates** | `loran-tui`, `loran-render` |
 | **Inputs** | WP-P2.03, WP-P1.06 |
-| **Outputs** | Rendered Markdown body with Steelbore intro, pairs/safe-alias badges, frontmatter side-panel |
+| **Outputs** | Rendered Markdown body with Spacecraft Software intro, pairs/safe-alias badges, frontmatter side-panel |
 | **PRD links** | FR-013, FR-014, FR-015 |
 
-**Approach.** Add a Markdown-to-`ratatui-text` renderer for the body. Top section: Steelbore intro block. Middle: rendered body. Right sidebar: badges for `pairs_with`, `safe_alias_for`, `written_in` (with 🦀 for rust). Tab cycles through detail, raw Markdown, and frontmatter views (agent-friendly inspection per spec §10).
+**Approach.** Add a Markdown-to-`ratatui-text` renderer for the body. Top section: Spacecraft Software intro block. Middle: rendered body. Right sidebar: badges for `pairs_with`, `safe_alias_for`, `written_in` (with 🦀 for rust). Tab cycles through detail, raw Markdown, and frontmatter views (agent-friendly inspection per spec §10).
 
 **Acceptance criteria:**
 - [ ] Body renders headings, code blocks, lists, links correctly
-- [ ] Steelbore palette applied
+- [ ] Spacecraft Software palette applied
 - [ ] `pairs_with` sidebar populated
 - [ ] `safe_alias_for` badge distinct from `replaces`
 - [ ] 🦀 badge appears for `written_in = "rust"`
@@ -950,7 +950,7 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 
 ## 7. Phase 3 — Bloom (Work Packages)
 
-**Phase outcome (from PRD §14.3):** Loran becomes the primary tool-discovery surface for AI agents on Steelbore systems, and the ecosystem becomes self-documenting via SFRS describe ingestion.
+**Phase outcome (from PRD §14.3):** Loran becomes the primary tool-discovery surface for AI agents on Spacecraft Software systems, and the ecosystem becomes self-documenting via SFRS describe ingestion.
 
 ### WP-P3.01 — Full JSON Schema emission
 
@@ -1018,7 +1018,7 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 | **Sizing** | M |
 | **Owner crates** | `loran-index` |
 | **Inputs** | WP-P1.02 (Ingestor trait) |
-| **Outputs** | A new `Ingestor` impl that spawns `<tool> describe --json` against allowlisted Steelbore binaries |
+| **Outputs** | A new `Ingestor` impl that spawns `<tool> describe --json` against allowlisted Spacecraft Software binaries |
 | **PRD links** | FR-071, FR-072, FR-073 |
 
 **Approach.** Implements `DescribeIngestor`. Allowlist of trusted binary names lives in the upstream pages tarball as `trusted_describe.toml`. For each name, resolve via `$PATH`, spawn with sandbox per WP-P1.05's invariants, parse SFRS-§4 describe JSON, synthesise a baseline `Page`. Curated pages overlay on top.
@@ -1080,7 +1080,7 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 | **Outputs** | End-to-end tests for MCP, schema emission, DescribeIngestor |
 | **PRD links** | All Phase 3 FRs |
 
-**Approach.** MCP tests via `rmcp` test harness invoking every read-only verb and confirming write verbs are rejected. Schema tests validate against the JSON Schema Draft 2020-12 meta-schema. DescribeIngestor tests with mock Steelbore-style describe-output binaries.
+**Approach.** MCP tests via `rmcp` test harness invoking every read-only verb and confirming write verbs are rejected. Schema tests validate against the JSON Schema Draft 2020-12 meta-schema. DescribeIngestor tests with mock Spacecraft Software-style describe-output binaries.
 
 **Acceptance criteria:**
 - [ ] MCP test suite covers all 5 read-only verbs + rejection of write verbs
@@ -1154,7 +1154,7 @@ These run alongside all phases. None has a fixed phase; each starts in Phase 0 a
 | **Owner** | `pages/` (this repo) + per-distro repos |
 | **PRD links** | M-01, M-02, M-03 |
 
-**Approach.** Page authoring is distinct from page tooling. Initial seed catalog (Phase 1, ~25–40 pages) covers the most-frequently-used legacy-replacement tools (eza, bat, rg, fd, procs, bottom, dog, xh, jaq, etc.). Phase 2 adds another 50+ to bring Bravais default-install coverage above 80% (M-01). Phase 3 leans on `DescribeIngestor` to auto-cover Steelbore-native CLIs.
+**Approach.** Page authoring is distinct from page tooling. Initial seed catalog (Phase 1, ~25–40 pages) covers the most-frequently-used legacy-replacement tools (eza, bat, rg, fd, procs, bottom, dog, xh, jaq, etc.). Phase 2 adds another 50+ to bring Bravais default-install coverage above 80% (M-01). Phase 3 leans on `DescribeIngestor` to auto-cover Spacecraft Software-native CLIs.
 
 **Acceptance criteria:**
 - [ ] Phase 1 ships with 25+ curated pages
@@ -1463,8 +1463,8 @@ Tag `v1.x` (where x ≥ 1) for Bloom:
 - [ ] All FRs from PRD §8 pass integration tests.
 - [ ] All NFRs from PRD §9 met.
 - [ ] MCP server invokable by Claude Code, Codex CLI, and Cursor with no special configuration.
-- [ ] `DescribeIngestor` ingests at least 3 other Steelbore CLIs in test (M-07).
-- [ ] At least 3 Steelbore CLIs reference `loran show <self>` in their `--help` (M-08).
+- [ ] `DescribeIngestor` ingests at least 3 other Spacecraft Software CLIs in test (M-07).
+- [ ] At least 3 Spacecraft Software CLIs reference `loran show <self>` in their `--help` (M-08).
 - [ ] Open Question 1 (minisign key rotation) resolved and documented.
 - [ ] Standard §14 compliance checklist run.
 - [ ] CHANGELOG entry written.
@@ -1485,12 +1485,12 @@ Tag `v1.x` (where x ≥ 1) for Bloom:
 - `compliance-log.md` — Standard §14 audit log.
 - `CHANGELOG.md` — Release history.
 
-### 14.2 Steelbore standards & skills
+### 14.2 Spacecraft Software standards & skills
 
-- **The Steelbore Standard v1.1** — Naming, priorities, license, posture, platform, PFA, key bindings, palette, fonts, UI/UX, time, attribution.
-- **Steelbore SFRS v1.0.0** — Dual-Mode Self-Documenting CLI Framework.
-- **Steelbore Agentic-CLI Standard** — Agentic surface conventions.
-- **Steelbore Rust Guidelines** — Crate choices, `unsafe` policy, error handling.
+- **The Spacecraft Software Standard v1.1** — Naming, priorities, license, posture, platform, PFA, key bindings, palette, fonts, UI/UX, time, attribution.
+- **Spacecraft Software SFRS v1.0.0** — Dual-Mode Self-Documenting CLI Framework.
+- **Spacecraft Software Agentic-CLI Standard** — Agentic surface conventions.
+- **Spacecraft Software Rust Guidelines** — Crate choices, `unsafe` policy, error handling.
 
 ### 14.3 External
 
@@ -1503,4 +1503,4 @@ Tag `v1.x` (where x ≥ 1) for Bloom:
 
 ---
 
-*Forged in Steelbore.*
+*Forged in Spacecraft Software.*

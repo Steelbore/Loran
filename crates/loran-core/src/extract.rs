@@ -5,7 +5,7 @@
 //!
 //! Two archive formats are supported:
 //!
-//! - **gzipped tarball** ([`extract_tarball`]) — the Steelbore upstream
+//! - **gzipped tarball** ([`extract_tarball`]) — the Spacecraft Software upstream
 //!   pages format per Spec §11. Decoded with `flate2::GzDecoder` →
 //!   `tar::Archive`.
 //! - **zip** ([`extract_zip`]) — the tldr-pages format per Spec §11.

@@ -273,10 +273,10 @@ mod tests {
 
     #[test]
     fn overlay_overrides_summary_without_restating_category() {
-        let src = "+++\nname = \"eza\"\nsummary = \"Steelbore-tuned ls.\"\n+++\n";
+        let src = "+++\nname = \"eza\"\nsummary = \"Spacecraft Software-tuned ls.\"\n+++\n";
         let overlay = OverlayPage::parse(src).unwrap();
         let merged = base_eza().merge_overlay(overlay).unwrap();
-        assert_eq!(merged.summary, "Steelbore-tuned ls.");
+        assert_eq!(merged.summary, "Spacecraft Software-tuned ls.");
         assert_eq!(merged.category, "file-listing");
         assert_eq!(merged.replaces, vec!["ls"]);
     }

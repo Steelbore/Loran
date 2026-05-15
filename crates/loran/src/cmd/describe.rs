@@ -52,7 +52,7 @@ pub(crate) fn run(_cli: &Cli, _args: &DescribeArgs) -> ExitCode {
     ExitCode::from(0)
 }
 
-/// Capability-tag taxonomy per `steelbore-agentic-cli` §4:
+/// Capability-tag taxonomy per `spacecraft-agentic-cli` §4:
 ///
 /// - `read-only` — does not modify any state on disk or network.
 /// - `network` — performs outbound network I/O.
