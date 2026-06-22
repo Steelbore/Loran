@@ -13,9 +13,11 @@
 //! in Sub-phases 1C–1D per `loran-plan-v0_1.md`.
 
 mod agent;
+mod autoupdate;
 mod cli;
 mod cmd;
 mod color;
+mod config;
 mod envelope;
 mod exit;
 mod index_loader;
@@ -43,6 +45,11 @@ fn main() -> ExitCode {
     }
 
     if let Some(cmd) = cli.command.as_ref() {
+        // Opt-in: refresh a stale catalog before the catalog read verbs
+        // build their index, so they see the freshly downloaded pages.
+        if is_catalog_read_verb(cmd) {
+            autoupdate::maybe_refresh(&cli);
+        }
         match cmd {
             Command::Categories(args) => cmd::categories::run(&cli, args),
             Command::Describe(args) => cmd::describe::run(&cli, args),
@@ -74,6 +81,22 @@ fn main() -> ExitCode {
     }
 }
 
+/// Whether a sub-command reads the curated catalog index (and so
+/// benefits from an opt-in pre-read auto-update). `update`, `new`,
+/// `validate`, `describe`, `schema`, `help`, and the `mcp` server are
+/// deliberately excluded — the maintenance verbs manage the catalog
+/// themselves and `mcp` must stay free of surprise network I/O.
+fn is_catalog_read_verb(cmd: &Command) -> bool {
+    matches!(
+        cmd,
+        Command::Categories(_)
+            | Command::Find(_)
+            | Command::List(_)
+            | Command::Search(_)
+            | Command::Show(_)
+    )
+}
+
 /// Decide whether to launch the TUI for the no-subcommand path.
 ///
 /// Mirrors the SFRS §5 agent cascade: explicit JSON / agent env / pipe
@@ -101,6 +124,8 @@ fn should_launch_tui(cli: &Cli) -> bool {
 }
 
 fn launch_tui(cli: &Cli) -> ExitCode {
+    // The interactive browser is a catalog read surface too.
+    autoupdate::maybe_refresh(cli);
     let index = match index_loader::build_layered_index_with_overlay(cli.global.overlay.as_deref())
     {
         Ok(idx) => idx,

@@ -83,6 +83,12 @@ pub(crate) struct GlobalFlags {
     #[arg(long, global = true)]
     pub yes: bool,
 
+    /// Suppress all network access for this invocation: disables the
+    /// opt-in catalog auto-update. (`loran update` still errors loudly
+    /// rather than silently succeeding.)
+    #[arg(long, global = true)]
+    pub offline: bool,
+
     /// Pin the active distro overlay layer by name (e.g. `bravais`,
     /// `ferrite`). Highest-precedence override — beats
     /// `LORAN_DISTRO_OVERRIDE` and `/etc/os-release`. Useful for
@@ -284,7 +290,14 @@ pub(crate) struct UpdateArgs {
 }
 
 #[derive(Debug, Args)]
-pub(crate) struct ValidateArgs {}
+pub(crate) struct ValidateArgs {
+    /// Validate this directory as an upstream-strict pages tree (full
+    /// pages only) instead of the on-disk overlay roots under
+    /// `$XDG_DATA_HOME/loran/`. Intended for CI gating a pages repo,
+    /// e.g. `loran validate pages/`.
+    #[arg(value_name = "ROOT")]
+    pub root: Option<std::path::PathBuf>,
+}
 
 #[derive(Debug, Args)]
 pub(crate) struct SchemaArgs {

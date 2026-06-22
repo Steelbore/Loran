@@ -57,27 +57,38 @@ struct ValidateData {
     errors: Vec<ValidationError>,
 }
 
-pub(crate) fn run(cli: &Cli, _args: &ValidateArgs) -> ExitCode {
-    let Some(data_dir) = loran_core::data_home() else {
-        emit_no_data_dir(cli);
-        return ExitCode::from(LoranExit::PermissionDenied.to_process_code());
+pub(crate) fn run(cli: &Cli, args: &ValidateArgs) -> ExitCode {
+    // Explicit `loran validate <ROOT>`: validate a single tree as
+    // upstream-strict (full pages only). Lets CI gate a pages repo
+    // without provisioning `$XDG_DATA_HOME`. Otherwise fall back to
+    // walking the on-disk overlay roots.
+    let roots: Vec<(&'static str, PathBuf, LayerKind)> = if let Some(root) = &args.root {
+        if !root.is_dir() {
+            emit_bad_root(cli, root);
+            return ExitCode::from(LoranExit::UsageError.to_process_code());
+        }
+        vec![("upstream", root.clone(), LayerKind::Upstream)]
+    } else {
+        let Some(data_dir) = loran_core::data_home() else {
+            emit_no_data_dir(cli);
+            return ExitCode::from(LoranExit::PermissionDenied.to_process_code());
+        };
+        let loran_root = data_dir.join("loran");
+        let distro = active_distro();
+        vec![
+            ("upstream", loran_root.join("pages"), LayerKind::Upstream),
+            (
+                "distro",
+                loran_root.join("overlays").join(&distro),
+                LayerKind::Overlay,
+            ),
+            (
+                "user",
+                loran_root.join("overlays").join("user"),
+                LayerKind::Overlay,
+            ),
+        ]
     };
-    let loran_root = data_dir.join("loran");
-    let distro = active_distro();
-
-    let roots: [(&'static str, PathBuf, LayerKind); 3] = [
-        ("upstream", loran_root.join("pages"), LayerKind::Upstream),
-        (
-            "distro",
-            loran_root.join("overlays").join(&distro),
-            LayerKind::Overlay,
-        ),
-        (
-            "user",
-            loran_root.join("overlays").join("user"),
-            LayerKind::Overlay,
-        ),
-    ];
 
     let mut data = ValidateData {
         valid: 0,
@@ -323,6 +334,29 @@ fn emit_no_data_dir(cli: &Cli) {
                 code.numeric(),
                 msg,
                 &hint,
+                "loran validate",
+                None,
+            );
+            let _ = JsonEmitter::stdio().emit_error(&envelope);
+        }
+        Format::Human => {
+            eprintln!("error: {msg}");
+            eprintln!("  hint: {hint}");
+        }
+    }
+}
+
+fn emit_bad_root(cli: &Cli, root: &Path) {
+    let code = LoranExit::UsageError;
+    let msg = format!("validate root is not a directory: {}", root.display());
+    let hint = "pass a directory of pages, e.g. `loran validate pages/`";
+    match cli.output_format() {
+        Format::Json => {
+            let envelope = ErrorEnvelope::new(
+                code.name(),
+                code.numeric(),
+                &msg,
+                hint,
                 "loran validate",
                 None,
             );

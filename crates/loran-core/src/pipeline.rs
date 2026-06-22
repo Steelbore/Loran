@@ -51,30 +51,41 @@ pub const TLDR_PAGES_URL: &str = "https://tldr-pages.github.io/assets/tldr.zip";
 
 /// Publisher manifest URL.
 ///
-/// **Placeholder.** The real upstream CDN endpoint is selected when
-/// the publisher pipeline (Sub-phase 2D) launches. Until then this URL
-/// will fail a manifest fetch — that's by design, so a `loran update`
-/// against an un-launched publisher fails loud rather than silently.
+/// Served from the `Spacecraft-Software/loran-pages` content repo as a
+/// GitHub Release asset on the moving `latest` release, so the URL
+/// always resolves to the most recently published catalog (the same
+/// `releases/latest/download/…` pattern tldr-pages clients use). The
+/// 302 redirect to GitHub's asset CDN carries an `ETag`, which the
+/// conditional-GET path in [`FetchClient::fetch_manifest`] relies on.
+///
+/// Until the publisher pipeline cuts its first release this asset 404s
+/// — by design, so a `loran update` against an un-launched publisher
+/// fails loud rather than silently.
 pub const PUBLISHER_PAGES_MANIFEST_URL: &str =
-    "https://Loran.SpacecraftSoftware.org/pages/v1/pages.json";
+    "https://github.com/Spacecraft-Software/loran-pages/releases/latest/download/pages.json";
 
-/// Publisher tarball URL. Placeholder; see [`PUBLISHER_PAGES_MANIFEST_URL`].
+/// Publisher tarball URL. See [`PUBLISHER_PAGES_MANIFEST_URL`].
 pub const PUBLISHER_PAGES_TARBALL_URL: &str =
-    "https://Loran.SpacecraftSoftware.org/pages/v1/pages.tar.gz";
+    "https://github.com/Spacecraft-Software/loran-pages/releases/latest/download/pages.tar.gz";
 
 /// Publisher detached signature URL (minisign `.minisig`).
-/// Placeholder; see [`PUBLISHER_PAGES_MANIFEST_URL`].
-pub const PUBLISHER_PAGES_SIG_URL: &str =
-    "https://Loran.SpacecraftSoftware.org/pages/v1/pages.tar.gz.minisig";
+/// See [`PUBLISHER_PAGES_MANIFEST_URL`].
+pub const PUBLISHER_PAGES_SIG_URL: &str = "https://github.com/Spacecraft-Software/loran-pages/releases/latest/download/pages.tar.gz.minisig";
 
 /// Publisher's minisign public key.
 ///
-/// **Placeholder — development key, NOT for production use.** Real
-/// upstream releases replace this with the publisher's actual public
-/// key as part of the Sub-phase 2D launch. Until then this constant
-/// is the same test key as `signing::tests::TEST_PUBLIC_KEY`, embedded
-/// here so the orchestration code compiles and unit tests can exercise
-/// the verify step.
+/// **Placeholder — development key, NOT for production use.**
+///
+/// TODO(launch): replace with the real `loran-pages` publisher public
+/// key before the first signed release. Generate the keypair with
+/// `nix shell nixpkgs#minisign -c minisign -G`, paste the public half
+/// here, and store the secret key + password as the `MINISIGN_SECRET_KEY`
+/// / `MINISIGN_PASSWORD` secrets in the `loran-pages` repo (see
+/// `OPERATIONS.md` → "Producing & publishing the pages tarball").
+/// Until then this constant is the same test key as
+/// `signing::tests::TEST_PUBLIC_KEY`, embedded here so the
+/// orchestration code compiles and unit tests can exercise the verify
+/// step.
 ///
 /// Key rotation: a new Loran release ships a new value here. Older
 /// binaries fetching tarballs signed by a rotated key fail with

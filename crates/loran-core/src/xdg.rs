@@ -39,6 +39,17 @@ pub fn cache_home() -> Option<PathBuf> {
     env_path("XDG_CACHE_HOME").or_else(dirs::cache_dir)
 }
 
+/// Resolve the base config-home directory (where Loran reads its
+/// `config.toml`).
+///
+/// Order of precedence:
+/// 1. `$XDG_CONFIG_HOME` (any platform, when non-empty).
+/// 2. `dirs::config_dir()` (native convention per platform).
+#[must_use]
+pub fn config_home() -> Option<PathBuf> {
+    env_path("XDG_CONFIG_HOME").or_else(dirs::config_dir)
+}
+
 fn env_path(key: &str) -> Option<PathBuf> {
     std::env::var_os(key)
         .map(PathBuf::from)
