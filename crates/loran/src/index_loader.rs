@@ -4,17 +4,22 @@
 //! Shared index builder for the read-side verbs (`show`, `list`,
 //! `find`, `search`, `categories`).
 //!
-//! Combines three precedence layers per Spec §5.1:
+//! Combines the following precedence layers per Spec §5.1 (lowest to
+//! highest):
 //!
 //! 1. Bundled upstream pages — compiled into the binary via
-//!    [`BundledPagesIngestor`].
-//! 2. `$XDG_DATA_HOME/loran/overlays/<distro>/` — distro overlay,
+//!    [`BundledPagesIngestor`]. The always-available offline core.
+//! 2. `$XDG_DATA_HOME/loran/pages/` — the downloaded upstream catalog
+//!    written by `loran update`. Overrides bundled pages by name and
+//!    contributes any pages the offline core doesn't carry. Absent
+//!    until the first successful update.
+//! 3. `$XDG_DATA_HOME/loran/overlays/<distro>/` — distro overlay,
 //!    resolved from `/etc/os-release` or the `LORAN_DISTRO_OVERRIDE`
 //!    env var.
-//! 3. `$XDG_DATA_HOME/loran/overlays/user/` — user overlay.
+//! 4. `$XDG_DATA_HOME/loran/overlays/user/` — user overlay.
 //!
-//! Either overlay root is skipped silently when its directory doesn't
-//! exist (fresh install, no user overlay yet, …).
+//! Every on-disk layer is skipped silently when its directory doesn't
+//! exist (fresh install, no update yet, no user overlay yet, …).
 //!
 //! Optionally augmented at the lowest precedence by auto-synthesised
 //! Spacecraft Software-CLI pages from [`DescribeIngestor`] when the
@@ -23,7 +28,8 @@
 
 use loran_core::BundledPagesIngestor;
 use loran_index::{
-    DescribeIngestor, Index, Ingestor, LayeredIngestor, OverlayLayer, detect_distro_id,
+    DescribeIngestor, Index, Ingestor, LayeredIngestor, MarkdownPagesIngestor, OverlayLayer,
+    detect_distro_id,
 };
 
 /// Build the merged read-side index, optionally overriding the
@@ -61,6 +67,25 @@ pub(crate) fn build_layered_index_with_overlay(
     for page in bundled {
         by_name.insert(page.name.clone(), page);
     }
+
+    // The downloaded upstream catalog (`loran update` extracts it to
+    // `$XDG_DATA_HOME/loran/pages/`) overrides the compiled-in bundled
+    // pages by name and supplies any the offline core lacks. This is
+    // what closes the update→read loop: without it, `loran update`
+    // would refresh a tree nothing ever reads. Skipped until the first
+    // successful update creates the directory.
+    if let Some(data_dir) = loran_core::data_home() {
+        let pages_dir = data_dir.join("loran").join("pages");
+        if pages_dir.is_dir() {
+            let downloaded = MarkdownPagesIngestor::new(&pages_dir)
+                .ingest()
+                .map_err(|e| format!("upstream pages ingest failed: {e}"))?;
+            for page in downloaded {
+                by_name.insert(page.name.clone(), page);
+            }
+        }
+    }
+
     let merged_base: Vec<loran_pages::Page> = by_name.into_values().collect();
 
     let layers = on_disk_overlay_layers(overlay_override);

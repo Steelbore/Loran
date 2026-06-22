@@ -189,3 +189,104 @@ fn show_miss_json_mode_emits_error_envelope_with_hint() {
         .expect("timestamp present");
     assert!(ts.ends_with('Z'), "timestamp must end with Z: {ts}");
 }
+
+/// Closed-loop proof: a tool present only in the downloaded upstream
+/// tree (`$XDG_DATA_HOME/loran/pages/`, where `loran update` extracts
+/// the verified tarball) must surface from `loran show`. Before the
+/// `index_loader` fix this directory was written but never read.
+#[test]
+fn show_surfaces_downloaded_upstream_introduced_tool() {
+    let xdg = tempfile::TempDir::new().unwrap();
+    let upstream = xdg
+        .path()
+        .join("loran")
+        .join("pages")
+        .join("data-processing");
+    std::fs::create_dir_all(&upstream).unwrap();
+    std::fs::write(
+        upstream.join("dasel.md"),
+        "+++\n\
+         name = \"dasel\"\n\
+         category = \"data-processing\"\n\
+         summary = \"Query and modify data structures from the shell.\"\n\
+         +++\n",
+    )
+    .unwrap();
+
+    let assert = loran()
+        .args(["show", "dasel", "--json"])
+        .env("XDG_DATA_HOME", xdg.path())
+        .env("LORAN_DISTRO_OVERRIDE", "generic")
+        .assert()
+        .success();
+    let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
+    let envelope: serde_json::Value = serde_json::from_str(&stdout).unwrap();
+    assert_eq!(
+        envelope.pointer("/data/name").and_then(|v| v.as_str()),
+        Some("dasel"),
+        "downloaded upstream pages must surface in the read index"
+    );
+}
+
+/// Precedence chain per Spec §5.1: bundled < downloaded upstream <
+/// user overlay. A downloaded page overrides the compiled-in bundled
+/// one, and the user overlay overrides the downloaded one in turn.
+#[test]
+fn show_precedence_bundled_below_downloaded_below_user_overlay() {
+    let xdg = tempfile::TempDir::new().unwrap();
+    let loran_root = xdg.path().join("loran");
+
+    // Downloaded upstream override of the bundled `eza` page.
+    let upstream = loran_root.join("pages").join("file-listing");
+    std::fs::create_dir_all(&upstream).unwrap();
+    std::fs::write(
+        upstream.join("eza.md"),
+        "+++\n\
+         name = \"eza\"\n\
+         category = \"file-listing\"\n\
+         summary = \"Downloaded upstream summary.\"\n\
+         +++\n",
+    )
+    .unwrap();
+
+    // Downloaded upstream beats bundled.
+    let assert = loran()
+        .args(["show", "eza", "--json"])
+        .env("XDG_DATA_HOME", xdg.path())
+        .env("LORAN_DISTRO_OVERRIDE", "generic")
+        .assert()
+        .success();
+    let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
+    let envelope: serde_json::Value = serde_json::from_str(&stdout).unwrap();
+    assert_eq!(
+        envelope.pointer("/data/summary").and_then(|v| v.as_str()),
+        Some("Downloaded upstream summary."),
+        "downloaded upstream must override bundled"
+    );
+
+    // Now add a user overlay; it must win over the downloaded page.
+    let user_overlay = loran_root
+        .join("overlays")
+        .join("user")
+        .join("file-listing");
+    std::fs::create_dir_all(&user_overlay).unwrap();
+    std::fs::write(
+        user_overlay.join("eza.md"),
+        "+++\nname = \"eza\"\nsummary = \"User-pinned summary.\"\n+++\n",
+    )
+    .unwrap();
+
+    let assert = loran()
+        .args(["show", "eza", "--json"])
+        .env("XDG_DATA_HOME", xdg.path())
+        .env("LORAN_DISTRO_OVERRIDE", "generic")
+        .assert()
+        .success();
+    let stdout = String::from_utf8(assert.get_output().stdout.clone()).unwrap();
+    let envelope: serde_json::Value = serde_json::from_str(&stdout).unwrap();
+    assert_eq!(
+        envelope.pointer("/data/summary").and_then(|v| v.as_str()),
+        Some("User-pinned summary."),
+        "user overlay must override the downloaded upstream page"
+    );
+}
