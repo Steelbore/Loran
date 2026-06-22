@@ -58,4 +58,4 @@ pub use search::{ScoredMatch, SearchResult, resolve_search};
 pub use show::{BodyBlock, IntroBlock, ShowResult, resolve_show, resolve_show_with_tldr};
 pub use signing::{SignError, verify as verify_minisign, verify_any as verify_minisign_any};
 pub use tldr::{DEFAULT_PLATFORMS, NoTldr, TldrCache, TldrLookup};
-pub use xdg::{cache_home, data_home};
+pub use xdg::{cache_home, config_home, data_home};

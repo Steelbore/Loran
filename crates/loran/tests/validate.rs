@@ -205,3 +205,62 @@ fn validate_categorises_invalid_toml_with_line_number() {
         Some("INVALID_TOML")
     );
 }
+
+// `loran validate <ROOT>` — validate an arbitrary tree as
+// upstream-strict, the CI gate for a pages repo.
+
+#[test]
+fn validate_root_arg_succeeds_on_valid_tree() {
+    let dir = TempDir::new().unwrap();
+    write(dir.path(), "file-listing/eza.md", good_page());
+
+    loran()
+        .args(["validate", dir.path().to_str().unwrap()])
+        .assert()
+        .success()
+        .stdout(predicates::str::contains("1 pages OK"));
+}
+
+#[test]
+fn validate_root_arg_exits_8_on_broken_page() {
+    let dir = TempDir::new().unwrap();
+    write(dir.path(), "broken.md", missing_summary());
+
+    loran()
+        .args(["validate", dir.path().to_str().unwrap()])
+        .assert()
+        .failure()
+        .code(8);
+}
+
+#[test]
+fn validate_root_arg_is_upstream_strict_rejecting_partial_overlay() {
+    // A partial overlay (no category/summary) is accepted in the user
+    // overlay root but must be rejected when ROOT is validated
+    // upstream-strict.
+    let dir = TempDir::new().unwrap();
+    write(dir.path(), "eza.md", "+++\nname = \"eza\"\n+++\n");
+
+    loran()
+        .args(["validate", dir.path().to_str().unwrap()])
+        .assert()
+        .failure()
+        .code(8);
+}
+
+#[test]
+fn validate_root_arg_exits_2_on_nonexistent_dir() {
+    let dir = TempDir::new().unwrap();
+    let missing = dir.path().join("does-not-exist");
+
+    let assert = loran()
+        .args(["validate", missing.to_str().unwrap()])
+        .assert()
+        .failure()
+        .code(2);
+    let stderr = String::from_utf8(assert.get_output().stderr.clone()).unwrap();
+    assert!(
+        stderr.contains("not a directory"),
+        "stderr should explain the bad root:\n{stderr}"
+    );
+}
