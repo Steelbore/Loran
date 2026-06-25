@@ -6,7 +6,7 @@ SPDX-FileCopyrightText: 2026 Mohamed Hammad
 # Ambiguous Review — Steelbore → Spacecraft Software rename
 
 Generated alongside the mechanical rename pass described in
-`/steelbore/steelbore/spacecraft-software-rename-prompt.md`.
+`/spacecraft-software/spacecraft-software/spacecraft-software-rename-prompt.md`.
 
 ## Unresolved ambiguities (left as-is for human review)
 
@@ -97,19 +97,29 @@ These cannot be done by a code-walking agent:
       shows the new URL.
 - [x] Update the local clone's `[remote "origin"]` URL in
       `.git/config`. **Done.**
-- [ ] Register / DNS-configure `SpacecraftSoftware.org` and
+- [x] Register / DNS-configure `SpacecraftSoftware.org` and
       `Loran.SpacecraftSoftware.org` (or whichever URL shape is
-      adopted from §1 above).
-- [ ] Update the `homepage` and `repository` metadata for already-
+      adopted from §1 above). **Done.**
+- [x] Update the `homepage` and `repository` metadata for already-
       published crates on crates.io (each crate's metadata can be
       republished via `cargo publish` once a version bump is cut; the
       v0.3.0 metadata on crates.io still points to the old URLs).
-- [ ] Update GitHub Release notes attached to `v0.1.0-ingot`,
+      **Resolved** — workspace Cargo.toml already carries the new URLs
+      (`github.com/Spacecraft-Software/Loran`,
+      `Loran.SpacecraftSoftware.org`); all crates inherit via
+      `repository.workspace = true` / `homepage.workspace = true`.
+      Correct metadata will land on crates.io with the v0.4.0 publish.
+- [x] Update GitHub Release notes attached to `v0.1.0-ingot`,
       `v0.2.0-billet`, `v0.3.0-bloom` if they reference the old org
-      URL (the release-notes Markdown lives outside the repo).
-- [ ] Update any external project-registry entries (Lobste.rs,
+      URL (the release-notes Markdown lives outside the repo). **Done.**
+      Changes per release:
+      - ingot: `Forged in Steelbore.` × 2, `Steelbore default chain` → Spacecraft Software.
+      - billet: `Steelbore palette` × 2, `Forged in Steelbore.` → Spacecraft Software.
+      - bloom: `Steelbore-CLI self-documentation`, `github.com/Steelbore/Loran` × 2,
+        `Forged in Steelbore.` → Spacecraft Software.
+- [x] Update any external project-registry entries (Lobste.rs,
       crates.io account profile, personal site) that point at the
-      old org or domain.
+      old org or domain. **Done.**
 - [ ] Update minisign trust policy / `OPERATIONS.md` channels if key
-      rotation is announced via a Steelbore-branded mailing list or
+      rotation is announced via a Spacecraft Software-branded mailing list or
       Matrix room that's also being renamed.

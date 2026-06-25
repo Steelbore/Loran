@@ -46,3 +46,11 @@ description = "Shells, prompts, and small productivity tools that improve daily 
 [data-processing]
 title = "Data processing"
 description = "JSON, YAML, CSV, and structured-data manipulation tools."
+
+[audio]
+title = "Audio control"
+description = "PipeWire / PulseAudio volume, routing, and output-device control."
+
+[bluetooth]
+title = "Bluetooth"
+description = "BlueZ device discovery, pairing, connection, and management clients."

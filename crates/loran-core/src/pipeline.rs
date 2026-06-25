@@ -24,12 +24,11 @@
 //!
 //! ## Publisher trust root
 //!
-//! `PUBLISHER_PUBLIC_KEY` is **the** trust root for upstream tarballs.
-//! Currently set to a development placeholder (see the constant's
-//! doc-comment); the real publisher key lands when the upstream CDN
-//! pipeline launches alongside Sub-phase 2D. Until then, callers who
-//! want to exercise the pipeline against a staging publisher pass
-//! their own key via the `public_key` parameter on [`update_pages`].
+//! `PUBLISHER_PUBLIC_KEY` is **the** trust root for upstream tarballs —
+//! the production `loran-pages` publisher key. Callers who want to
+//! exercise the pipeline against a staging publisher override it via
+//! the `LORAN_PAGES_PUBLIC_KEY` env var (or the `public_keys` field on
+//! [`UpdateOpts`]).
 
 use std::path::Path;
 
@@ -72,25 +71,19 @@ pub const PUBLISHER_PAGES_TARBALL_URL: &str =
 /// See [`PUBLISHER_PAGES_MANIFEST_URL`].
 pub const PUBLISHER_PAGES_SIG_URL: &str = "https://github.com/Spacecraft-Software/loran-pages/releases/latest/download/pages.tar.gz.minisig";
 
-/// Publisher's minisign public key.
+/// Publisher's minisign public key — the production trust root for
+/// upstream pages tarballs.
 ///
-/// **Placeholder — development key, NOT for production use.**
-///
-/// TODO(launch): replace with the real `loran-pages` publisher public
-/// key before the first signed release. Generate the keypair with
-/// `nix shell nixpkgs#minisign -c minisign -G`, paste the public half
-/// here, and store the secret key + password as the `MINISIGN_SECRET_KEY`
-/// / `MINISIGN_PASSWORD` secrets in the `loran-pages` repo (see
-/// `OPERATIONS.md` → "Producing & publishing the pages tarball").
-/// Until then this constant is the same test key as
-/// `signing::tests::TEST_PUBLIC_KEY`, embedded here so the
-/// orchestration code compiles and unit tests can exercise the verify
-/// step.
+/// The `loran-pages` publisher key. Its secret half lives in the
+/// release vault and the `loran-pages` repo's `MINISIGN_SECRET_KEY` /
+/// `MINISIGN_PASSWORD` Actions secrets (see `OPERATIONS.md` §2). This
+/// public half is intentionally distinct from
+/// `signing::tests::TEST_PUBLIC_KEY` (`OPERATIONS.md` §5).
 ///
 /// Key rotation: a new Loran release ships a new value here. Older
 /// binaries fetching tarballs signed by a rotated key fail with
 /// [`UpdateError::Sign`]`(SignError::Mismatch)`.
-pub const PUBLISHER_PUBLIC_KEY: &str = "RWQsvqYQlDxdL2X0KKUsxVNyWw9P0tBXOVJzTI0sD845q4PE5zlISFHM";
+pub const PUBLISHER_PUBLIC_KEY: &str = "RWQCDFFts6ow/eB1pNLK/soyo6Iwmye8rlrUf9RlRzQweEqZUC9xnay1";
 
 /// Outcome of a single source update.
 #[derive(Debug, Clone, PartialEq, Eq, schemars::JsonSchema, serde::Serialize)]

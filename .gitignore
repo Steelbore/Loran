@@ -33,3 +33,9 @@ Thumbs.db
 
 # Node (in case xtask or tooling pulls in npm later)
 node_modules/
+
+# Publisher signing keypair. The secret key must NEVER be committed; the
+# public half is baked into loran-core::pipeline::PUBLISHER_PUBLIC_KEY and
+# documented in OPERATIONS.md, so neither file belongs in the tree.
+loran-pages.key
+loran-pages.pub
