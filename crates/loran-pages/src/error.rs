@@ -67,4 +67,23 @@ pub enum PageError {
         /// Human-readable explanation of which well-formedness rule fired.
         reason: &'static str,
     },
+
+    /// `tldr_page`, when present, is structurally malformed.
+    ///
+    /// `tldr_page` names a page in the tldr-pages corpus (Spec §6.1).
+    /// tldr filenames are lowercase, hyphen-separated identifiers with no
+    /// extension, so a non-empty value may not contain whitespace or
+    /// uppercase letters, include a path separator, or carry a `.md`
+    /// suffix. An empty string is allowed — it is the explicit "no tldr
+    /// page" sentinel that disables the lookup. The `reason` payload
+    /// spells out which rule fired. This is a well-formedness check only —
+    /// it does **not** assert the page actually exists upstream (that
+    /// would require the tldr archive and break hermetic validation).
+    #[error("`tldr_page` is malformed (`{value}`): {reason}")]
+    InvalidTldrPage {
+        /// The rejected `tldr_page` string, verbatim.
+        value: String,
+        /// Human-readable explanation of which well-formedness rule fired.
+        reason: &'static str,
+    },
 }

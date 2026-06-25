@@ -27,6 +27,7 @@ impl Page {
     /// 4. `summary` length cap (or [`PageError::SummaryTooLong`]).
     /// 5. `category` well-formedness (or [`PageError::InvalidCategory`]).
     /// 6. `safe_alias_for ⊆ replaces` (or [`PageError::InvalidSafeAliasFor`]).
+    /// 7. `tldr_page` well-formedness, when set (or [`PageError::InvalidTldrPage`]).
     ///
     /// # Examples
     ///
@@ -126,6 +127,10 @@ fn validate(raw: RawPage, body: &str) -> Result<Page, PageError> {
         }
     }
 
+    if let Some(tldr_page) = &raw.tldr_page {
+        validate_tldr_page(tldr_page)?;
+    }
+
     Ok(Page {
         name,
         category,
@@ -174,6 +179,52 @@ pub(crate) fn validate_category(value: &str) -> Result<(), PageError> {
     }
     if value.contains("//") {
         return Err(make_err("must not contain `//`"));
+    }
+    Ok(())
+}
+
+/// Enforce `tldr_page` well-formedness per Spec §6.1. Shared between
+/// [`Page::parse`] and [`crate::OverlayPage::parse`]; only called when
+/// the field is present (it is optional).
+///
+/// The rules are deliberately conservative — they reject the realistic
+/// authoring mistakes (a copied filename like `eza.md`, a display name
+/// like `git commit`, a stray capital) without rejecting legitimate tldr
+/// page names that contain `+`, `.`, or digits (`g++`, `7z`, `2to3`).
+/// This is a *format* check; it does not verify the page exists in the
+/// tldr-pages corpus, which would require the archive and break hermetic
+/// validation.
+///
+/// An **empty string is permitted**: it is the explicit "this tool has no
+/// tldr page" sentinel that disables the tldr lookup (see
+/// [`crate::Page::tldr_page`] usage in `loran-core::show`). Only *non-empty*
+/// values are held to the format rules below.
+pub(crate) fn validate_tldr_page(value: &str) -> Result<(), PageError> {
+    let make_err = |reason: &'static str| PageError::InvalidTldrPage {
+        value: value.to_owned(),
+        reason,
+    };
+
+    if value.chars().any(char::is_whitespace) {
+        return Err(make_err("must not contain whitespace"));
+    }
+    if value.chars().any(|c| c.is_ascii_uppercase()) {
+        return Err(make_err("must be lowercase"));
+    }
+    if value.contains('/') || value.contains('\\') {
+        return Err(make_err("must not contain a path separator"));
+    }
+    // Reject a trailing `.md` (a copied filename) case-insensitively via
+    // `Path::extension` — `str::ends_with(".md")` trips clippy's
+    // `case_sensitive_file_extension_comparisons` and would miss `.MD`.
+    if std::path::Path::new(value)
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .is_some_and(|ext| ext.eq_ignore_ascii_case("md"))
+    {
+        return Err(make_err(
+            "must be the page name, without the `.md` extension",
+        ));
     }
     Ok(())
 }
@@ -452,6 +503,85 @@ safe_alias_for = [\"less\"]
         let err = Page::parse(src).unwrap_err();
         assert!(
             matches!(err, PageError::InvalidCategory { .. }),
+            "got {err:?}"
+        );
+    }
+
+    #[test]
+    fn parses_well_formed_tldr_page() {
+        let src = "+++\nname = \"x\"\ncategory = \"c\"\nsummary = \"s\"\ntldr_page = \"git-cliff\"\n+++\n";
+        let page = Page::parse(src).expect("hyphenated tldr_page is well-formed");
+        assert_eq!(page.tldr_page.as_deref(), Some("git-cliff"));
+    }
+
+    #[test]
+    fn parses_tldr_page_with_punctuation_and_digits() {
+        // `g++`, `7z`, `2to3` are real tldr pages — `+`, leading digits,
+        // and embedded digits must all be accepted by the format check.
+        for name in ["g++", "7z", "2to3"] {
+            let src = format!(
+                "+++\nname = \"x\"\ncategory = \"c\"\nsummary = \"s\"\ntldr_page = \"{name}\"\n+++\n"
+            );
+            assert!(Page::parse(&src).is_ok(), "tldr_page `{name}` should parse");
+        }
+    }
+
+    #[test]
+    fn omitted_tldr_page_is_allowed() {
+        // The field is optional; a page without it parses cleanly.
+        let src = "+++\nname = \"x\"\ncategory = \"c\"\nsummary = \"s\"\n+++\n";
+        let page = Page::parse(src).expect("tldr_page is optional");
+        assert_eq!(page.tldr_page, None);
+    }
+
+    #[test]
+    fn empty_tldr_page_is_allowed_as_disable_sentinel() {
+        // An explicit empty `tldr_page` is the documented "this tool has
+        // no tldr page" sentinel that disables the lookup (see
+        // `loran-core::show`). It must parse, not be rejected as malformed.
+        let src = "+++\nname = \"x\"\ncategory = \"c\"\nsummary = \"s\"\ntldr_page = \"\"\n+++\n";
+        let page = Page::parse(src).expect("empty tldr_page is a valid sentinel");
+        assert_eq!(page.tldr_page.as_deref(), Some(""));
+    }
+
+    #[test]
+    fn error_tldr_page_uppercase() {
+        let src =
+            "+++\nname = \"x\"\ncategory = \"c\"\nsummary = \"s\"\ntldr_page = \"GitCliff\"\n+++\n";
+        let err = Page::parse(src).unwrap_err();
+        assert!(
+            matches!(err, PageError::InvalidTldrPage { .. }),
+            "got {err:?}"
+        );
+    }
+
+    #[test]
+    fn error_tldr_page_whitespace() {
+        let src = "+++\nname = \"x\"\ncategory = \"c\"\nsummary = \"s\"\ntldr_page = \"git commit\"\n+++\n";
+        let err = Page::parse(src).unwrap_err();
+        assert!(
+            matches!(err, PageError::InvalidTldrPage { .. }),
+            "got {err:?}"
+        );
+    }
+
+    #[test]
+    fn error_tldr_page_path_separator() {
+        let src = "+++\nname = \"x\"\ncategory = \"c\"\nsummary = \"s\"\ntldr_page = \"common/eza\"\n+++\n";
+        let err = Page::parse(src).unwrap_err();
+        assert!(
+            matches!(err, PageError::InvalidTldrPage { .. }),
+            "got {err:?}"
+        );
+    }
+
+    #[test]
+    fn error_tldr_page_md_extension() {
+        let src =
+            "+++\nname = \"x\"\ncategory = \"c\"\nsummary = \"s\"\ntldr_page = \"eza.md\"\n+++\n";
+        let err = Page::parse(src).unwrap_err();
+        assert!(
+            matches!(err, PageError::InvalidTldrPage { .. }),
             "got {err:?}"
         );
     }
