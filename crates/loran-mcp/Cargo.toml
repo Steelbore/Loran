@@ -16,9 +16,9 @@ keywords = ["man", "help", "mcp", "agent", "jsonrpc"]
 categories = ["api-bindings", "development-tools"]
 
 [dependencies]
-loran-core = { path = "../loran-core", version = "0.4.0" }
-loran-index = { path = "../loran-index", version = "0.4.0" }
-loran-pages = { path = "../loran-pages", version = "0.4.0" }
+loran-core = { path = "../loran-core", version = "0.4.1" }
+loran-index = { path = "../loran-index", version = "0.4.1" }
+loran-pages = { path = "../loran-pages", version = "0.4.1" }
 schemars = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

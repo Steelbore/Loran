@@ -926,7 +926,7 @@ checksum = "5e5032e24019045c762d3c0f28f5b6b8bbf38563a65908389bf7978758920897"
 
 [[package]]
 name = "loran"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -954,7 +954,7 @@ dependencies = [
 
 [[package]]
 name = "loran-core"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "criterion",
  "dirs",
@@ -981,7 +981,7 @@ dependencies = [
 
 [[package]]
 name = "loran-index"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "loran-pages",
  "serde",
@@ -995,7 +995,7 @@ dependencies = [
 
 [[package]]
 name = "loran-mcp"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "loran-core",
  "loran-index",
@@ -1009,7 +1009,7 @@ dependencies = [
 
 [[package]]
 name = "loran-pages"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "schemars",
  "serde",
@@ -1019,18 +1019,18 @@ dependencies = [
 
 [[package]]
 name = "loran-render"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "pulldown-cmark",
 ]
 
 [[package]]
 name = "loran-tldr"
-version = "0.4.0"
+version = "0.4.1"
 
 [[package]]
 name = "loran-tui"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "crossterm",
  "loran-core",
@@ -2341,7 +2341,7 @@ dependencies = [
 
 [[package]]
 name = "xtask"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "anyhow",
 ]

@@ -16,7 +16,7 @@ keywords = ["man", "help", "info", "tldr", "index"]
 categories = ["parser-implementations", "development-tools"]
 
 [dependencies]
-loran-pages = { path = "../loran-pages", version = "0.4.0" }
+loran-pages = { path = "../loran-pages", version = "0.4.1" }
 serde = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
