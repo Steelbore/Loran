@@ -6,6 +6,9 @@ replaces = []
 safe_alias_for = []
 pairs_with = ["bluetoothctl"]
 official = "https://github.com/bluez/bluez"
+# Empty: btmgmt has no tldr-pages entry, so this is the explicit
+# "no tldr page" sentinel that disables the `loran show` tldr lookup.
+tldr_page = ""
 written_in = "c"
 since = "bravais@0.1"
 tags = ["bluetooth", "bluez"]
