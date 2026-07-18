@@ -5,7 +5,7 @@ SPDX-FileCopyrightText: 2026 Mohamed Hammad
 
 ---
 name: loran
-description: Loran — the Spacecraft Software reference manual. Catalog-browse, curated tool pages, reverse legacy lookup, fuzzy search, and a deliberately-de-themed live `--help` capture. Agent-native (`--json`, `schema`, `describe`, read-only MCP) per Spacecraft Software SFRS v1.0.0.
+description: Loran — the Spacecraft Software reference manual. Catalog-browse, curated tool pages, reverse legacy lookup, fuzzy search, and a deliberately-de-themed live `--help` capture. Agent-native (`--json`, `schema`, `describe`, read-only MCP) per Spacecraft Software CLI Standard v1.0.0.
 license: GPL-3.0-or-later
 project: Spacecraft Software
 component: Loran
@@ -18,7 +18,7 @@ governing_docs:
   - loran-todo-v0_1.md
 governing_standards:
   - Spacecraft Software Standard v1.1
-  - Spacecraft Software SFRS v1.0.0
+  - Spacecraft Software CLI Standard v1.0.0
 entry_points:
   - command: loran list
     description: List tools in the catalog (filterable by --category, --replaces, --safe-alias-for).
@@ -73,7 +73,7 @@ entry_points:
     idempotent: true
     phase: 1 (placeholder), 3 (full)
   - command: loran describe
-    description: Emit the live capability manifest per SFRS §4.
+    description: Emit the live capability manifest per the CLI Standard §4.
     destructive: false
     idempotent: true
     phase: 1

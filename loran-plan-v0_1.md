@@ -17,7 +17,7 @@ Copyright (c) 2026 Mohamed Hammad
 | **Copyright**   | (c) 2026 Mohamed Hammad                                     |
 | **License**     | GPL-3.0-or-later                                            |
 | **Website**     | https://Loran.SpacecraftSoftware.org/                                |
-| **Governed by** | Spacecraft Software Standard v1.1, Spacecraft Software SFRS v1.0.0              |
+| **Governed by** | Spacecraft Software Standard v1.1, Spacecraft Software CLI Standard v1.0.0      |
 | **PRD**         | `loran-prd-v0_1.md`                                         |
 | **Spec**        | `loran-spec-v0_2.md`                                        |
 
@@ -214,7 +214,7 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 
 ## 5. Phase 1 — Ingot (Work Packages)
 
-**Phase outcome (from PRD §14.1):** A useful binary that lists, shows, finds, and searches the bundled tool catalog, with full JSON output and SFRS-compliant flags. No network, no overlays, no TUI.
+**Phase outcome (from PRD §14.1):** A useful binary that lists, shows, finds, and searches the bundled tool catalog, with full JSON output and CLI-Standard-compliant flags. No network, no overlays, no TUI.
 
 ### WP-P1.01 — Page parser (`loran-pages`)
 
@@ -350,16 +350,16 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 | **Sizing** | M |
 | **Owner crates** | `loran-cli` |
 | **Inputs** | WP-P0.04 |
-| **Outputs** | A `loran` binary that responds to all SFRS §3 global flags; sub-commands are stubs |
+| **Outputs** | A `loran` binary that responds to all the CLI Standard §3 global flags; sub-commands are stubs |
 | **PRD links** | All FR-060 series, NFR-053 to NFR-056 |
 
-**Approach.** Define the clap derive structure with every global flag per SFRS §3 (`--json`, `--format`, `--fields`, `--dry-run`, `--verbose`, `--quiet`, `--no-color`, `--color`, `--help`, `--version`, `--absolute-time`, `--print0`, `--yes`). Add sub-command stubs that print "not yet implemented" but accept their flag signatures. `--version` produces the attribution per Standard §13.2 in human mode and the SFRS §6 envelope in JSON mode. `--help` output includes the maintainer footer per Standard §13.2.
+**Approach.** Define the clap derive structure with every global flag per the CLI Standard §3 (`--json`, `--format`, `--fields`, `--dry-run`, `--verbose`, `--quiet`, `--no-color`, `--color`, `--help`, `--version`, `--absolute-time`, `--print0`, `--yes`). Add sub-command stubs that print "not yet implemented" but accept their flag signatures. `--version` produces the attribution per Standard §13.2 in human mode and the CLI Standard §6 envelope in JSON mode. `--help` output includes the maintainer footer per Standard §13.2.
 
 **Acceptance criteria:**
-- [ ] All SFRS §3 global flags parse correctly
+- [ ] All the CLI Standard §3 global flags parse correctly
 - [ ] `--version` output passes manual review against Standard §13.2 format
 - [ ] `--help` footer matches Standard §13.2
-- [ ] `--json --version` returns SFRS §6 envelope with `metadata.maintainer` and `metadata.website`
+- [ ] `--json --version` returns the CLI Standard §6 envelope with `metadata.maintainer` and `metadata.website`
 - [ ] Sub-command stubs accept their full flag surface
 
 ### WP-P1.08 — JSON envelope (`loran-cli` cross-cutting)
@@ -370,15 +370,15 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 | **Sizing** | S |
 | **Owner crates** | `loran-cli` |
 | **Inputs** | WP-P1.07 |
-| **Outputs** | A common output emitter that produces SFRS §6 envelopes |
+| **Outputs** | A common output emitter that produces the CLI Standard §6 envelopes |
 | **PRD links** | FR-060, FR-061, FR-068 |
 
-**Approach.** A single module that wraps any "data + metadata" into the SFRS §6 envelope. Provides a `JsonEmitter` type with methods like `emit_data(value)`, `emit_error(code, message, hint)`. Auto-formats timestamps as ISO 8601 UTC with `Z`. Auto-fills `metadata.tool`, `metadata.version`, `metadata.command`, `metadata.maintainer`, `metadata.website`. Used by every sub-command implementation.
+**Approach.** A single module that wraps any "data + metadata" into the CLI Standard §6 envelope. Provides a `JsonEmitter` type with methods like `emit_data(value)`, `emit_error(code, message, hint)`. Auto-formats timestamps as ISO 8601 UTC with `Z`. Auto-fills `metadata.tool`, `metadata.version`, `metadata.command`, `metadata.maintainer`, `metadata.website`. Used by every sub-command implementation.
 
 **Acceptance criteria:**
-- [ ] Envelope structure matches SFRS §6 exactly
+- [ ] Envelope structure matches the CLI Standard §6 exactly
 - [ ] Timestamps always carry `Z` suffix (NFR-053)
-- [ ] Error envelopes include `error.{code, exit_code, message, hint, timestamp, command}` per SFRS §1 Rule 8
+- [ ] Error envelopes include `error.{code, exit_code, message, hint, timestamp, command}` per the CLI Standard §1 Rule 8
 - [ ] Unit tests confirm envelope round-trips through `serde_json`
 
 ### WP-P1.09 — Agent env-var detection & TTY cascade
@@ -389,15 +389,15 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 | **Sizing** | S |
 | **Owner crates** | `loran-cli` |
 | **Inputs** | WP-P1.07, WP-P1.08 |
-| **Outputs** | Auto-detection per SFRS §5: agent env → JSON; non-TTY stdout → JSON; TTY → text (TUI in Billet) |
+| **Outputs** | Auto-detection per the CLI Standard §5: agent env → JSON; non-TTY stdout → JSON; TTY → text (TUI in Billet) |
 | **PRD links** | FR-061, FR-067 |
 
-**Approach.** A module that inspects `AI_AGENT`, `AGENT`, `CI`, `CLAUDECODE`, `CURSOR_AGENT`, `GEMINI_CLI` and `is_terminal()` on stdout. Resolves to one of `{Tui, Text, Json}`. Phase 1 collapses `Tui` to `Text` (TUI doesn't exist yet) and logs a one-line warning to stderr per SFRS §5 when an agent is detected.
+**Approach.** A module that inspects `AI_AGENT`, `AGENT`, `CI`, `CLAUDECODE`, `CURSOR_AGENT`, `GEMINI_CLI` and `is_terminal()` on stdout. Resolves to one of `{Tui, Text, Json}`. Phase 1 collapses `Tui` to `Text` (TUI doesn't exist yet) and logs a one-line warning to stderr per the CLI Standard §5 when an agent is detected.
 
 **Acceptance criteria:**
 - [ ] Any agent env var → `Json` mode + stderr warning
 - [ ] `--json` explicit flag always wins
-- [ ] Non-TTY stdout → `Json` mode (per SFRS §5 cascade)
+- [ ] Non-TTY stdout → `Json` mode (per the CLI Standard §5 cascade)
 - [ ] TTY stdout → `Text` mode in Phase 1 (will become `Tui` in Phase 2)
 - [ ] Detection covered by unit tests with env-var injection
 
@@ -431,7 +431,7 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 | **Outputs** | Working `loran list` with `--category`, `--replaces`, `--safe-alias-for`, `--fields` |
 | **PRD links** | FR-001 |
 
-**Approach.** Implements `loran list` using the index. Filters by `--category`, `--replaces` (broad match), `--safe-alias-for` (strict match). `--fields name,summary` projects only the requested columns. Default text output: a fixed-width table; JSON output: an array of objects in the SFRS envelope.
+**Approach.** Implements `loran list` using the index. Filters by `--category`, `--replaces` (broad match), `--safe-alias-for` (strict match). `--fields name,summary` projects only the requested columns. Default text output: a fixed-width table; JSON output: an array of objects in the response envelope.
 
 **Acceptance criteria:**
 - [ ] All four filter flags work and compose
@@ -542,13 +542,13 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 | **Sizing** | XS |
 | **Owner crates** | `loran-cli` |
 | **Inputs** | WP-P1.07 |
-| **Outputs** | Self-description manifest per SFRS §4 |
+| **Outputs** | Self-description manifest per the CLI Standard §4 |
 | **PRD links** | FR-063 |
 
-**Approach.** Returns a structured manifest: tool name, version, every sub-command with one-line description, capability tags, link to `loran schema` (which returns "schema available in Phase 3" placeholder for Ingot). Per SFRS §4 schema.
+**Approach.** Returns a structured manifest: tool name, version, every sub-command with one-line description, capability tags, link to `loran schema` (which returns "schema available in Phase 3" placeholder for Ingot). Per the CLI Standard §4 schema.
 
 **Acceptance criteria:**
-- [ ] Output validates against SFRS §4 describe schema
+- [ ] Output validates against the CLI Standard §4 describe schema
 - [ ] Every sub-command listed with description
 - [ ] Capability tags present (e.g., `read-only`, `network`, `subprocess`)
 
@@ -950,7 +950,7 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 
 ## 7. Phase 3 — Bloom (Work Packages)
 
-**Phase outcome (from PRD §14.3):** Loran becomes the primary tool-discovery surface for AI agents on Spacecraft Software systems, and the ecosystem becomes self-documenting via SFRS describe ingestion.
+**Phase outcome (from PRD §14.3):** Loran becomes the primary tool-discovery surface for AI agents on Spacecraft Software systems, and the ecosystem becomes self-documenting via the CLI Standard's describe ingestion.
 
 ### WP-P3.01 — Full JSON Schema emission
 
@@ -988,7 +988,7 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 - [ ] MCP server starts and responds to `initialize`
 - [ ] `tools/list` returns only the 5 read-only verbs
 - [ ] `tools/get` returns the schema for a specific verb
-- [ ] `tools/call` produces SFRS-compliant envelopes
+- [ ] `tools/call` produces CLI-Standard-compliant envelopes
 - [ ] Attempts to call `update`, `new`, `validate`, `help` via MCP are rejected
 - [ ] Integration test via `rmcp` test harness
 
@@ -1008,7 +1008,7 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 **Acceptance criteria:**
 - [ ] `loran mcp` starts and serves
 - [ ] No stdout output except MCP protocol traffic
-- [ ] stderr carries structured logs per SFRS
+- [ ] stderr carries structured logs per the CLI Standard
 
 ### WP-P3.04 — `DescribeIngestor` implementation
 
@@ -1021,12 +1021,12 @@ The first commit's worth of work. Establishes the workspace, posture files, and 
 | **Outputs** | A new `Ingestor` impl that spawns `<tool> describe --json` against allowlisted Spacecraft Software binaries |
 | **PRD links** | FR-071, FR-072, FR-073 |
 
-**Approach.** Implements `DescribeIngestor`. Allowlist of trusted binary names lives in the upstream pages tarball as `trusted_describe.toml`. For each name, resolve via `$PATH`, spawn with sandbox per WP-P1.05's invariants, parse SFRS-§4 describe JSON, synthesise a baseline `Page`. Curated pages overlay on top.
+**Approach.** Implements `DescribeIngestor`. Allowlist of trusted binary names lives in the upstream pages tarball as `trusted_describe.toml`. For each name, resolve via `$PATH`, spawn with sandbox per WP-P1.05's invariants, parse the CLI Standard §4 describe JSON, synthesise a baseline `Page`. Curated pages overlay on top.
 
 **Acceptance criteria:**
 - [ ] Allowlist sourced from `trusted_describe.toml`
 - [ ] Spawn uses the same sandbox as `loran-core::capture_help`
-- [ ] SFRS-compliant describe output parsed correctly
+- [ ] CLI-Standard-compliant describe output parsed correctly
 - [ ] Baseline page generated with `name`, `summary`, `category` (from describe metadata), `replaces` (if declared)
 - [ ] Curated pages always override `DescribeIngestor` output
 
@@ -1235,13 +1235,13 @@ These run alongside all phases. None has a fixed phase; each starts in Phase 0 a
 
 - Library crates use `thiserror` for typed errors.
 - Binary crate (`loran-cli`) uses `anyhow` at the top level and translates to typed errors at function boundaries.
-- Every error type that crosses a process boundary (i.e., is reported to the user) has a stable `code`, a human message, and a runnable `hint` per SFRS tips-thinking discipline.
+- Every error type that crosses a process boundary (i.e., is reported to the user) has a stable `code`, a human message, and a runnable `hint` per the CLI Standard's tips-thinking discipline.
 
 ### 9.3 Logging & tracing
 
 - `tracing` for all logs; `tracing-subscriber` configured in `loran-cli`.
 - Log levels: ERROR (user-visible failures), WARN (degraded behaviour), INFO (lifecycle events), DEBUG (development). Never use `println!` or `eprintln!` for diagnostics.
-- All logs go to stderr; stdout is data only per SFRS §1 Rule 7.
+- All logs go to stderr; stdout is data only per the CLI Standard §1 Rule 7.
 - Structured logs in JSON when `--format json` is active.
 
 ### 9.4 Time handling
@@ -1488,7 +1488,7 @@ Tag `v1.x` (where x ≥ 1) for Bloom:
 ### 14.2 Spacecraft Software standards & skills
 
 - **The Spacecraft Software Standard v1.1** — Naming, priorities, license, posture, platform, PFA, key bindings, palette, fonts, UI/UX, time, attribution.
-- **Spacecraft Software SFRS v1.0.0** — Dual-Mode Self-Documenting CLI Framework.
+- **Spacecraft Software Dual-Mode Self-Documenting CLI Standard (v1.0.0)**.
 - **Spacecraft Software Agentic-CLI Standard** — Agentic surface conventions.
 - **Spacecraft Software Rust Guidelines** — Crate choices, `unsafe` policy, error handling.
 

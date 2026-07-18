@@ -6,7 +6,7 @@
 // dead-code at the module level until the bin pulls those paths in.
 #![allow(dead_code)]
 
-//! SFRS §6 output envelope — the canonical JSON shape every Loran
+//! The CLI Standard §6 output envelope — the canonical JSON shape every Loran
 //! sub-command emits in `--format json` mode.
 //!
 //! ```text
@@ -18,7 +18,7 @@
 //!
 //! Errors use a parallel [`ErrorEnvelope`] shape with `code`,
 //! `exit_code`, `message`, `hint`, `timestamp`, `command`, and
-//! `docs_url`, written to stderr (per SFRS §1 Rule 8 — stdout is for
+//! `docs_url`, written to stderr (per the CLI Standard §1 Rule 8 — stdout is for
 //! data only, never diagnostics).
 //!
 //! Timestamps everywhere are `jiff::Timestamp` values serialised to
@@ -57,7 +57,7 @@ impl<T: Serialize> Envelope<T> {
     }
 }
 
-/// SFRS §6 metadata block.
+/// The CLI Standard §6 metadata block.
 ///
 /// Every successful Loran output carries this exact shape. The fields
 /// are alphabetically `command` / `maintainer` / `timestamp` / `tool` /
@@ -88,7 +88,7 @@ impl Metadata {
     }
 }
 
-/// SFRS §1 Rule 8 error envelope, written to stderr.
+/// The CLI Standard §1 Rule 8 error envelope, written to stderr.
 ///
 /// `code` is a stable string identifier (`"NOT_FOUND"`, `"INDEX_NOT_BUILT"`
 /// …); `exit_code` is the numeric process exit code; `hint` is a runnable
@@ -253,7 +253,7 @@ mod tests {
     }
 
     #[test]
-    fn error_envelope_carries_every_sfrs_required_field() {
+    fn error_envelope_carries_every_cli_standard_required_field() {
         let env = ErrorEnvelope::new(
             "NOT_FOUND",
             3,
@@ -277,7 +277,7 @@ mod tests {
         ] {
             assert!(
                 body.get(field).is_some(),
-                "error.{field} must be present per SFRS §1 Rule 8"
+                "error.{field} must be present per the CLI Standard §1 Rule 8"
             );
         }
 
@@ -326,7 +326,7 @@ mod tests {
         );
         assert!(
             !stdout_str.contains("\"error\""),
-            "stdout must never carry the error envelope (SFRS §1 Rule 8)"
+            "stdout must never carry the error envelope (the CLI Standard §1 Rule 8)"
         );
         assert!(
             stderr_str.contains("\"error\""),

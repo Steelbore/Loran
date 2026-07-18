@@ -55,7 +55,7 @@ Before opening a PR:
 - [ ] `cargo audit` reports no advisories (or new advisories are documented).
 - [ ] If a TODO task is cleared, `loran-todo-v0_1.md` is updated in the same PR.
 - [ ] If spec or PRD behaviour changed, the affected document is updated in the same PR.
-- [ ] New CLI features honour Spacecraft Software SFRS v1.0.0 §3–§11 (global flags, JSON envelope, exit-code map, structured errors to stderr).
+- [ ] New CLI features honour the Spacecraft Software CLI Standard §3–§11 (global flags, JSON envelope, exit-code map, structured errors to stderr).
 
 ## Maintainer discretion
 

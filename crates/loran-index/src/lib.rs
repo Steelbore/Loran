@@ -13,7 +13,7 @@
 //! any source. v1 ships exactly one implementation
 //! ([`MarkdownPagesIngestor`], which walks a directory of `*.md`
 //! files); Phase 3 will add a `DescribeIngestor` that synthesises
-//! entries by invoking `<tool> describe --json` against SFRS-compliant
+//! entries by invoking `<tool> describe --json` against CLI-Standard-compliant
 //! Spacecraft Software CLIs on `$PATH`.
 //!
 //! ## Failure policy

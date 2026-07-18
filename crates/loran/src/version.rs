@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2026 Mohamed Hammad
 
-//! `--version` emission in both human and SFRS-envelope JSON forms.
+//! `--version` emission in both human and CLI-Standard-envelope JSON forms.
 
 use std::process::ExitCode;
 
@@ -29,7 +29,7 @@ struct VersionData {
 /// Print the version banner and return an [`ExitCode`].
 ///
 /// Human form: `tool version` on the first line, blank line, attribution
-/// block. JSON form: an SFRS `Envelope<VersionData>` with the metadata
+/// block. JSON form: the CLI Standard's `Envelope<VersionData>` with the metadata
 /// fields supplied by [`crate::envelope::Metadata`].
 pub(crate) fn emit(cli: &Cli) -> ExitCode {
     match cli.output_format() {

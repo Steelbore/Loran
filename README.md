@@ -34,7 +34,7 @@ A separate verb (`loran help <tool>`) captures live `--help` output from any bin
 |---|---|---|---|
 | [`v0.1.0-ingot`](https://github.com/Spacecraft-Software/Loran/releases/tag/v0.1.0-ingot) | Ingot | Text-mode binary; 6 read verbs; bundled catalog. | 2026-05-12 |
 | [`v0.2.0-billet`](https://github.com/Spacecraft-Software/Loran/releases/tag/v0.2.0-billet) | Billet | TUI; signed tarball updates; overlays; authoring. The 1.0-equivalent milestone. | 2026-05-12 |
-| [`v0.3.0-bloom`](https://github.com/Spacecraft-Software/Loran/releases/tag/v0.3.0-bloom) | Bloom | Read-only MCP; JSON Schema; SFRS auto-ingestion; key-rotation primitive. | 2026-05-12 |
+| [`v0.3.0-bloom`](https://github.com/Spacecraft-Software/Loran/releases/tag/v0.3.0-bloom) | Bloom | Read-only MCP; JSON Schema; CLI-Standard describe auto-ingestion; key-rotation primitive. | 2026-05-12 |
 
 Twelve sub-commands functional, 26 curated pages bundled across 10 categories, full ratatui TUI, synchronous stdio JSON-RPC 2.0 MCP server, multi-platform CI matrix green (Linux gnu/musl/aarch64, FreeBSD cross-check, macOS arm64).
 
@@ -71,7 +71,7 @@ loran schema --json         # emit Draft 2020-12 JSON Schema for the data model
 loran categories            # category registry with counts
 ```
 
-Add `--json` to any read verb to get a structured envelope (per SFRS §6). Set `AI_AGENT=1` or `AGENT=1` in the environment and the TUI never activates — Loran emits JSON or a usage hint instead.
+Add `--json` to any read verb to get a structured envelope (per the CLI Standard §6). Set `AI_AGENT=1` or `AGENT=1` in the environment and the TUI never activates — Loran emits JSON or a usage hint instead.
 
 ## Features
 
@@ -81,7 +81,7 @@ Add `--json` to any read verb to get a structured envelope (per SFRS §6). Set `
 - **Agent-native by default** — `--json` on every read verb, `loran schema` emits Draft 2020-12 JSON Schema for every public type, `loran mcp` exposes a read-only MCP stdio server with the five read verbs.
 - **No tokio anywhere.** Fully synchronous workspace, including the MCP server — one in-flight RPC at a time, blocking stdin reads.
 - **TUI** built on `ratatui` + `crossterm` — browse view (categories ↔ tools), detail view (rendered / raw / frontmatter sub-views), `/`-fuzzy search, `?`-help overlay, panic-safe terminal restoration.
-- **`DescribeIngestor`** — auto-synthesises pages from any SFRS-compliant tool's `<tool> describe --json` output (allowlisted via `LORAN_DESCRIBE_BINARIES`).
+- **`DescribeIngestor`** — auto-synthesises pages from any CLI-Standard-compliant tool's `<tool> describe --json` output (allowlisted via `LORAN_DESCRIBE_BINARIES`).
 - **Hermetic test seams** — every integration test sandboxes via env vars (`XDG_DATA_HOME`, `LORAN_DISTRO_OVERRIDE`, `LORAN_PAGES_*_URL`, …). No test ever writes to the real home.
 
 ## CLI reference
@@ -98,7 +98,7 @@ Add `--json` to any read verb to get a structured envelope (per SFRS §6). Set `
 | `update` | `loran update` | Write | Refreshes upstream + tldr tarballs over HTTPS, verifies minisign. |
 | `validate` | `loran validate` | Meta | Walks every overlay root; emits structured errors per file. |
 | `schema` | `loran schema [--json]` | Meta | Draft 2020-12 JSON Schema for every public type. |
-| `describe` | `loran describe [--json]` | Meta | SFRS describe manifest for agents. |
+| `describe` | `loran describe [--json]` | Meta | The CLI Standard's describe manifest for agents. |
 | `mcp` | `loran mcp` | Meta | Stdio JSON-RPC 2.0 MCP server (read-only verbs only). |
 | _(default)_ | `loran` (no verb) | TUI | ratatui app when stdout is a TTY and no agent env detected. |
 
@@ -205,7 +205,7 @@ All key design decisions are locked in [`loran-spec-v0_2.md`](loran-spec-v0_2.md
 From [`loran-spec-v0_2.md`](loran-spec-v0_2.md) §15:
 
 1. **`pairs_with` reciprocity** — should `loran validate` warn when A claims `pairs_with = ["B"]` but B does not reciprocate, or accept asymmetry as intentional?
-2. **`DescribeIngestor` security model** — allowlist (current default: env-driven via `LORAN_DESCRIBE_BINARIES`) vs self-declaration via SFRS `describe`?
+2. **`DescribeIngestor` security model** — allowlist (current default: env-driven via `LORAN_DESCRIBE_BINARIES`) vs self-declaration via the CLI Standard's `describe`?
 
 ## Contributing
 

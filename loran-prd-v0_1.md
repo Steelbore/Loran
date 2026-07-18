@@ -17,7 +17,7 @@ Copyright (c) 2026 Mohamed Hammad
 | **Copyright**   | (c) 2026 Mohamed Hammad                                     |
 | **License**     | GPL-3.0-or-later                                            |
 | **Website**     | https://Loran.SpacecraftSoftware.org/                                |
-| **Governed by** | Spacecraft Software Standard v1.1, Spacecraft Software SFRS v1.0.0              |
+| **Governed by** | Spacecraft Software Standard v1.1, Spacecraft Software CLI Standard v1.0.0      |
 | **Spec**        | `loran-spec-v0_2.md` (canonical technical reference)        |
 
 ---
@@ -59,7 +59,7 @@ The product answers three questions about the tool catalog of a Spacecraft Softw
 
 A separate verb (`loran help <tool>`) captures live `--help` output from any binary on `$PATH`, rendered in a deliberately de-themed frame so curated content stays visually distinct from uncurated passthroughs.
 
-Loran ships in three phases: **Ingot** (text-mode catalog + JSON + bundled pages), **Billet** (TUI + signed tarball updates + overlays + page authoring — the 1.0 milestone), and **Bloom** (read-only MCP surface + JSON Schema for agent function-calling + auto-ingestion of SFRS `describe` from other Spacecraft Software CLIs).
+Loran ships in three phases: **Ingot** (text-mode catalog + JSON + bundled pages), **Billet** (TUI + signed tarball updates + overlays + page authoring — the 1.0 milestone), and **Bloom** (read-only MCP surface + JSON Schema for agent function-calling + auto-ingestion of the CLI Standard's `describe` from other Spacecraft Software CLIs).
 
 The detailed technical specification — workspace layout, dependency stack, resolution chains, page format, JSON envelope, exit codes, file system layout — lives in `loran-spec-v0_2.md`. This PRD defines *what Loran must accomplish*; the spec defines *how*.
 
@@ -98,7 +98,7 @@ The result: even after installing a Spacecraft Software system, a user spends da
 Three factors make this the right moment:
 
 1. **The Spacecraft Software tool catalog has reached critical mass.** Bravais ships ~150 packages by default; further distros (Ferrite OS) are imminent. Without a curated catalog, that breadth becomes navigation debt.
-2. **AI-agent CLIs have become primary users of Unix tooling.** Spacecraft Software's SFRS v1.0.0 codifies this by mandating `--json`, `schema`, and MCP on every Spacecraft Software CLI. A system-wide catalog that exposes the same agent surface unifies the ecosystem.
+2. **AI-agent CLIs have become primary users of Unix tooling.** Spacecraft Software's CLI Standard v1.0.0 codifies this by mandating `--json`, `schema`, and MCP on every Spacecraft Software CLI. A system-wide catalog that exposes the same agent surface unifies the ecosystem.
 3. **`tldr-pages` proved the tarball + Markdown model works at scale.** Loran can reuse the distribution pattern while overlaying Spacecraft Software's curation on top, avoiding both the maintenance burden of forking tldr and the limitations of being only a tldr client.
 
 ---
@@ -189,7 +189,7 @@ The non-negotiable outcomes Loran must achieve to be considered successful.
 | Q-04 | WCAG 2.1 AA contrast in every UI surface.                                                                         |
 | Q-05 | Zero telemetry, zero analytics, zero network calls except `loran update`.                                         |
 | Q-06 | Atomic tarball updates: a failed verify never corrupts the working catalog.                                       |
-| Q-07 | Predictable failure modes: every error code has an actionable hint following SFRS tips-thinking discipline.       |
+| Q-07 | Predictable failure modes: every error code has an actionable hint following the CLI Standard's tips-thinking discipline. |
 
 ---
 
@@ -205,7 +205,7 @@ Items deliberately excluded from scope. Listed up front to prevent scope creep.
 | NG-04 | **Loran does not embed a scripting language or plugin system.** Pages are static Markdown + TOML; no eval, no execute.            |
 | NG-05 | **Loran does not write to the upstream `pages/` tree at runtime.** That directory is sync target only; user edits live in overlays. |
 | NG-06 | **Loran does not invoke arbitrary binaries via MCP.** The MCP surface is strictly read-only; `loran help` is human-mode only.     |
-| NG-07 | **Loran does not provide real-time tool discovery (e.g., scanning /usr/bin).** Phase 3 may auto-ingest from SFRS `describe`, but only for binaries already known to be Spacecraft Software-native. |
+| NG-07 | **Loran does not provide real-time tool discovery (e.g., scanning /usr/bin).** Phase 3 may auto-ingest from the CLI Standard's `describe`, but only for binaries already known to be Spacecraft Software-native. |
 | NG-08 | **Loran does not localise the CLI surface in v1.** English-only for command names, flag descriptions, error messages. Page content i18n is a v1.x concern. |
 | NG-09 | **Loran does not host or distribute upstream pages itself.** A separate publisher pipeline (out of scope for this PRD) produces the signed tarball. |
 | NG-10 | **Loran does not provide a web-based catalog viewer.** A future static-site export of pages is conceivable but not in scope for v1. |
@@ -343,22 +343,22 @@ Each requirement is testable. The implementation is described in `loran-spec-v0_
 
 | ID     | Requirement                                                                                                                                           | Phase |
 |--------|-------------------------------------------------------------------------------------------------------------------------------------------------------|-------|
-| FR-060 | Every data-returning command shall accept `--json` and produce output conforming to the SFRS §6 envelope.                                              | Ingot |
-| FR-061 | Auto-detection shall switch to `--format json` when stdout is not a TTY, per SFRS §5 cascade.                                                          | Ingot |
+| FR-060 | Every data-returning command shall accept `--json` and produce output conforming to the CLI Standard §6 envelope.                                     | Ingot |
+| FR-061 | Auto-detection shall switch to `--format json` when stdout is not a TTY, per the CLI Standard §5 cascade.                                             | Ingot |
 | FR-062 | `loran schema` shall emit JSON Schema Draft 2020-12 of all public data types: page, list-entry, search-result, error envelope.                         | Bloom |
-| FR-063 | `loran describe` shall emit a self-description manifest per SFRS §4: tool name, version, sub-commands with one-line descriptions, capability tags.    | Ingot |
+| FR-063 | `loran describe` shall emit a self-description manifest per the CLI Standard §4: tool name, version, sub-commands with one-line descriptions, capability tags. | Ingot |
 | FR-064 | `loran mcp` shall run as an MCP server over stdio.                                                                                                     | Bloom |
 | FR-065 | The MCP surface shall expose only read-only verbs: `list`, `show`, `find`, `search`, `categories`. `update`, `new`, `validate`, `help` shall NOT be exposed. | Bloom |
 | FR-066 | MCP `tools/list` shall advertise tool names + capability tags only; full schemas shall come from `tools/get` (lazy-loading per `spacecraft-agentic-cli` §6). | Bloom |
-| FR-067 | When `AI_AGENT=1` or `AGENT=1` is set, the system shall never activate the TUI and shall warn on stderr per SFRS §5.                                    | Ingot |
-| FR-068 | Every JSON error envelope shall include a runnable `hint` field per SFRS tips-thinking discipline.                                                     | Ingot |
+| FR-067 | When `AI_AGENT=1` or `AGENT=1` is set, the system shall never activate the TUI and shall warn on stderr per the CLI Standard §5.                        | Ingot |
+| FR-068 | Every JSON error envelope shall include a runnable `hint` field per the CLI Standard's tips-thinking discipline.                                       | Ingot |
 
 ### 8.8 Self-description ingestion (Phase 3)
 
 | ID     | Requirement                                                                                                                                              | Phase |
 |--------|----------------------------------------------------------------------------------------------------------------------------------------------------------|-------|
 | FR-070 | The index loader shall expose an `Ingestor` trait abstraction allowing additional content sources to plug in.                                              | Ingot |
-| FR-071 | The `DescribeIngestor` shall invoke `<tool> describe --json` against SFRS-compliant Spacecraft Software binaries on `$PATH` and synthesise baseline catalog entries. | Bloom |
+| FR-071 | The `DescribeIngestor` shall invoke `<tool> describe --json` against CLI-Standard-compliant Spacecraft Software binaries on `$PATH` and synthesise baseline catalog entries. | Bloom |
 | FR-072 | `DescribeIngestor` results shall be overlayed by any curated page that exists for the same tool — curated content always wins.                            | Bloom |
 | FR-073 | The trust list for `DescribeIngestor` (which binaries are safe to invoke) shall be defined by an allowlist baked into the upstream pages tarball.         | Bloom |
 
@@ -422,7 +422,7 @@ Each requirement is testable. The implementation is described in `loran-spec-v0_
 | NFR-042 | Network access shall be limited to `loran update` (tarball fetch over HTTPS to known endpoints).        |
 | NFR-043 | Loran shall ship without a "phone home" mechanism of any kind, including for version checks.            |
 
-### 9.6 POSIX compliance & SFRS conformance
+### 9.6 POSIX compliance & CLI Standard conformance
 
 | ID      | Requirement                                                                                              |
 |---------|----------------------------------------------------------------------------------------------------------|
@@ -430,7 +430,7 @@ Each requirement is testable. The implementation is described in `loran-spec-v0_
 | NFR-051 | stdout shall carry data only; stderr shall carry everything else (logs, progress, banners, errors).      |
 | NFR-052 | UTF-8 without BOM for all output streams.                                                                |
 | NFR-053 | All timestamps in stored, transmitted, and logged form shall be ISO 8601 UTC with the `Z` suffix.        |
-| NFR-054 | The `--local-time` flag is explicitly prohibited per SFRS §1 Rule 1.                                     |
+| NFR-054 | The `--local-time` flag is explicitly prohibited per the CLI Standard §1 Rule 1.                         |
 | NFR-055 | Durations shall be represented in ISO 8601 duration form (`PT1H30M`) in machine-readable output.         |
 | NFR-056 | All units shall be metric (SI); no AM/PM, no imperial.                                                   |
 
@@ -472,7 +472,7 @@ A high-level view; the full command surface, flag inventory, and exact resolutio
 
 | Command            | Purpose                                                                            |
 |--------------------|------------------------------------------------------------------------------------|
-| `loran`            | TUI if TTY, else `loran list --json` (auto-detection per SFRS §5)                 |
+| `loran`            | TUI if TTY, else `loran list --json` (auto-detection per the CLI Standard §5)      |
 | `loran list`       | List catalogued tools, filterable                                                  |
 | `loran show <tool>`| Show resolved curated page (Spacecraft Software intro + body, curated-or-fail)             |
 | `loran help <tool>`| Capture and render `<tool> --help` directly (always-live, de-themed)              |
@@ -490,7 +490,7 @@ A high-level view; the full command surface, flag inventory, and exact resolutio
 
 - **TUI mode** (default on TTY): ratatui-based dual-pane browser, Spacecraft Software palette, Vim + CUA keybindings.
 - **Text mode** (no TTY, `--format text`, or stdout redirected): POSIX-parseable plain text.
-- **JSON mode** (`--json`, `--format json`, agent env vars set, or stdout piped): SFRS-compliant envelope.
+- **JSON mode** (`--json`, `--format json`, agent env vars set, or stdout piped): CLI-Standard-compliant envelope.
 
 ### 10.3 Three audience layers
 
@@ -593,9 +593,9 @@ Loran does not live in a vacuum. Its integrations with other Spacecraft Software
 
 Each per-distro overlay is authored and maintained in its respective project repo, then surfaced into Loran via the upstream publisher tarball pipeline. This keeps distro opinions co-located with their distros.
 
-### 13.2 SFRS describe ingestion (Phase 3)
+### 13.2 CLI Standard describe ingestion (Phase 3)
 
-Every Spacecraft Software CLI must implement `<tool> describe --json` per SFRS §4. The `DescribeIngestor` (Phase 3) invokes this on Spacecraft Software-native binaries and synthesises baseline catalog entries. Net effect: every new Spacecraft Software CLI (Ferrocast, Caliper, Craton, Ironway, Zamak, Flux, Mawaqit, and future projects) gets a Loran entry for free, with curated pages overlayed on top where they exist.
+Every Spacecraft Software CLI must implement `<tool> describe --json` per the CLI Standard §4. The `DescribeIngestor` (Phase 3) invokes this on Spacecraft Software-native binaries and synthesises baseline catalog entries. Net effect: every new Spacecraft Software CLI (Ferrocast, Caliper, Craton, Ironway, Zamak, Flux, Mawaqit, and future projects) gets a Loran entry for free, with curated pages overlayed on top where they exist.
 
 ### 13.3 Cross-CLI references
 
@@ -622,17 +622,17 @@ Per Spacecraft Software Standard §2, release codenames follow the cast-form lis
 
 ### 14.1 Phase 1: Ingot (v0.1.x → v0.x — text-mode usable)
 
-**Outcome:** A useful binary that lists, shows, finds, and searches the bundled tool catalog, with full JSON output and SFRS-compliant flags. No network, no overlays, no TUI.
+**Outcome:** A useful binary that lists, shows, finds, and searches the bundled tool catalog, with full JSON output and CLI-Standard-compliant flags. No network, no overlays, no TUI.
 
 **Scope:**
 
 - Cargo workspace + posture files (README, NOTICE, CONTRIBUTING, LICENSE) per Standard v1.1 §5.2.
-- All global flags per SFRS §3.
+- All global flags per the CLI Standard §3.
 - Sub-commands: `list`, `show`, `help`, `find`, `search`, `categories`, `describe`, `schema` (placeholder, full schema in Bloom).
 - Page format parser (`loran-pages` crate).
 - `Ingestor` trait abstraction in `loran-index` (only `MarkdownPagesIngestor` implemented).
 - Index from bundled `pages/` tree (built into binary).
-- JSON envelope per SFRS §6.
+- JSON envelope per the CLI Standard §6.
 - POSIX-compliant text mode.
 - Live `--help` capture with full sandbox per FR-020 through FR-025.
 - Agent env-var detection (`AI_AGENT`, `AGENT`, `CI`, `CLAUDECODE`, `CURSOR_AGENT`, `GEMINI_CLI`).
@@ -661,11 +661,11 @@ Per Spacecraft Software Standard §2, release codenames follow the cast-form lis
 
 ### 14.3 Phase 3: Bloom (v1.x — the agentic completion)
 
-**Outcome:** Loran becomes the primary tool-discovery surface for AI agents on Spacecraft Software systems, and the ecosystem becomes self-documenting via SFRS describe ingestion.
+**Outcome:** Loran becomes the primary tool-discovery surface for AI agents on Spacecraft Software systems, and the ecosystem becomes self-documenting via the CLI Standard's describe ingestion.
 
 **Scope:**
 
-- `loran-mcp` crate: read-only MCP server over stdio per SFRS, with lazy-loading discipline.
+- `loran-mcp` crate: read-only MCP server over stdio per the CLI Standard, with lazy-loading discipline.
 - `loran schema` emits full JSON Schema Draft 2020-12 for Anthropic, OpenAI, Gemini, MCP function-calling.
 - `DescribeIngestor` implementation: ingests `<tool> describe --json` from allowlisted Spacecraft Software binaries.
 - Cross-distro overlay surfacing (the Bravais and Ferrite OS overlays are part of the upstream tarball, not just the per-distro overlays).
@@ -697,7 +697,7 @@ Personal-hobby projects don't have MAU/DAU metrics. The right success metrics he
 
 ### 15.3 Ecosystem-integration metrics
 
-- **M-07: SFRS describe parity.** Number of Spacecraft Software CLIs whose `<tool> describe --json` output is correctly ingested by `DescribeIngestor`. Target: all Spacecraft Software CLIs by Bloom release.
+- **M-07: CLI Standard describe parity.** Number of Spacecraft Software CLIs whose `<tool> describe --json` output is correctly ingested by `DescribeIngestor`. Target: all Spacecraft Software CLIs by Bloom release.
 - **M-08: Cross-CLI references.** Number of Spacecraft Software CLIs whose `--help` text references `loran show <self>`. Target: all Spacecraft Software CLIs by Bloom release.
 
 ### 15.4 Anti-metrics (things we deliberately do not measure)
@@ -715,7 +715,7 @@ Personal-hobby projects don't have MAU/DAU metrics. The right success metrics he
 | Dependency                  | Type           | Relationship                                                                |
 |-----------------------------|----------------|------------------------------------------------------------------------------|
 | Spacecraft Software Standard v1.1     | Specification  | Authoritative for naming, palette, fonts, time, attribution, posture        |
-| Spacecraft Software SFRS v1.0.0       | Specification  | Authoritative for CLI shape, JSON envelope, exit codes, agent env vars      |
+| Spacecraft Software CLI Standard v1.0.0 | Specification | Authoritative for CLI shape, JSON envelope, exit codes, agent env vars      |
 | `rust-guidelines` skill     | Implementation | Loaded at every Rust-writing session                                         |
 | Bravais project             | Content        | Provides the Bravais overlay; ships Loran in default install                 |
 | Ferrite OS project          | Content        | Provides the Ferrite overlay; ships Loran in default install                |
@@ -763,7 +763,7 @@ Full canonical list in spec §3.3. Critical ones:
 - Schema validation (`loran validate`) blocks malformed pages.
 - A documented style guide for pages (covered briefly in spec §11.3; expanded in CONTRIBUTING.md).
 - Fallback chain (Spacecraft Software intro → custom → tldr → no-entry) means an incomplete catalog still produces useful output: the absence of a curated body falls back to tldr automatically.
-- `DescribeIngestor` (Bloom) auto-generates baseline pages from SFRS `describe`, reducing the from-zero authoring cost.
+- `DescribeIngestor` (Bloom) auto-generates baseline pages from the CLI Standard's `describe`, reducing the from-zero authoring cost.
 
 ### 17.2 Upstream signing key compromise
 
@@ -791,7 +791,7 @@ Full canonical list in spec §3.3. Critical ones:
 
 **Mitigations:**
 - Per-distro overlays in distro repos make it easy to add distro-specific entries.
-- `DescribeIngestor` (Bloom) automatically picks up any SFRS-compliant Spacecraft Software binary on `$PATH`.
+- `DescribeIngestor` (Bloom) automatically picks up any CLI-Standard-compliant Spacecraft Software binary on `$PATH`.
 - Drift detection: an `xtask` or CI check compares the Bravais default-install package list against the Loran catalog and flags gaps.
 
 ### 17.5 Agent-misinterpretation of `safe_alias_for`
@@ -833,7 +833,7 @@ The same set as spec §15. Resolution belongs in v0.3 of the spec; the PRD inher
 **Still open:**
 
 1. **`pairs_with` reciprocity.** Should `loran validate` warn on non-reciprocal pairings, or accept asymmetry as intentional?
-2. **`DescribeIngestor` trust list.** Allowlist baked into the upstream tarball (current leaning)? Self-declaration via SFRS `describe`? Cryptographic attestation?
+2. **`DescribeIngestor` trust list.** Allowlist baked into the upstream tarball (current leaning)? Self-declaration via the CLI Standard's `describe`? Cryptographic attestation?
 
 Neither blocks Phase 1 (Ingot), Phase 2 (Billet), or Phase 3 (Bloom) implementation. Both are future-policy concerns.
 
@@ -852,7 +852,7 @@ Per Standard §14, every Spacecraft Software artifact must pass this audit. This
 | 4   | GPL-3.0-or-later + SPDX                  | ✓      | NFR-070, NFR-071.                                                                                                 |
 | 5.2 | Required posture files (README/NOTICE/CONTRIBUTING/LICENSE) | ✓ | NFR-072.                                                                                                          |
 | 5.1 | Default personal-hobby posture           | ✓      | Stated in README Project Posture section.                                                                         |
-| 6.1 | POSIX-compliant CLI                      | ✓      | NFR-050, NFR-051. Per SFRS §1 Rule 3.                                                                             |
+| 6.1 | POSIX-compliant CLI                      | ✓      | NFR-050, NFR-051. Per the CLI Standard §1 Rule 3.                                                                 |
 | 7   | PFA: no tracking, minimal perms, local   | ✓      | NFR-040 through NFR-043.                                                                                          |
 | 8   | CUA + Vim bindings                       | ✓      | NFR-062. Both schemes in TUI.                                                                                     |
 | 9   | Spacecraft Software palette; Void Navy bg          | ✓      | Curated content uses palette tokens; `loran help` capture frame uses monochrome (intentional brand boundary).     |
@@ -880,7 +880,7 @@ The single ⚠️ on §2 is a known and accepted deviation, documented openly so
 ### 20.2 Spacecraft Software standards
 
 - **The Spacecraft Software Standard v1.1** — Naming, priorities, license, posture, platform, PFA, key bindings, palette, fonts, UI/UX, time, attribution.
-- **Spacecraft Software SFRS v1.0.0** — Dual-Mode Self-Documenting CLI Framework. Authoritative for `--json`, `--format`, exit codes, JSON envelope, agent env vars, MCP threshold rule.
+- **Spacecraft Software Dual-Mode Self-Documenting CLI Standard (v1.0.0)** — Authoritative for `--json`, `--format`, exit codes, JSON envelope, agent env vars, MCP threshold rule.
 - **Spacecraft Software Agentic-CLI Standard** — Lazy-loading discipline for MCP, AGENTS.md / CLAUDE.md conventions, tips-thinking error hints.
 - **Spacecraft Software Rust Guidelines** — Crate choices (`jiff`, `thiserror`+`anyhow`, `tracing`), `unsafe` policy, error handling.
 

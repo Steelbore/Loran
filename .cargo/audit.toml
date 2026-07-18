@@ -21,7 +21,7 @@ ignore = [
     # Postcard pins heapless 0.7 in its 1.x line. The fix is upstream
     # (heapless 0.8 → portable-atomic) which postcard adopts when its
     # next major version lands. Until then, accepting the unmaintained-
-    # warning is the only viable path — `postcard` is the SFRS-pinned
+    # warning is the only viable path — `postcard` is the CLI-Standard-pinned
     # cache format and `atomic-polyfill` itself carries no known CVE.
     #
     # Re-check whenever `postcard` releases a 2.x or otherwise drops

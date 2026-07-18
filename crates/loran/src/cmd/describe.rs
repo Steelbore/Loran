@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2026 Mohamed Hammad
 
-//! `loran describe` — SFRS describe manifest for agents.
+//! `loran describe` — the CLI Standard's describe manifest for agents.
 //!
-//! Always JSON-shaped (SFRS §4); `--format human` produces the same
+//! Always JSON-shaped (the CLI Standard §4); `--format human` produces the same
 //! envelope pretty-printed, not a different shape.
 
 use std::process::ExitCode;
@@ -112,7 +112,7 @@ fn command_manifest() -> Vec<CommandManifest> {
         },
         CommandManifest {
             name: "describe",
-            summary: "Emit the SFRS describe manifest for agents.",
+            summary: "Emit the CLI Standard's describe manifest for agents.",
             capability_tags: vec!["read-only"],
         },
         CommandManifest {

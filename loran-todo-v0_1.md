@@ -155,7 +155,7 @@ Update this table whenever the document is revised.
 
 ## 5. Phase 1 — Ingot (Detailed)
 
-**Phase outcome (Plan §5):** A useful binary that lists, shows, finds, and searches the bundled tool catalog, with full JSON output and SFRS-compliant flags. No network, no overlays, no TUI.
+**Phase outcome (Plan §5):** A useful binary that lists, shows, finds, and searches the bundled tool catalog, with full JSON output and CLI-Standard-compliant flags. No network, no overlays, no TUI.
 
 ### WP-P1.01 — Page parser (`loran-pages`)
 
@@ -263,14 +263,14 @@ Update this table whenever the document is revised.
 **Sizing:** M | **Critical Path:** No (early-parallel; gates sub-commands) | **Plan §:** 5 | **Deps:** WP-P0.04 | **PRD:** All FR-060 series, NFR-053 to NFR-056
 
 - [x] **LOR-P001-069** — Add `clap` (derive), `serde`, `serde_json`, `tracing`, `tracing-subscriber`, `jiff`, `anyhow` deps to `loran-cli/Cargo.toml`
-- [x] **LOR-P001-070** — Define top-level `Cli` struct with clap derive containing all SFRS §3 global flags: `--json`, `--format`, `--fields`, `--dry-run`, `--verbose`, `--quiet`, `--no-color`, `--color`, `--absolute-time`, `--print0`, `--yes`
+- [x] **LOR-P001-070** — Define top-level `Cli` struct with clap derive containing all the CLI Standard §3 global flags: `--json`, `--format`, `--fields`, `--dry-run`, `--verbose`, `--quiet`, `--no-color`, `--color`, `--absolute-time`, `--print0`, `--yes`
 - [x] **LOR-P001-071** — Add `--version` with custom long-format output per Standard §13.2 (maintainer footer + project URL)
 - [x] **LOR-P001-072** — Add `--help` long-format footer per Standard §13.2
 - [x] **LOR-P001-073** — Define `Command` enum with all sub-command stubs: `List`, `Show`, `Help`, `Find`, `Search`, `Categories`, `New`, `Update`, `Validate`, `Schema`, `Describe`, `Mcp`
 - [x] **LOR-P001-074** — Each sub-command stub accepts its expected flags (per spec §7) and prints "not yet implemented in Phase 1" with appropriate exit code
 - [x] **LOR-P001-075** — Wire `tracing-subscriber` configured by `--verbose` / `--quiet` flags; stderr only
 - [x] **LOR-P001-076** — Implement `--no-color` / `--color` / `NO_COLOR` env handling for the CLI's own output (TUI rendering comes in Phase 2)
-- [x] **LOR-P001-077** — Make `--json --version` produce SFRS §6 envelope with `metadata.maintainer` and `metadata.website` populated
+- [x] **LOR-P001-077** — Make `--json --version` produce the CLI Standard §6 envelope with `metadata.maintainer` and `metadata.website` populated
 - [x] **LOR-P001-078** — Add integration test confirming `loran --version` output matches Standard §13.2 format exactly
 - [x] **LOR-P001-079** — Add integration test confirming `loran --help` footer matches Standard §13.2 format
 
@@ -280,11 +280,11 @@ Update this table whenever the document is revised.
 
 - [x] **LOR-P001-080** — Define `Envelope<T: Serialize>` struct in `loran-cli/src/envelope.rs` with `metadata` + `data` fields
 - [x] **LOR-P001-081** — Define `Metadata` struct: `tool`, `version`, `command`, `timestamp` (jiff::Timestamp serialised as ISO 8601 UTC + Z), `maintainer`, `website`
-- [x] **LOR-P001-082** — Define `ErrorEnvelope` struct with `error.{code, exit_code, message, hint, timestamp, command, docs_url}` per SFRS §1 Rule 8
+- [x] **LOR-P001-082** — Define `ErrorEnvelope` struct with `error.{code, exit_code, message, hint, timestamp, command, docs_url}` per the CLI Standard §1 Rule 8
 - [x] **LOR-P001-083** — Implement `JsonEmitter` type with `emit_data<T: Serialize>(&self, data: T)`, `emit_error(&self, code, message, hint)`
 - [x] **LOR-P001-084** — Implement custom `serde` serialiser for `jiff::Timestamp` ensuring `Z` suffix (NFR-053)
 - [x] **LOR-P001-085** — Add unit tests round-tripping envelopes through `serde_json` and confirming `Z` suffix on timestamps
-- [x] **LOR-P001-086** — Add unit test confirming error envelopes include all SFRS §1 Rule 8 fields
+- [x] **LOR-P001-086** — Add unit test confirming error envelopes include all the CLI Standard §1 Rule 8 fields
 
 ### WP-P1.09 — Agent env-var detection & TTY cascade
 
@@ -293,7 +293,7 @@ Update this table whenever the document is revised.
 - [x] **LOR-P001-087** — Add `is-terminal` crate (or use `std::io::IsTerminal`) to `loran-cli`
 - [x] **LOR-P001-088** — Define `OutputMode` enum: `Tui`, `Text`, `Json`
 - [x] **LOR-P001-089** — Implement `detect_output_mode(cli: &Cli) -> OutputMode` checking, in order: explicit `--json` / `--format=json` → `Json`; agent env vars (`AI_AGENT`, `AGENT`, `CI`, `CLAUDECODE`, `CURSOR_AGENT`, `GEMINI_CLI`) → `Json` + stderr warning; non-TTY stdout → `Json`; TTY → `Text` (Phase 1 collapses `Tui` to `Text` until Phase 2 lands the TUI)
-- [x] **LOR-P001-090** — Emit the stderr warning when an agent env var triggers JSON mode (per SFRS §5)
+- [x] **LOR-P001-090** — Emit the stderr warning when an agent env var triggers JSON mode (per the CLI Standard §5)
 - [x] **LOR-P001-091** — Add unit tests with env-var injection covering each detection branch
 
 ### WP-P1.10 — Exit codes + error catalog (`loran-cli`)
@@ -373,9 +373,9 @@ Update this table whenever the document is revised.
 **Sizing:** XS | **Critical Path:** No | **Plan §:** 5 | **Deps:** WP-P1.07 | **PRD:** FR-063
 
 - [x] **LOR-P001-129** — Implement `loran describe` handler in `loran-cli/src/cmd/describe.rs`
-- [x] **LOR-P001-130** — Build the describe manifest per SFRS §4: tool name, version, every sub-command with one-line description, capability tags (`read-only`, `network`, `subprocess`)
-- [x] **LOR-P001-131** — Emit as JSON only (describe is always machine-readable per SFRS §4)
-- [x] **LOR-P001-132** — Add integration test validating output against the SFRS describe schema (hand-coded validator in test for now; replaced by schema validation in Phase 3)
+- [x] **LOR-P001-130** — Build the describe manifest per the CLI Standard §4: tool name, version, every sub-command with one-line description, capability tags (`read-only`, `network`, `subprocess`)
+- [x] **LOR-P001-131** — Emit as JSON only (describe is always machine-readable per the CLI Standard §4)
+- [x] **LOR-P001-132** — Add integration test validating output against the CLI Standard's describe schema (hand-coded validator in test for now; replaced by schema validation in Phase 3)
 
 ### WP-P1.18 — `loran schema` placeholder
 

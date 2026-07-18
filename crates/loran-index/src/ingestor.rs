@@ -18,7 +18,7 @@ use crate::error::IngestError;
 /// Future implementations (Phase 3):
 ///
 /// - `DescribeIngestor` — invokes `<tool> describe --json` against
-///   SFRS-compliant Spacecraft Software binaries on `$PATH` and synthesises
+///   CLI-Standard-compliant Spacecraft Software binaries on `$PATH` and synthesises
 ///   baseline entries. Lets the Spacecraft Software ecosystem self-document by
 ///   default; curated pages overlay on top where they exist.
 pub trait Ingestor {

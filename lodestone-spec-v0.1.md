@@ -14,7 +14,7 @@ Copyright (c) 2026 Mohamed Hammad
 | **Author**     | Mohamed Hammad                                              |
 | **Copyright**  | (c) 2026 Mohamed Hammad                                     |
 | **License**    | GPL-3.0-or-later                                            |
-| **Governed by**| Spacecraft Software Standard v1.0, Spacecraft Software SFRS v1.0.0              |
+| **Governed by**| Spacecraft Software Standard v1.0, Spacecraft Software CLI Standard v1.0.0      |
 
 ---
 
@@ -42,7 +42,7 @@ These are settled and inform the rest of this spec. Listed up front so reviewers
 | 2 | **Greenfield Cargo workspace.** No fork of tealdeer or tlrc. Reuse patterns, not code.                  |
 | 3 | **Global registry + overlays** for the page collection (upstream / per-distro / per-user).              |
 | 4 | **Category-first browsing** (mirrors the GRUB/parted help affordance the user described).              |
-| 5 | **TUI default with TTY auto-detection** per SFRS §5 cascade. Pipe = `--format json`.                    |
+| 5 | **TUI default with TTY auto-detection** per the CLI Standard §5 cascade. Pipe = `--format json`.        |
 | 6 | **Tarball update model**, mirroring tldr-pages. No git client dependency at runtime.                    |
 | 7 | **Resolution order:** Spacecraft Software intro (always) → custom page → tldr page → live `--help` → no-entry prompt. |
 | 8 | **Page format:** single Markdown file with TOML frontmatter (Hugo/Zola style).                          |
@@ -86,18 +86,18 @@ Crate-prefix naming follows mainstream Rust workspace convention. Project-level 
 
 | Concern              | Crate                          | Rationale                                                |
 |----------------------|--------------------------------|----------------------------------------------------------|
-| CLI parsing          | `clap` (derive)                | SFRS canonical                                           |
-| Serialization        | `serde`, `serde_json`, `toml`  | SFRS canonical                                           |
+| CLI parsing          | `clap` (derive)                | CLI Standard canonical                                   |
+| Serialization        | `serde`, `serde_json`, `toml`  | CLI Standard canonical                                   |
 | Markdown parsing     | `pulldown-cmark`               | CommonMark, fast, no_std-friendly                        |
-| TUI                  | `ratatui` + `crossterm`        | SFRS canonical                                           |
+| TUI                  | `ratatui` + `crossterm`        | CLI Standard canonical                                   |
 | Time                 | `jiff`                         | Microsoft Rust Guidelines preferred over chrono          |
 | HTTP (tarball)       | `ureq` + `rustls`              | Lean, no async runtime needed for one-shot fetch         |
 | Tar/gzip             | `tar` + `flate2`               | Standard combo                                           |
 | Fuzzy search         | `nucleo-matcher`               | Used by helix; fast and well-tested                      |
 | Binary cache format  | `postcard`                     | Compact, fast, schema-stable                             |
-| MCP (Phase 3)        | `rmcp`                         | SFRS canonical                                           |
+| MCP (Phase 3)        | `rmcp`                         | CLI Standard canonical                                   |
 | Errors               | `thiserror` (lib), `anyhow` (bin) | Microsoft Rust Guidelines                              |
-| Logging              | `tracing` + `tracing-subscriber`  | Per SFRS                                              |
+| Logging              | `tracing` + `tracing-subscriber`  | Per the CLI Standard                                  |
 
 No `tokio` in the v1 fast path. Tarball fetch is one synchronous request; everything else is local I/O. MCP server may introduce async in Phase 3 — scoped to that crate only.
 
@@ -153,7 +153,7 @@ error: no Lodestone entry for 'widgetctl'
   see also: lodestone search widget --json
 ```
 
-In `--json` mode, the structured error carries the same hint (`error.hint = "lodestone new widgetctl --edit"`) per SFRS tips-thinking discipline.
+In `--json` mode, the structured error carries the same hint (`error.hint = "lodestone new widgetctl --edit"`) per the CLI Standard's tips-thinking discipline.
 
 ### 4.2 `--help` fallback safety
 
@@ -287,11 +287,11 @@ User overlays may add categories but cannot remove upstream ones.
 
 ## 7. Subcommand Surface
 
-Noun-verb per SFRS §2 Rule 7. Verbs in the canonical set where applicable.
+Noun-verb per the CLI Standard §2 Rule 7. Verbs in the canonical set where applicable.
 
 | Command                            | Description                                                           |
 |------------------------------------|-----------------------------------------------------------------------|
-| `lodestone`                        | TUI if TTY, else `lodestone list --json`. Auto-detection per SFRS §5. |
+| `lodestone`                        | TUI if TTY, else `lodestone list --json`. Auto-detection per the CLI Standard §5. |
 | `lodestone list`                   | List tools (filterable). Honours `--category`, `--replaces`, `--fields`. |
 | `lodestone show <tool>`            | Show resolved page (Spacecraft Software intro + body per §4 chain).             |
 | `lodestone find <legacy>`          | Reverse lookup: which tool replaces `<legacy>`?                       |
@@ -300,11 +300,11 @@ Noun-verb per SFRS §2 Rule 7. Verbs in the canonical set where applicable.
 | `lodestone new <tool>`             | Scaffold a new page from template. `--edit` opens `$EDITOR`.         |
 | `lodestone update`                 | Refresh upstream `pages/` tarball + tldr tarball. Re-builds index.    |
 | `lodestone validate`               | Validate all pages against frontmatter schema. CI-friendly.           |
-| `lodestone schema`                 | JSON Schema (Draft 2020-12) of own data types. SFRS §4.               |
-| `lodestone describe`               | Self-description manifest for agents. SFRS §4.                        |
+| `lodestone schema`                 | JSON Schema (Draft 2020-12) of own data types. the CLI Standard §4.   |
+| `lodestone describe`               | Self-description manifest for agents. the CLI Standard §4.            |
 | `lodestone mcp`                    | Run as MCP server over stdio. Phase 3.                                |
 
-### 7.1 Global flags (SFRS §3, identical across all Spacecraft Software CLIs)
+### 7.1 Global flags (the CLI Standard §3, identical across all Spacecraft Software CLIs)
 
 `--json`, `--format`, `--fields`, `--dry-run`, `--verbose`, `--quiet`, `--no-color`, `--color`, `--help`, `--version`, `--absolute-time`, `--print0`, `--yes`. No deviations.
 
@@ -335,7 +335,7 @@ Template lives at `$XDG_DATA_HOME/lodestone/templates/tool.md`, populated on fir
 
 ## 8. JSON Envelope
 
-Per SFRS §6. Example for `lodestone show eza --json`:
+Per the CLI Standard §6. Example for `lodestone show eza --json`:
 
 ```json
 {
@@ -371,7 +371,7 @@ Per SFRS §6. Example for `lodestone show eza --json`:
 
 ---
 
-## 9. Exit Codes (SFRS §4 + Lodestone-specific)
+## 9. Exit Codes (the CLI Standard §4 + Lodestone-specific)
 
 Canonical codes 0–5 unchanged. Tool-specific (6–125):
 
@@ -392,7 +392,7 @@ All documented in `lodestone schema` output.
 - **Default view (no args, TTY):** category list (left pane) + tool list (right pane). Vim `hjkl` navigation; CUA arrow keys. `/` for fuzzy search, `?` for in-app help.
 - **Detail view:** Spacecraft Software intro block, then body, with a live indicator if `body.kind = "live_help"`. Tab-switchable to raw Markdown and frontmatter views (agent-friendly inspection).
 - **Theme:** Spacecraft Software palette only (Void Navy bg, Molten Amber primary text, Steel Blue structural, Radium Green success, Liquid Coolant info, Red Oxide error). Honours `NO_COLOR`.
-- **Agent guard rail:** If `AI_AGENT=1` or `AGENT=1` is set, TUI never activates — falls back to `--format json` and warns on stderr per SFRS §5.
+- **Agent guard rail:** If `AI_AGENT=1` or `AGENT=1` is set, TUI never activates — falls back to `--format json` and warns on stderr per the CLI Standard §5.
 
 ---
 
@@ -426,7 +426,7 @@ All present at repo root from the first commit, before `lodestone-cli` has any s
 
 ### 12.2 MCP Surface (Phase 3)
 
-Lodestone's full sub-command count (≈12) is borderline for SFRS §2 Rule 8's MCP threshold. We ship MCP because the read-only ones (`list`, `show`, `find`, `search`, `categories`) are unusually high-value for agents discovering what tools exist on a Spacecraft Software system. Lazy-loading discipline per `spacecraft-agentic-cli` §6: `tools/list` advertises names + capability tags only; full schemas come from `tools/get`.
+Lodestone's full sub-command count (≈12) is borderline for the CLI Standard §2 Rule 8's MCP threshold. We ship MCP because the read-only ones (`list`, `show`, `find`, `search`, `categories`) are unusually high-value for agents discovering what tools exist on a Spacecraft Software system. Lazy-loading discipline per `spacecraft-agentic-cli` §6: `tools/list` advertises names + capability tags only; full schemas come from `tools/get`.
 
 ### 12.3 Tips-thinking error catalog
 
@@ -451,7 +451,7 @@ Every error code from §9 has a runnable `hint`. Examples:
 | 3.2 | Performance / concurrency designed-in | ✓ Sync where appropriate; async confined to MCP crate. Index build benched.         |
 | 3.3 | Hardened security; PQC                | ✓ `rustls` for tarball fetch (PQC-ready via hybrid KEMs in upstream roadmap). No crypto subsystem of our own. |
 | 4 | GPL-3.0-or-later + SPDX                | ✓ All `.rs` and Cargo.toml files. Pages (Markdown) are documents → exempt.          |
-| 5.1 | POSIX-compliant CLI                  | ✓ SFRS-compliant; default output is POSIX-safe.                                     |
+| 5.1 | POSIX-compliant CLI                  | ✓ CLI-Standard-compliant; default output is POSIX-safe.                             |
 | 6 | PFA: no tracking, minimal perms, local | ✓ No telemetry. Filesystem + outbound HTTPS to tarball CDN only. All data local.   |
 | 7 | CUA + Vim bindings                     | ✓ Both schemes in TUI.                                                              |
 | 8 | Spacecraft Software palette; Void Navy bg        | ✓ TUI uses palette tokens only.                                                     |

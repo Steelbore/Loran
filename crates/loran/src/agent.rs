@@ -5,7 +5,7 @@
 // and will be called from every sub-command starting in Sub-phase 1C.
 #![allow(dead_code)]
 
-//! Output-mode resolution: TTY auto-detection plus the SFRS §5
+//! Output-mode resolution: TTY auto-detection plus the CLI Standard §5
 //! "agent guard rail" that forces JSON output whenever a known
 //! coding-agent runner is observed in the environment.
 //!
@@ -49,7 +49,7 @@ pub(crate) enum OutputMode {
     /// Plain ANSI-free text suitable for piping. The Phase 1 default
     /// when stdout is a TTY.
     Text,
-    /// SFRS-shaped JSON envelope, written to stdout.
+    /// CLI-Standard-shaped JSON envelope, written to stdout.
     Json,
 }
 
@@ -131,7 +131,7 @@ pub(crate) fn detect_output_mode(
     }
 }
 
-/// Write the SFRS §5 stderr warning when an agent env var has forced
+/// Write the CLI Standard §5 stderr warning when an agent env var has forced
 /// JSON mode. No-op for any other reason.
 pub(crate) fn emit_agent_env_warning<W: Write>(
     decision: &OutputDecision,
