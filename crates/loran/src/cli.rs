@@ -15,7 +15,7 @@ Source: https://github.com/Spacecraft-Software/Loran";
 
 /// Output format for sub-commands that emit structured data.
 ///
-/// `Human` is the TTY-friendly default; `Json` produces the SFRS §6
+/// `Human` is the TTY-friendly default; `Json` produces the CLI Standard §6
 /// envelope. The `--json` global flag is sugar for `--format json`.
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, ValueEnum)]
 pub(crate) enum Format {
@@ -33,11 +33,11 @@ pub(crate) enum ColorMode {
     Never,
 }
 
-/// SFRS §3 global flags. Every flag is `global = true` so it can be
+/// The CLI Standard §3 global flags. Every flag is `global = true` so it can be
 /// supplied either before or after the sub-command — `loran --json list`
 /// and `loran list --json` behave identically.
 #[derive(Debug, Args)]
-#[allow(clippy::struct_excessive_bools)] // SFRS §3 dictates the flag shape
+#[allow(clippy::struct_excessive_bools)] // the CLI Standard §3 dictates the flag shape
 pub(crate) struct GlobalFlags {
     /// Emit machine-readable JSON output. Equivalent to `--format json`.
     #[arg(long, global = true)]
@@ -100,7 +100,7 @@ pub(crate) struct GlobalFlags {
 /// Top-level CLI surface.
 ///
 /// `disable_version_flag = true` because we surface `--version` ourselves
-/// — we need the flag to interact with `--json` (printing the SFRS
+/// — we need the flag to interact with `--json` (printing the CLI Standard
 /// envelope) and `--format`, which clap's auto-version handling doesn't
 /// support. See [`crate::version::emit`].
 #[derive(Debug, Parser)]
@@ -117,7 +117,7 @@ pub(crate) struct GlobalFlags {
     after_long_help = ATTRIBUTION_FOOTER,
 )]
 pub(crate) struct Cli {
-    /// Print version info and exit. Use with `--json` for the SFRS envelope.
+    /// Print version info and exit. Use with `--json` for the CLI Standard envelope.
     #[arg(long, short = 'V', global = true)]
     pub version: bool,
 
@@ -172,7 +172,7 @@ pub(crate) enum Command {
     Validate(ValidateArgs),
     /// Emit JSON Schema for the Loran data model.
     Schema(SchemaArgs),
-    /// Emit the SFRS describe manifest for agents.
+    /// Emit the CLI Standard's describe manifest for agents.
     Describe(DescribeArgs),
     /// Run as a read-only MCP server over stdio.
     Mcp(McpArgs),

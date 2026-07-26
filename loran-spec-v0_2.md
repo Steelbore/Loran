@@ -16,7 +16,7 @@ Copyright (c) 2026 Mohamed Hammad
 | **Copyright**  | (c) 2026 Mohamed Hammad                                     |
 | **License**    | GPL-3.0-or-later                                            |
 | **Website**    | https://Loran.SpacecraftSoftware.org/                                |
-| **Governed by**| Spacecraft Software Standard v1.1, Spacecraft Software SFRS v1.0.0              |
+| **Governed by**| Spacecraft Software Standard v1.1, Spacecraft Software CLI Standard v1.0.0      |
 
 **Revision 2026-05-12 (in-place amendment to v0.2):**
 
@@ -32,7 +32,7 @@ Copyright (c) 2026 Mohamed Hammad
 - **Added** frontmatter field `pairs_with` — non-reciprocal recommendation set for companion tools.
 - **Promoted** page signing from open question to a Phase 2 (Billet) requirement: minisign + ed25519 + `minisign-verify` crate.
 - **Added** exit code `TARBALL_VERIFY_FAILED = 11`.
-- **Added** `Ingestor` trait abstraction in §3 to enable Phase 3 ingestion of SFRS `describe` output from other Spacecraft Software CLIs.
+- **Added** `Ingestor` trait abstraction in §3 to enable Phase 3 ingestion of the CLI Standard's `describe` output from other Spacecraft Software CLIs.
 - **Clarified** that `category` is slash-tolerant for future nested-hierarchy UX.
 - **Added** `NOTICE.md` to required posture files per Spacecraft Software Standard v1.1 §5.2.
 - **Resolved** three former open questions: per-distro overlay source-of-truth (per-distro repos, surfaced via tarball pipeline); i18n directory layout (tldr-pages `pages.<lang>/` precedent); nested-category UX threshold (~50 entries).
@@ -63,7 +63,7 @@ These are settled and inform the rest of this spec. Listed up front so reviewers
 | 2  | **Greenfield Cargo workspace.** No fork of tealdeer or tlrc. Reuse patterns, not code.                  |
 | 3  | **Global registry + overlays** for the page collection (upstream / per-distro / per-user).              |
 | 4  | **Category-first browsing** (mirrors the GRUB/parted help affordance).                                  |
-| 5  | **TUI default with TTY auto-detection** per SFRS §5 cascade. Pipe = `--format json`.                    |
+| 5  | **TUI default with TTY auto-detection** per the CLI Standard §5 cascade. Pipe = `--format json`.        |
 | 6  | **Tarball update model**, mirroring tldr-pages. No git client dependency at runtime. Tarballs are minisign-signed. |
 | 7  | **Verb split:** `loran show <tool>` is curated-or-fail (no live fallback); `loran help <tool>` is always-live `--help` capture. |
 | 8  | **Resolution order for `show`:** Spacecraft Software intro (always) → custom page → tldr page → no-entry prompt. **Live `--help` is never invoked by `show`.** |
@@ -111,7 +111,7 @@ Crate-prefix naming follows mainstream Rust workspace convention. Project-level 
 
 ### 3.2 The `Ingestor` Trait
 
-`loran-index` exposes an `Ingestor` trait so the index loader is pluggable rather than hard-coded to a single source format. v1 ships one implementation: `MarkdownPagesIngestor` (TOML frontmatter + Markdown body). Phase 3 adds `DescribeIngestor`, which invokes `<tool> describe --json` against SFRS-compliant Spacecraft Software binaries on `$PATH` and synthesises baseline entries — making the Spacecraft Software ecosystem self-documenting (every new Spacecraft Software CLI gets a Loran entry for free, with curated pages overlaying on top where they exist).
+`loran-index` exposes an `Ingestor` trait so the index loader is pluggable rather than hard-coded to a single source format. v1 ships one implementation: `MarkdownPagesIngestor` (TOML frontmatter + Markdown body). Phase 3 adds `DescribeIngestor`, which invokes `<tool> describe --json` against CLI-Standard-compliant Spacecraft Software binaries on `$PATH` and synthesises baseline entries — making the Spacecraft Software ecosystem self-documenting (every new Spacecraft Software CLI gets a Loran entry for free, with curated pages overlaying on top where they exist).
 
 This abstraction is non-load-bearing in v1 but designed-in from Phase 1 so retrofitting it later doesn't require restructuring the index pipeline.
 
@@ -119,19 +119,19 @@ This abstraction is non-load-bearing in v1 but designed-in from Phase 1 so retro
 
 | Concern              | Crate                          | Rationale                                                |
 |----------------------|--------------------------------|----------------------------------------------------------|
-| CLI parsing          | `clap` (derive)                | SFRS canonical                                           |
-| Serialization        | `serde`, `serde_json`, `toml`  | SFRS canonical                                           |
+| CLI parsing          | `clap` (derive)                | CLI Standard canonical                                   |
+| Serialization        | `serde`, `serde_json`, `toml`  | CLI Standard canonical                                   |
 | Markdown parsing     | `pulldown-cmark`               | CommonMark, fast, no_std-friendly                        |
-| TUI                  | `ratatui` + `crossterm`        | SFRS canonical                                           |
+| TUI                  | `ratatui` + `crossterm`        | CLI Standard canonical                                   |
 | Time                 | `jiff`                         | Spacecraft Software Standard §12.5 preferred                       |
 | HTTP (tarball)       | `ureq` + `rustls`              | Lean, no async runtime needed for one-shot fetch         |
 | Tar/gzip             | `tar` + `flate2`               | Standard combo                                           |
 | Signing verification | `minisign-verify`              | Pure Rust, small surface, ed25519 detached sigs          |
 | Fuzzy search         | `nucleo-matcher`               | Used by helix; fast and well-tested                      |
 | Binary cache format  | `postcard`                     | Compact, fast, schema-stable                             |
-| MCP (Phase 3)        | `rmcp`                         | SFRS canonical                                           |
+| MCP (Phase 3)        | `rmcp`                         | CLI Standard canonical                                   |
 | Errors               | `thiserror` (lib), `anyhow` (bin) | Microsoft Rust Guidelines                              |
-| Logging              | `tracing` + `tracing-subscriber`  | Per SFRS                                              |
+| Logging              | `tracing` + `tracing-subscriber`  | Per the CLI Standard                                  |
 
 No `tokio` in the v1 fast path. Tarball fetch is one synchronous request; everything else is local I/O. The MCP server may introduce async in Phase 3 — scoped to that crate only.
 
@@ -199,7 +199,7 @@ error: no Loran entry for 'widgetctl'
             loran help widgetctl  (capture upstream --help directly)
 ```
 
-In `--json` mode, the structured error carries the same hints (`error.hint` plus `error.see_also`) per SFRS tips-thinking discipline.
+In `--json` mode, the structured error carries the same hints (`error.hint` plus `error.see_also`) per the CLI Standard's tips-thinking discipline.
 
 ### 4.2 `loran help <tool>` — Always-Live Capture
 
@@ -405,11 +405,11 @@ User overlays may add categories but cannot remove upstream ones.
 
 ## 7. Subcommand Surface
 
-Noun-verb per SFRS §2 Rule 7. Verbs in the canonical set where applicable.
+Noun-verb per the CLI Standard §2 Rule 7. Verbs in the canonical set where applicable.
 
 | Command                            | Description                                                                                |
 |------------------------------------|--------------------------------------------------------------------------------------------|
-| `loran`                            | TUI if TTY, else `loran list --json`. Auto-detection per SFRS §5.                          |
+| `loran`                            | TUI if TTY, else `loran list --json`. Auto-detection per the CLI Standard §5.               |
 | `loran list`                       | List tools (filterable). Honours `--category`, `--replaces`, `--safe-alias-for`, `--fields`. |
 | `loran show <tool>`                | Show resolved curated page (Spacecraft Software intro + body per §4.1). Curated-or-fail.            |
 | `loran help <tool>`                | Capture and render `<tool> --help` directly (always-live, de-themed). Per §4.2. Sub-command flag: `--pager <cmd>` (overrides the §4.2.1 cascade; `--pager=""` disables pagination; `--pager=loran` forces the Spacecraft Software default chain).            |
@@ -419,11 +419,11 @@ Noun-verb per SFRS §2 Rule 7. Verbs in the canonical set where applicable.
 | `loran new <tool>`                 | Scaffold a new page from template. `--edit` opens `$EDITOR`.                              |
 | `loran update`                     | Refresh upstream `pages/` tarball + tldr tarball. Verifies signatures. Re-builds index.   |
 | `loran validate`                   | Validate all pages against frontmatter schema. CI-friendly.                                |
-| `loran schema`                     | JSON Schema (Draft 2020-12) of own data types. SFRS §4.                                    |
-| `loran describe`                   | Self-description manifest for agents. SFRS §4.                                             |
+| `loran schema`                     | JSON Schema (Draft 2020-12) of own data types. the CLI Standard §4.                        |
+| `loran describe`                   | Self-description manifest for agents. the CLI Standard §4.                                 |
 | `loran mcp`                        | Run as read-only MCP server over stdio. Phase 3.                                           |
 
-### 7.1 Global flags (SFRS §3, identical across all Spacecraft Software CLIs)
+### 7.1 Global flags (the CLI Standard §3, identical across all Spacecraft Software CLIs)
 
 `--json`, `--format`, `--fields`, `--dry-run`, `--verbose`, `--quiet`, `--no-color`, `--color`, `--help`, `--version`, `--absolute-time`, `--print0`, `--yes`. No deviations.
 
@@ -455,7 +455,7 @@ Template lives at `$XDG_DATA_HOME/loran/templates/tool.md`, populated on first r
 
 ## 8. JSON Envelope
 
-Per SFRS §6. Example for `loran show eza --json`:
+Per the CLI Standard §6. Example for `loran show eza --json`:
 
 ```json
 {
@@ -495,7 +495,7 @@ For `loran show`, `body.kind ∈ {custom, tldr, none}`. For `loran help`, the en
 
 ---
 
-## 9. Exit Codes (SFRS §4 + Loran-specific)
+## 9. Exit Codes (the CLI Standard §4 + Loran-specific)
 
 Canonical codes 0–5 unchanged. Tool-specific (6–125):
 
@@ -518,7 +518,7 @@ All documented in `loran schema` output.
 - **Detail view:** Spacecraft Software intro block, then body. Tab-switchable to raw Markdown and frontmatter views (agent-friendly inspection). `pairs_with` entries render as a sidebar.
 - **`loran help` capture frame:** monochrome / dim chrome only — NOT the Spacecraft Software palette. Visually distinct from curated content. Honours `NO_COLOR`.
 - **Curated content theme:** Spacecraft Software palette only — Void Navy bg, Molten Amber primary text, Steel Blue structural, Radium Green success, Liquid Coolant info, Red Oxide error. Honours `NO_COLOR`.
-- **Agent guard rail:** If `AI_AGENT=1` or `AGENT=1` is set, TUI never activates — falls back to `--format json` and warns on stderr per SFRS §5.
+- **Agent guard rail:** If `AI_AGENT=1` or `AGENT=1` is set, TUI never activates — falls back to `--format json` and warns on stderr per the CLI Standard §5.
 
 ---
 
@@ -564,7 +564,7 @@ All present at repo root from the first commit, before `loran-cli` has any sub-c
 
 ### 12.2 MCP Surface (Phase 3, Read-Only)
 
-Loran's full sub-command count (≈13) is borderline for SFRS §2 Rule 8's MCP threshold. We ship MCP because the read-only ones (`list`, `show`, `find`, `search`, `categories`) are unusually high-value for agents discovering what tools exist on a Spacecraft Software system.
+Loran's full sub-command count (≈13) is borderline for the CLI Standard §2 Rule 8's MCP threshold. We ship MCP because the read-only ones (`list`, `show`, `find`, `search`, `categories`) are unusually high-value for agents discovering what tools exist on a Spacecraft Software system.
 
 **The MCP surface is strictly read-only.** Agents cannot invoke `update`, `new`, `validate`, or `help` (the live capture). This is a deliberate security and predictability decision:
 
@@ -611,7 +611,7 @@ Per Spacecraft Software Standard §13.2:
 | 4  | GPL-3.0-or-later + SPDX                | ✓ All `.rs` and `Cargo.toml` files. Pages (Markdown) are documents → exempt.                                                 |
 | 5.2| Required posture files                 | ✓ README.md, NOTICE.md, CONTRIBUTING.md, LICENSE all present at repo root from first commit.                                 |
 | 5.1| Default personal-hobby posture         | ✓ Stated in README Project Posture section.                                                                                  |
-| 6.1| POSIX-compliant CLI                    | ✓ SFRS-compliant; default output is POSIX-safe.                                                                              |
+| 6.1| POSIX-compliant CLI                    | ✓ CLI-Standard-compliant; default output is POSIX-safe.                                                                      |
 | 7  | PFA: no tracking, minimal perms, local | ✓ No telemetry. Filesystem + outbound HTTPS to upstream + tldr CDNs only. All data local.                                    |
 | 8  | CUA + Vim bindings                     | ✓ Both schemes in TUI.                                                                                                       |
 | 9  | Spacecraft Software palette; Void Navy bg        | ✓ TUI uses palette tokens only for curated content. `loran help` capture frame uses monochrome (intentional brand boundary). |
@@ -628,7 +628,7 @@ Per Spacecraft Software Standard §13.2:
 |---------|----------|------------------------------------------------------------------------------------------------------------------------------------|
 | Phase 1 | Ingot    | Workspace + posture files + global flags + JSON envelope + `list` / `show` / `help` / `find` / `search` / `categories` + index from bundled `pages/`. `Ingestor` trait abstraction. Text-mode only. |
 | Phase 2 | Billet   | Tarball update + minisign signature verification + overlays + TUI + `loran new` + `validate`. The user-visible 1.0 milestone.       |
-| Phase 3 | Bloom    | Read-only MCP surface + `loran schema` JSON-Schema-ified for Anthropic/OpenAI/Gemini/MCP function-calling + `DescribeIngestor` for SFRS describe-compatible Spacecraft Software CLIs + Bravais/Ferrite OS overlay catalogs in tree. |
+| Phase 3 | Bloom    | Read-only MCP surface + `loran schema` JSON-Schema-ified for Anthropic/OpenAI/Gemini/MCP function-calling + `DescribeIngestor` for `describe`-compatible Spacecraft Software CLIs (per the CLI Standard) + Bravais/Ferrite OS overlay catalogs in tree. |
 
 Ingot is shippable on its own as a useful binary, even before tarball/overlay machinery exists. Billet is the user-visible 1.0 milestone. Bloom is the agentic completion.
 
@@ -646,7 +646,7 @@ The following questions from earlier drafts have been resolved and integrated in
 Remaining open questions:
 
 1. **`pairs_with` reciprocity** — current spec treats it as non-reciprocal. Should `loran validate` warn when A claims `pairs_with = ["B"]` but B does not reciprocate? Or accept asymmetry as intentional?
-2. **`DescribeIngestor` security model** — Phase 3 wants to spawn `<tool> describe --json` against Spacecraft Software-native binaries. How does Loran decide which binaries are trusted to spawn? Allowlist baked into upstream pages tarball? Self-declaration via SFRS `describe`?
+2. **`DescribeIngestor` security model** — Phase 3 wants to spawn `<tool> describe --json` against Spacecraft Software-native binaries. How does Loran decide which binaries are trusted to spawn? Allowlist baked into upstream pages tarball? Self-declaration via the CLI Standard's `describe`?
 
 ---
 

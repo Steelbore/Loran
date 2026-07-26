@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2026 Mohamed Hammad
 
-//! `DescribeIngestor` — synthesize Loran pages from SFRS-compliant
+//! `DescribeIngestor` — synthesize Loran pages from CLI-Standard-compliant
 //! `<tool> describe --json` output (WP-P3.04).
 //!
 //! Spacecraft Software CLIs are required to implement a `describe` sub-command
-//! that emits an SFRS envelope describing every verb, global flag,
+//! that emits the CLI Standard's envelope describing every verb, global flag,
 //! and exit code (`spacecraft-cli-standard` §7). This ingester walks a
 //! caller-supplied list of binaries, runs `describe --json` against
 //! each with a 5-second timeout, parses the envelope, and synthesises
@@ -165,7 +165,7 @@ impl Runner for RealRunner {
     }
 }
 
-/// SFRS envelope subset we need — only the fields that feed the
+/// The CLI Standard's envelope subset we need — only the fields that feed the
 /// synthesised Page. `serde(default)` is permissive so a binary that
 /// emits an unrelated envelope still produces a parse error at the
 /// schema level rather than a hard deserialise crash.

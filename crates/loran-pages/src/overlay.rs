@@ -18,7 +18,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::PageError;
 use crate::page::Page;
-use crate::parse::{split_frontmatter, validate_category, validate_summary_length};
+use crate::parse::{
+    split_frontmatter, validate_category, validate_summary_length, validate_tldr_page,
+};
 
 /// Partial overlay frontmatter. `name` is required (it's the merge
 /// key); everything else is `Some(_)` when the overlay sets the field
@@ -72,8 +74,8 @@ impl OverlayPage {
     /// as [`Page::parse`], but every field except `name` may be absent.
     ///
     /// Field-level invariants are still enforced when the overlay does
-    /// set them (`summary` length, `category` shape) so a malformed
-    /// overlay file fails fast rather than at merge time.
+    /// set them (`summary` length, `category` shape, `tldr_page` shape)
+    /// so a malformed overlay file fails fast rather than at merge time.
     pub fn parse(input: &str) -> Result<Self, PageError> {
         let (frontmatter, body) = split_frontmatter(input)?;
         let raw: RawOverlay = toml::from_str(frontmatter)?;
@@ -85,6 +87,9 @@ impl OverlayPage {
         }
         if let Some(category) = raw.category.as_deref() {
             validate_category(category)?;
+        }
+        if let Some(tldr_page) = raw.tldr_page.as_deref() {
+            validate_tldr_page(tldr_page)?;
         }
 
         // safe_alias_for ⊆ replaces only validated when both are set in
@@ -166,10 +171,10 @@ impl Page {
     ///
     /// - [`PageError::InvalidSafeAliasFor`] if the merged `safe_alias_for`
     ///   is no longer a subset of the merged `replaces`.
-    /// - [`PageError::SummaryTooLong`] / [`PageError::InvalidCategory`]
-    ///   if the overlay's replacement violates the per-field rule
-    ///   (these are also checked at overlay-parse time, so the merge-
-    ///   time check is a defense-in-depth.)
+    /// - [`PageError::SummaryTooLong`] / [`PageError::InvalidCategory`] /
+    ///   [`PageError::InvalidTldrPage`] if the overlay's replacement
+    ///   violates the per-field rule (these are also checked at overlay-
+    ///   parse time, so the merge-time check is a defense-in-depth.)
     ///
     /// # Panics
     ///
@@ -203,6 +208,7 @@ impl Page {
             self.official = Some(official);
         }
         if let Some(tldr_page) = overlay.tldr_page {
+            validate_tldr_page(&tldr_page)?;
             self.tldr_page = Some(tldr_page);
         }
         if let Some(tags) = overlay.tags {
@@ -343,6 +349,31 @@ mod tests {
         let err = OverlayPage::parse(src).unwrap_err();
         assert!(
             matches!(err, PageError::InvalidCategory { .. }),
+            "got {err:?}"
+        );
+    }
+
+    #[test]
+    fn overlay_validates_tldr_page_shape_at_parse_time() {
+        let src = "+++\nname = \"x\"\ntldr_page = \"eza.md\"\n+++\n";
+        let err = OverlayPage::parse(src).unwrap_err();
+        assert!(
+            matches!(err, PageError::InvalidTldrPage { .. }),
+            "got {err:?}"
+        );
+    }
+
+    #[test]
+    fn merge_validates_replacement_tldr_page() {
+        // An overlay that swaps in a malformed `tldr_page` is rejected at
+        // merge time even if it somehow bypassed parse-time validation.
+        let overlay = OverlayPage {
+            tldr_page: Some("Bad Name".to_owned()),
+            ..OverlayPage::parse("+++\nname = \"eza\"\n+++\n").unwrap()
+        };
+        let err = base_eza().merge_overlay(overlay).unwrap_err();
+        assert!(
+            matches!(err, PageError::InvalidTldrPage { .. }),
             "got {err:?}"
         );
     }

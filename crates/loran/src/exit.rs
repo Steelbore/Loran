@@ -7,13 +7,13 @@
 
 //! Canonical exit-code map + tips-thinking error hints.
 //!
-//! Per `loran-spec-v0_2.md` §9, Loran reserves the SFRS-canonical
+//! Per `loran-spec-v0_2.md` §9, Loran reserves the CLI-Standard-canonical
 //! codes 0–5 (`Success` / `GeneralError` / `UsageError` / `NotFound` /
 //! `PermissionDenied` / `Conflict`) and adds six Loran-specific codes
 //! 6–11. Every variant carries:
 //!
 //! - a stable string `name` (`"NOT_FOUND"`, `"INDEX_NOT_BUILT"`, …),
-//!   surfaced as `error.code` in the SFRS envelope and used by agents
+//!   surfaced as `error.code` in the CLI Standard's envelope and used by agents
 //!   for branching;
 //! - a `numeric` exit code, returned to the OS;
 //! - a runnable `hint`, produced via [`ExitCode::hint`] over an
@@ -60,7 +60,7 @@ impl ExitCode {
         }
     }
 
-    /// Stable string identifier surfaced as `error.code` in the SFRS
+    /// Stable string identifier surfaced as `error.code` in the CLI Standard's
     /// envelope. `SCREAMING_SNAKE_CASE` per Spec §9.
     pub(crate) fn name(self) -> &'static str {
         match self {
@@ -240,7 +240,7 @@ mod tests {
             } else {
                 assert!(
                     !hint.is_empty(),
-                    "{} must carry a recovery hint per SFRS tips-thinking",
+                    "{} must carry a recovery hint per the CLI Standard's tips-thinking",
                     code.name()
                 );
             }

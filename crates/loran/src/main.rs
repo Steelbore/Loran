@@ -5,7 +5,7 @@
 
 //! Loran CLI binary entry point.
 //!
-//! Phase 1B scaffolding: parses every SFRS global flag, dispatches to
+//! Phase 1B scaffolding: parses every CLI-Standard global flag, dispatches to
 //! one of twelve sub-commands, and surfaces a custom `--version` /
 //! `--help` footer per Spacecraft Software Standard v1.1 §13.2. Sub-command
 //! handlers are stubs that emit a "not yet implemented" notice and
@@ -99,7 +99,7 @@ fn is_catalog_read_verb(cmd: &Command) -> bool {
 
 /// Decide whether to launch the TUI for the no-subcommand path.
 ///
-/// Mirrors the SFRS §5 agent cascade: explicit JSON / agent env / pipe
+/// Mirrors the CLI Standard §5 agent cascade: explicit JSON / agent env / pipe
 /// all disqualify the TUI. Stdout must be a TTY for the curses-style
 /// surface to make sense.
 fn should_launch_tui(cli: &Cli) -> bool {

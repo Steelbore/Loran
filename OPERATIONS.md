@@ -48,7 +48,7 @@ procedure must be planned well before the trust root has to change.
 
 | Constant in `loran-core::pipeline` | Used for           | Notes                            |
 |------------------------------------|--------------------|----------------------------------|
-| `PUBLISHER_PUBLIC_KEY`             | Upstream pages tarball | Placeholder; replace with the real key at first launch (§2.4) |
+| `PUBLISHER_PUBLIC_KEY`             | Upstream pages tarball | Production `loran-pages` key (baked in-tree; ships with the next Loran release) |
 
 When parallel keys are active the `default_publisher` constructor
 returns both via the `LORAN_PAGES_PUBLIC_KEY` env var (comma-separated)
@@ -220,13 +220,12 @@ the advisory is published before the new release ships.
 
 - `crates/loran-core/src/signing.rs::tests::TEST_PUBLIC_KEY` is a
   test-only key with a documented purpose. **It must never be the
-  active publisher key.** Phase 2 reuses the same string as the
-  placeholder `PUBLISHER_PUBLIC_KEY` precisely so an operator who
-  accidentally runs `loran update` against the placeholder URL gets a
-  clean diagnostic rather than a surprising decode failure.
-- At first launch (§2.4), the release engineer must swap
-  `PUBLISHER_PUBLIC_KEY` to the real key and update
-  `signing::tests::TEST_PUBLIC_KEY` to remain distinct.
+  active publisher key.** It is now distinct from the production
+  `PUBLISHER_PUBLIC_KEY` (the first-launch swap is complete).
+- The first-launch swap (§2.4) is **done**: `PUBLISHER_PUBLIC_KEY`
+  holds the production `loran-pages` key, distinct from
+  `signing::tests::TEST_PUBLIC_KEY`. Any future change to it is a key
+  rotation (§3 / §4), not a placeholder edit.
 
 ## 6. Release advisories
 

@@ -35,14 +35,14 @@ toml = "0.8"
 thiserror = "2"
 anyhow = "1"
 
-# Observability (per SFRS)
+# Observability (per the CLI Standard)
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 
 # Time — ISO 8601 UTC with Z suffix everywhere (Spacecraft Software Standard §12)
 jiff = { version = "0.2", features = ["serde"] }
 
-# CLI (per SFRS canonical)
+# CLI (CLI Standard canonical)
 clap = { version = "4", features = ["derive", "env", "wrap_help"] }
 
 # Markdown rendering (loran-render). CommonMark; no_std-friendly.

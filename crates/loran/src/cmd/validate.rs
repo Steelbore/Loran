@@ -256,6 +256,7 @@ fn classify(err: &PageError, text: &str) -> (&'static str, u32) {
             line_of_key(text, "safe_alias_for"),
         ),
         PageError::InvalidCategory { .. } => ("INVALID_CATEGORY", line_of_key(text, "category")),
+        PageError::InvalidTldrPage { .. } => ("INVALID_TLDR_PAGE", line_of_key(text, "tldr_page")),
     }
 }
 

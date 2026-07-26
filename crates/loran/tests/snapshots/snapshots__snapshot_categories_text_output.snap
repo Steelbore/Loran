@@ -2,6 +2,8 @@
 source: crates/loran/tests/snapshots.rs
 expression: normalise(&stdout)
 ---
+audio	Audio control	2
+bluetooth	Bluetooth	2
 data-processing	Data processing	4
 file-listing	File listing	3
 file-search	File search	2

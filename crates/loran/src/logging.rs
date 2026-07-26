@@ -3,7 +3,7 @@
 
 //! `tracing-subscriber` setup driven by `--verbose` / `--quiet`.
 //!
-//! Log destination is stderr (stdout is reserved for data per SFRS §6).
+//! Log destination is stderr (stdout is reserved for data per the CLI Standard §6).
 //! Quiet → error-only. Default → warn+. `-v` → info+. `-vv` → debug+.
 //! `-vvv+` → trace+.
 
