@@ -95,7 +95,8 @@ mod tests {
             make_page("rg", &["grep"], &[]),
             make_page("ack", &["grep"], &[]),
             make_page("bat", &["cat"], &["cat"]),
-            make_page("jaq", &["jq"], &["jq"]),
+            // jaq replaces jq but is not alias-safe; see the jaq page.
+            make_page("jaq", &["jq"], &[]),
         ])
         .unwrap();
 
