@@ -1,7 +1,7 @@
 +++
 name = "jaq"
 category = "data-processing"
-summary = "Fast Rust jq clone. Close to jq, but not alias-safe — see Pathfinder."
+summary = "Fast Rust jq clone. Close to jq, but not alias-safe: see Pathfinder."
 replaces = ["jq"]
 safe_alias_for = []
 pairs_with = ["xh", "rg", "pathfinder"]
