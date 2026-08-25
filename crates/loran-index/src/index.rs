@@ -288,8 +288,9 @@ mod tests {
             make_page("bat", &["cat"], &["cat"]),
             // eza: replaces ls but NOT alias-safe (different columns)
             make_page("eza", &["ls"], &[]),
-            // jaq: alias-safe for jq
-            make_page("jaq", &["jq"], &["jq"]),
+            // jaq: replaces jq but NOT alias-safe (no auto-vivification,
+            // 22 missing builtins, 9 rejected flags)
+            make_page("jaq", &["jq"], &[]),
         ])
         .unwrap();
 

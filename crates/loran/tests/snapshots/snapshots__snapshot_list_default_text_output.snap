@@ -17,7 +17,7 @@ git-cliff	version-control	Conventional-commit changelog generator. Configurable 
 gron	data-processing	Make JSON greppable. Flattens nested structures into discoverable assignment lines.
 hexyl	file-viewing	Coloured hex viewer for the terminal. Distinguishes ASCII, control, and printable bytes.
 hyperfine	shell-utilities	Benchmarking tool for CLI commands. Warmup runs, statistical analysis, JSON export.
-jaq	data-processing	Faster, drop-in jq replacement with stricter semantics.
+jaq	data-processing	Fast Rust jq clone. Close to jq, but not alias-safe: see Pathfinder.
 just	shell-utilities	Modern command runner. `justfile` recipes with arguments, dependencies, and listing.
 lazygit	version-control	Git TUI with stage-hunk-by-hunk, interactive rebase, and one-key commands.
 lsd	file-listing	Drop-in `ls` replacement with colours and icons. Conservative alternative to eza.
